@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Game.Messages;
 using JetBrains.Annotations;
+using Logging;
 using Railroader.ModInjector;
 using Serilog;
 using Serilog.Core;
@@ -14,6 +15,11 @@ using UnityEngine;
 
 namespace Railroader_ModInterfaces.Tests;
 
+public static class Fixture
+{
+    public static TestFixture Instance = null!;
+}
+
 [PublicAPI]
 [CollectionDefinition("TestFixture")]
 public sealed class TestFixture : IDisposable, ICollectionFixture<TestFixture>
@@ -22,19 +28,24 @@ public sealed class TestFixture : IDisposable, ICollectionFixture<TestFixture>
 
     public IEnumerable<LogEvent> Events => TestLogManager.Events;
 
-    public string LogMessages => string.Join("\r\n", TestLogManager.Events.Select(o => {
-        var sb = new StringBuilder();
-        using (TextWriter output = new StringWriter(sb)) {
-            o.MessageTemplate.Render(o.Properties, output);
+    public string LogMessages {
+        get {
+            return string.Join("\r\n", TestLogManager.Events.Select(o => {
+                var sb = new StringBuilder();
+                using (TextWriter output = new StringWriter(sb)) {
+                    o.MessageTemplate.Render(o.Properties, output);
+                }
+
+                return sb.ToString();
+            }));
         }
+    }
 
-        return sb.ToString();
-    }));
-
-    public TestFixture()
-    {
+    public TestFixture() {
+        Fixture.Instance = this;
         Directory.SetCurrentDirectory(GameDir);
         TestLogManager.Awake();
+        
     }
 
     public void Dispose() {
@@ -89,8 +100,8 @@ public sealed class TestFixture : IDisposable, ICollectionFixture<TestFixture>
                    .Destructure.ByTransforming<Model.Car>((Func<Model.Car, object>)(c => (object)new {
                        Id = c.id,
                        Name = c.DisplayName
-                   }));
-            //.WriteTo.UnityConsole("[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties}{NewLine}{Exception}");
+                   }))
+                   .WriteTo.UnityConsole("[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties}{NewLine}{Exception}");
         }
     }
 

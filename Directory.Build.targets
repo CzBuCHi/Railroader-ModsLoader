@@ -44,14 +44,15 @@
     <!-- Copy the mod to the game directory -->
     <Target Name="CopyToGameModDir" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Debug' And '$(IsMod)' == 'true'">
         <ItemGroup>
-            <ModFiles Include="$(MSBuildProjectDirectory)/Definition.json" />
+            <DefinitionJson Include="$(MSBuildProjectDirectory)/Definition.json" />
             <ModFiles Include="$(MSBuildProjectDirectory)/**/*.cs" Exclude="$(MSBuildProjectDirectory)/bin/**/*.*;$(MSBuildProjectDirectory)/obj/**/*.*"/>            
         </ItemGroup>
                 
-        <Copy SourceFiles="@(ModFiles)" DestinationFiles="@(ModFiles->'$(GameModDir)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
+        <Copy SourceFiles="@(DefinitionJson)" DestinationFolder="$(GameModDir)" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(ModFiles)" DestinationFiles="@(ModFiles->'$(GameModDir)\src\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
     </Target>
     
-    <!-- TODO: Publish the mod as a neat zip file -->
+    <!-- TODO: Publish the mod as a neat zip file: this code zips output dlls instead of source code ... -->
     <Target Name="PackageMod" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release' And '$(PackageMod)' == 'enable'">
         <Message Text="Packaging $(AssemblyName) v$(AssemblyVersion)" Importance="high"/>
         <!-- Replace $(AssemblyVersion) with the actual version -->

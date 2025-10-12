@@ -10,6 +10,8 @@ internal sealed class ModdingContext(Mod[] mods) : IModdingContext
 {
     public IReadOnlyCollection<IMod> Mods => mods;
 
+    public string GamePath { get; set; } = null!;
+
     public T? LoadSettings<T>(string identifier) where T : class => throw new NotImplementedException();
 
     public void SaveSettings<T>(string identifier, T settings) where T : class {

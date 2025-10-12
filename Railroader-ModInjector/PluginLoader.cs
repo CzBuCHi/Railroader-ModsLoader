@@ -18,15 +18,13 @@ public class PluginLoader : IPluginLoader
         _Logger.Information("Loading assembly from {outputDllPath} ...", outputDllPath);
 
         var assembly = Assembly.LoadFrom(outputDllPath);
-        _Logger.Information("Loaded assembly from {outputDllPath}", outputDllPath);
-
         foreach (var type in assembly.GetTypes()) {
-            _Logger.Information("Checking type: {type}", type);
+            _Logger.Debug("Checking type: {type}", type);
             if (!typeof(PluginBase).IsAssignableFrom(type) || type.IsAbstract) {
                 continue;
             }
 
-            _Logger.Information("Found PluginBase-derived type: {type}", type);
+            _Logger.Debug("Found PluginBase-derived type: {type}", type);
 
             var constructor = type.GetConstructor([typeof(IModdingContext)]);
             if (constructor == null) {
@@ -40,7 +38,7 @@ public class PluginLoader : IPluginLoader
                 continue;
             }
 
-            _Logger.Information("Successfully created instance of {type}", type);
+            _Logger.Debug("Successfully created instance of {type}", type);
             yield return plugin;
         }
     }

@@ -21,6 +21,9 @@
         <GameAssembly Include="SimpleGraph.Runtime" />
     </ItemGroup>
     <ItemGroup>
+        <Reference Include="Mono.Cecil">
+            <HintPath>..\Railroader-ModsLoader\Assemblies\Mono.Cecil.dll</HintPath>
+        </Reference>
         <Reference Include="0Harmony">
             <HintPath>..\Railroader-ModsLoader\Injector\0Harmony.dll</HintPath>
         </Reference>

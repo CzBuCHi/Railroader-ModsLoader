@@ -11,8 +11,10 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.Core" />
-    <GameAssembly Include="Serilog" />
+      <Reference Include="System.Core" />
+      <GameAssembly Include="Assembly-CSharp" />
+      <GameAssembly Include="Serilog" />
+      <GameAssembly Include="0Harmony" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Railroader-ModInterfaces\Railroader-ModInterfaces.csproj" />
