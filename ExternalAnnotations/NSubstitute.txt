@@ -1,0 +1,8 @@
+M:NSubstitute.Arg.Any``1
+M:NSubstitute.Arg.Is``1(System.Linq.Expressions.Expression{System.Predicate{``0}})
+M:NSubstitute.Core.CallInfo.Arg``1
+M:NSubstitute.Substitute.For``1(System.Object[])
+M:NSubstitute.SubstituteExtensions.DidNotReceive``1(``0)
+M:NSubstitute.SubstituteExtensions.Received``1(``0)
+M:NSubstitute.SubstituteExtensions.Returns``1(``0,``0,``0[])
+M:NSubstitute.SubstituteExtensions.Returns``1(System.Threading.Tasks.Task{``0},``0,``0[])

@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<assembly name="FluentAssertions">
+  <member name="M:FluentAssertions.AssertionExtensions.Invoking``2(``0,System.Func{``0,``1})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Action)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Boolean)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Byte)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Collections.Generic.IEnumerable{System.String})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+    <parameter name="this">
+      <attribute ctor="M:JetBrains.Annotations.CanBeNullAttribute.#ctor" />
+    </parameter>
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.DateOnly)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.DateTime)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.DateTimeOffset)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Decimal)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Double)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Func{System.Threading.Tasks.Task})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Guid)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Int16)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Int32)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Int64)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.Boolean})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.DateTimeOffset})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.Int32})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.Int64})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Object)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+    <parameter name="actualValue">
+      <attribute ctor="M:JetBrains.Annotations.CanBeNullAttribute.#ctor" />
+    </parameter>
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.SByte)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Single)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.String)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+    <parameter name="actualValue">
+      <attribute ctor="M:JetBrains.Annotations.CanBeNullAttribute.#ctor" />
+    </parameter>
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.TimeOnly)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.TimeSpan)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.Type)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.UInt16)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.UInt32)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.UInt64)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should``1(System.Collections.Generic.IEnumerable{``0})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+    <parameter name="actualValue">
+      <attribute ctor="M:JetBrains.Annotations.CanBeNullAttribute.#ctor" />
+    </parameter>
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should``1(System.Func{``0})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should``1(System.Func{System.Threading.Tasks.Task{``0}})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should``1(System.IComparable{``0})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should``2(System.Collections.Generic.IDictionary{``0,``1})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.Collections.GenericDictionaryAssertions`4.ContainKey(`1,System.String,System.Object[])">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.EnumAssertionsExtensions.Should``1(``0)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.EnumAssertionsExtensions.Should``1(System.Nullable{``0})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.ExceptionAssertionsExtensions.WithMessage``1(System.Threading.Tasks.Task{FluentAssertions.Specialized.ExceptionAssertions{``0}},System.String,System.String,System.Object[])">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.Primitives.ReferenceTypeAssertions`2.BeOfType``1(System.String,System.Object[])">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.Primitives.ReferenceTypeAssertions`2.NotBeNull(System.String,System.Object[])">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.Specialized.AsyncFunctionAssertions`2.ThrowAsync``1(System.String,System.Object[])">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.Specialized.DelegateAssertions`2.Throw``1(System.String,System.Object[])">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:FluentAssertions.AndConstraint`1.And">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:FluentAssertions.AndWhichConstraint`2.Which">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:FluentAssertions.Collections.WhoseValueConstraint`4.WhoseValue">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:FluentAssertions.Primitives.ReferenceTypeAssertions`2.Subject">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:FluentAssertions.Specialized.ExceptionAssertions`1.Which">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+</assembly>

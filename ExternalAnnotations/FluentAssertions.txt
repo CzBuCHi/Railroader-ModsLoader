@@ -1,0 +1,47 @@
+M:FluentAssertions.AssertionExtensions.Invoking``2(``0,System.Func{``0,``1})
+M:FluentAssertions.AssertionExtensions.Should(System.Action)
+M:FluentAssertions.AssertionExtensions.Should(System.Boolean)
+M:FluentAssertions.AssertionExtensions.Should(System.Byte)
+M:FluentAssertions.AssertionExtensions.Should(System.Collections.Generic.IEnumerable{System.String}) this
+M:FluentAssertions.AssertionExtensions.Should(System.DateOnly)
+M:FluentAssertions.AssertionExtensions.Should(System.DateTime)
+M:FluentAssertions.AssertionExtensions.Should(System.DateTimeOffset)
+M:FluentAssertions.AssertionExtensions.Should(System.Decimal)
+M:FluentAssertions.AssertionExtensions.Should(System.Double)
+M:FluentAssertions.AssertionExtensions.Should(System.Func{System.Threading.Tasks.Task})
+M:FluentAssertions.AssertionExtensions.Should(System.Guid)
+M:FluentAssertions.AssertionExtensions.Should(System.Int16)
+M:FluentAssertions.AssertionExtensions.Should(System.Int32)
+M:FluentAssertions.AssertionExtensions.Should(System.Int64)
+M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.Boolean})
+M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.DateTimeOffset})
+M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.Int32})
+M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.Int64})
+M:FluentAssertions.AssertionExtensions.Should(System.Object) actualValue
+M:FluentAssertions.AssertionExtensions.Should(System.SByte)
+M:FluentAssertions.AssertionExtensions.Should(System.Single)
+M:FluentAssertions.AssertionExtensions.Should(System.String) actualValue
+M:FluentAssertions.AssertionExtensions.Should(System.TimeOnly)
+M:FluentAssertions.AssertionExtensions.Should(System.TimeSpan)
+M:FluentAssertions.AssertionExtensions.Should(System.Type)
+M:FluentAssertions.AssertionExtensions.Should(System.UInt16)
+M:FluentAssertions.AssertionExtensions.Should(System.UInt32)
+M:FluentAssertions.AssertionExtensions.Should(System.UInt64)
+M:FluentAssertions.AssertionExtensions.Should``1(System.Collections.Generic.IEnumerable{``0}) actualValue
+M:FluentAssertions.AssertionExtensions.Should``1(System.Func{``0})
+M:FluentAssertions.AssertionExtensions.Should``1(System.Func{System.Threading.Tasks.Task{``0}})
+M:FluentAssertions.AssertionExtensions.Should``1(System.IComparable{``0})
+M:FluentAssertions.AssertionExtensions.Should``2(System.Collections.Generic.IDictionary{``0,``1})
+M:FluentAssertions.Collections.GenericDictionaryAssertions`4.ContainKey(`1,System.String,System.Object[])
+M:FluentAssertions.EnumAssertionsExtensions.Should``1(``0)
+M:FluentAssertions.EnumAssertionsExtensions.Should``1(System.Nullable{``0})
+M:FluentAssertions.ExceptionAssertionsExtensions.WithMessage``1(System.Threading.Tasks.Task{FluentAssertions.Specialized.ExceptionAssertions{``0}},System.String,System.String,System.Object[])
+M:FluentAssertions.Primitives.ReferenceTypeAssertions`2.BeOfType``1(System.String,System.Object[])
+M:FluentAssertions.Primitives.ReferenceTypeAssertions`2.NotBeNull(System.String,System.Object[])
+M:FluentAssertions.Specialized.AsyncFunctionAssertions`2.ThrowAsync``1(System.String,System.Object[])
+M:FluentAssertions.Specialized.DelegateAssertions`2.Throw``1(System.String,System.Object[])
+P:FluentAssertions.AndConstraint`1.And
+P:FluentAssertions.AndWhichConstraint`2.Which
+P:FluentAssertions.Collections.WhoseValueConstraint`4.WhoseValue
+P:FluentAssertions.Primitives.ReferenceTypeAssertions`2.Subject
+P:FluentAssertions.Specialized.ExceptionAssertions`1.Which
