@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -7,36 +8,39 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Serilog;
 
-namespace Railroader.ModInjector;
+namespace Railroader.ModInjector.Services;
 
 public interface IHarmonyExporter
 {
     void ExportPatchedAssembly(string originalDllPath, Harmony harmony, string outputPath);
 }
 
-public class HarmonyExporter : IHarmonyExporter
+public class HarmonyExporter(ILogger logger) : IHarmonyExporter
 {
-    private readonly ILogger _Logger = ModLogger.ForContext(typeof(HarmonyExporter))!;
+    [ExcludeFromCodeCoverage]
+    public HarmonyExporter() : this(Log.ForContext<HarmonyExporter>()){
+        
+    }
 
     public void ExportPatchedAssembly(string originalDllPath, Harmony harmony, string outputPath) {
         try {
             // Step 1: Ensure Harmony debug logging is enabled
             Harmony.DEBUG = true; // Writes to harmony.log.txt for verification
-            _Logger.Information($"Starting export of patched assembly from {originalDllPath} to {outputPath}");
+            logger.Information($"Starting export of patched assembly from {originalDllPath} to {outputPath}");
 
             // Step 2: Load original assembly with Mono.Cecil
             var resolver = new DefaultAssemblyResolver();
             resolver.AddSearchDirectory(Path.GetDirectoryName(originalDllPath)!);
             var readerParameters = new ReaderParameters { AssemblyResolver = resolver };
             var assemblyDef      = AssemblyDefinition.ReadAssembly(originalDllPath, readerParameters);
-            _Logger.Information($"Loaded original assembly: {assemblyDef!.FullName}");
+            logger.Information($"Loaded original assembly: {assemblyDef!.FullName}");
 
             // Step 3: Get all patched methods from Harmony
             var patchedMethods = harmony.GetPatchedMethods()!.ToList();
-            _Logger.Information($"Found {patchedMethods.Count} patched methods");
+            logger.Information($"Found {patchedMethods.Count} patched methods");
 
             if (patchedMethods.Count == 0) {
-                _Logger.Warning("No patched methods found. Output assembly will be identical to the input.");
+                logger.Warning("No patched methods found. Output assembly will be identical to the input.");
             }
 
             // Step 4: Update each patched method in the Cecil assembly
@@ -44,13 +48,13 @@ public class HarmonyExporter : IHarmonyExporter
                 // Find the corresponding Cecil method
                 var declaringType = methodInfo.DeclaringType;
                 if (declaringType == null) {
-                    _Logger.Error($"Method {methodInfo.Name} has no declaring type");
+                    logger.Error($"Method {methodInfo.Name} has no declaring type");
                     continue;
                 }
 
                 var cecilType = assemblyDef.MainModule!.GetType(declaringType.FullName!.Replace("+", "/")); // Handle nested types
                 if (cecilType == null) {
-                    _Logger.Error($"Type {declaringType.FullName} not found in assembly");
+                    logger.Error($"Type {declaringType.FullName} not found in assembly");
                     continue;
                 }
 
@@ -58,14 +62,14 @@ public class HarmonyExporter : IHarmonyExporter
                 var methodName  = methodInfo.Name;
                 var cecilMethod = cecilType.Methods!.FirstOrDefault(m => IsMatchingMethod(m, methodInfo));
                 if (cecilMethod == null) {
-                    _Logger.Error($"Method {methodName} in type {cecilType.FullName} not found");
+                    logger.Error($"Method {methodName} in type {cecilType.FullName} not found");
                     continue;
                 }
 
                 // Get patched IL instructions from Harmony
                 var patchedInstructions = PatchProcessor.GetCurrentInstructions(methodInfo);
                 if (patchedInstructions == null) {
-                    _Logger.Error($"Failed to get patched instructions for {methodInfo}");
+                    logger.Error($"Failed to get patched instructions for {methodInfo}");
                     continue;
                 }
 
@@ -90,7 +94,7 @@ public class HarmonyExporter : IHarmonyExporter
                 foreach (var instruction in patchedInstructions) {
                     var cecilOpCode = ConvertOpCode(instruction.opcode);
                     if (cecilOpCode == null) {
-                        _Logger.Warning($"Skipping instruction with unmapped opcode: {instruction.opcode}");
+                        logger.Warning($"Skipping instruction with unmapped opcode: {instruction.opcode}");
                         ilProcessor.Append(ilProcessor.Create(OpCodes.Nop)!);
                         continue;
                     }
@@ -106,14 +110,14 @@ public class HarmonyExporter : IHarmonyExporter
                     ilProcessor.Append(cecilInstruction);
                 }
 
-                _Logger.Information($"Patched method {cecilMethod.FullName} in output assembly");
+                logger.Information($"Patched method {cecilMethod.FullName} in output assembly");
             }
 
             // Step 5: Save the modified assembly
             assemblyDef.Write(outputPath);
-            _Logger.Information($"Patched assembly saved to {outputPath}");
+            logger.Information($"Patched assembly saved to {outputPath}");
         } catch (Exception ex) {
-            _Logger.Error($"Failed to save patched assembly: {ex}");
+            logger.Error($"Failed to save patched assembly: {ex}");
         }
     }
 
@@ -149,7 +153,7 @@ public class HarmonyExporter : IHarmonyExporter
             return cecilOpCode;
         }
 
-        _Logger.Warning($"No matching Cecil opcode for {harmonyOpCode.Name}");
+        logger.Warning($"No matching Cecil opcode for {harmonyOpCode.Name}");
         return null;
     }
 
@@ -189,7 +193,7 @@ public class HarmonyExporter : IHarmonyExporter
             case Instruction[] targets:
                 return ilProcessor.Create(cecilOpCode, targets);
             default:
-                _Logger.Error($"Unsupported operand type for {cecilOpCode}: {operand.GetType()}");
+                logger.Error($"Unsupported operand type for {cecilOpCode}: {operand.GetType()}");
                 return ilProcessor.Create(OpCodes.Nop);
         }
     }
@@ -221,11 +225,11 @@ public class HarmonyExporter : IHarmonyExporter
                 case long l:
                     return l;
                 default:
-                    _Logger.Warning($"Unsupported operand type: {harmonyOperand.GetType()}");
+                    logger.Warning($"Unsupported operand type: {harmonyOperand.GetType()}");
                     return harmonyOperand;
             }
         } catch (Exception ex) {
-            _Logger.Error($"Failed to convert operand {harmonyOperand}: {ex}");
+            logger.Error($"Failed to convert operand {harmonyOperand}: {ex}");
             return harmonyOperand;
         }
     }

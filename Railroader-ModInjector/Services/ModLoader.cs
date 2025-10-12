@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Railroader.ModInjector.Wrappers;
 using Railroader.ModInterfaces;
 using Serilog;
 using Serilog.Events;
 using Path = System.IO.Path;
 
-namespace Railroader.ModInjector;
+namespace Railroader.ModInjector.Services;
 
 internal interface IModLoader
 {
@@ -18,6 +20,11 @@ internal interface IModLoader
 
 internal sealed class ModLoader(IFileSystem fileSystem) : IModLoader
 {
+    [ExcludeFromCodeCoverage]
+    public ModLoader() : this(new FileSystemWrapper()) {
+    }
+
+    // This code is called before serilog configuration, so I cannot simply pass ILogger in ctor
     private readonly List<(LogEventLevel Level, string Format, object[] Args)> _LogMessages = new();
 
     public IModDefinition[] LoadModDefinitions() {
@@ -31,7 +38,7 @@ internal sealed class ModLoader(IFileSystem fileSystem) : IModLoader
                 continue;
             }
 
-            _LogMessages.Add((LogEventLevel.Debug, "Load definition from {directory}...", [item]));
+            _LogMessages.Add((LogEventLevel.Debug, "Loaded definition from {directory}...", [item]));
             try {
                 var jObject       = JObject.Parse(fileSystem.File.ReadAllText(path));
                 var modDefinition = jObject.ToObject<ModDefinition>()!;
@@ -43,9 +50,9 @@ internal sealed class ModLoader(IFileSystem fileSystem) : IModLoader
                     modDefinitions.Add(modDefinition.Id, modDefinition);
                 }
             } catch (JsonException exc) {
-                _LogMessages.Add((LogEventLevel.Error, "Failed to parse definition JSON from {directory}', error: {exception}", [item, "Invalid JSON: " + exc.Message]));
+                _LogMessages.Add((LogEventLevel.Error, "Failed to parse definition JSON from {directory}', json error: {exception}", [item, exc]));
             } catch (Exception exc) {
-                _LogMessages.Add((LogEventLevel.Error, "Failed to parse definition JSON from {directory}', error: {exception}", [item, exc]));
+                _LogMessages.Add((LogEventLevel.Error, "Failed to parse definition JSON from {directory}', generic error: {exception}", [item, exc]));
             }
         }
 

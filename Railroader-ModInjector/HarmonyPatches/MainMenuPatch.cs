@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Railroader.ModInjector.Services;
 using Serilog;
 using UI.Menu;
 
@@ -13,7 +14,7 @@ namespace Railroader.ModInjector.HarmonyPatches;
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal static class MainMenuPatch
 {
-    private static readonly ILogger _Logger = ModLogger.ForContext(typeof(MainMenuPatch));
+    private static readonly ILogger _Logger = Log.ForContext(typeof(MainMenuPatch));
 
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(MainMenu), "Awake")]

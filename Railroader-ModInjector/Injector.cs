@@ -1,10 +1,11 @@
-﻿// #define DEBUG_LOG
-
-using System;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Railroader.ModInjector.Services;
+using Railroader.ModInjector.Wrappers;
 using Railroader.ModInterfaces;
 using Serilog;
 using ILogger = Serilog.ILogger;
@@ -16,7 +17,7 @@ namespace Railroader.ModInjector;
 public static class Injector
 {
     internal static ILogManager      LogManager      => new LogManager();
-    internal static IModLoader       ModLoader       => new ModLoader(new FileSystem());
+    internal static IModLoader       ModLoader       => new ModLoader();
     internal static ICodeCompiler    CodeCompiler    => new CodeCompiler();
     internal static IPluginLoader    PluginLoader    => new PluginLoader();
     internal static IHarmonyExporter HarmonyExporter => new HarmonyExporter();
@@ -27,7 +28,7 @@ public static class Injector
 
     /// <summary> Injector 'main' function. </summary>
     public static void ModInjectorMain() {
-        _Logger = ModLogger.ForContext(typeof(Injector))!;
+        _Logger = Log.ForContext(typeof(Injector))!;
         _Logger.Debug("ModInjectorMain start");
 
         _Mods = new Mod[_ModDefinitions.Length];

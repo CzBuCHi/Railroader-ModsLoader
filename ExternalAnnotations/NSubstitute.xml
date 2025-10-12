@@ -9,10 +9,16 @@
   <member name="M:NSubstitute.Core.CallInfo.Arg``1">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
+  <member name="M:NSubstitute.Core.CallInfo.ArgAt``1(System.Int32)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
   <member name="M:NSubstitute.Substitute.For``1(System.Object[])">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
   <member name="M:NSubstitute.SubstituteExtensions.DidNotReceive``1(``0)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:NSubstitute.SubstituteExtensions.Received``1(``0,System.Int32)">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
   <member name="M:NSubstitute.SubstituteExtensions.Received``1(``0)">

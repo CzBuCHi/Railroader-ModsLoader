@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Reflection;
 using FluentAssertions;
+using Newtonsoft.Json;
 using NSubstitute;
-using Railroader.ModInjector;
+using Railroader.ModInjector.Services;
+using Railroader.ModInjector.Wrappers;
 using Serilog;
 using Serilog.Events;
 
-namespace Railroader_ModInterfaces.Tests;
+namespace Railroader_ModInterfaces.Tests.Services;
 
 public sealed class ModLoaderTests
 {
@@ -79,12 +81,12 @@ public sealed class ModLoaderTests
         // Assert
         actual.Should().BeEmpty();
         accessor.LogMessages.Should().HaveCount(2);
-        accessor.LogMessages.Should().ContainEquivalentOf((LogEventLevel.Debug, "Load definition from {directory}...", new[] { "A" }));
+        accessor.LogMessages.Should().ContainEquivalentOf((LogEventLevel.Debug, "Loaded definition from {directory}...", new[] { "A" }));
         accessor.LogMessages.Should().Contain(o => o.Level == LogEventLevel.Error &&
-                                                   o.Format == "Failed to parse definition JSON from {directory}', error: {exception}" &&
+                                                   o.Format == "Failed to parse definition JSON from {directory}', json error: {exception}" &&
                                                    o.Args.Length == 2 &&
                                                    o.Args[0] as string == "A" &&
-                                                   o.Args[1] as string == "Invalid JSON: Unexpected end when reading JSON. Path '', line 1, position 7.");
+                                                   o.Args[1] is JsonException);
     }
 
     [Fact]
@@ -110,9 +112,9 @@ public sealed class ModLoaderTests
         // Assert
         actual.Should().BeEmpty();
         accessor.LogMessages.Should().HaveCount(2);
-        accessor.LogMessages.Should().ContainEquivalentOf((LogEventLevel.Debug, "Load definition from {directory}...", new[] { "A" }));
+        accessor.LogMessages.Should().ContainEquivalentOf((LogEventLevel.Debug, "Loaded definition from {directory}...", new[] { "A" }));
         accessor.LogMessages.Should().Contain(o => o.Level == LogEventLevel.Error &&
-                                                   o.Format == "Failed to parse definition JSON from {directory}', error: {exception}" &&
+                                                   o.Format == "Failed to parse definition JSON from {directory}', generic error: {exception}" &&
                                                    o.Args.Length == 2 &&
                                                    o.Args[0] as string == "A" &&
                                                    o.Args[1] is ArgumentNullException);
@@ -142,7 +144,7 @@ public sealed class ModLoaderTests
         actual.Should().HaveCount(1);
         actual.Should().ContainEquivalentOf(new { Id = "id", Name = "name" });
         accessor.LogMessages.Should().HaveCount(1);
-        accessor.LogMessages.Should().ContainEquivalentOf((LogEventLevel.Debug, "Load definition from {directory}...", new[] { "A" }));
+        accessor.LogMessages.Should().ContainEquivalentOf((LogEventLevel.Debug, "Loaded definition from {directory}...", new[] { "A" }));
     }
 
     [Fact]
@@ -171,8 +173,8 @@ public sealed class ModLoaderTests
         actual.Should().HaveCount(1);
         actual.Should().ContainEquivalentOf(new { Id = "id", Name = "name" });
         accessor.LogMessages.Should().HaveCount(3);
-        accessor.LogMessages.Should().ContainEquivalentOf((LogEventLevel.Debug, "Load definition from {directory}...", new[] { "A" }));
-        accessor.LogMessages.Should().ContainEquivalentOf((LogEventLevel.Debug, "Load definition from {directory}...", new[] { "B" }));
+        accessor.LogMessages.Should().ContainEquivalentOf((LogEventLevel.Debug, "Loaded definition from {directory}...", new[] { "A" }));
+        accessor.LogMessages.Should().ContainEquivalentOf((LogEventLevel.Debug, "Loaded definition from {directory}...", new[] { "B" }));
         accessor.LogMessages.Should().ContainEquivalentOf((LogEventLevel.Error, "Another mod with the same ID has been found in {directory}'", new[] { "A" }));
     }
 

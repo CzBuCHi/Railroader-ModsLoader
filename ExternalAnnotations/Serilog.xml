@@ -6,4 +6,7 @@
   <member name="M:Serilog.Log.ForContext``1">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
+  <member name="P:Serilog.LoggerConfiguration.WriteTo">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
 </assembly>
