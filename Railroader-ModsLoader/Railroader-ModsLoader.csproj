@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <AssemblyName>Railroader-ModsLoader</AssemblyName>
+        <RootNamespace>Railroader.ModsLoader</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="Mono.Cecil">
+            <HintPath>Assemblies\Mono.Cecil.dll</HintPath>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>Assemblies\Newtonsoft.Json.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Assemblies\Mono.Cecil.dll" />
+        <None Remove="Assemblies\Mono.Cecil.Mdb.dll" />
+        <None Remove="Assemblies\Mono.Cecil.Pdb.dll" />
+        <None Remove="Assemblies\Mono.Cecil.Rocks.dll" />
+        <None Remove="Assemblies\Newtonsoft.Json.dll" />
+        <None Remove="Injector\0Harmony.dll" />
+        <None Remove="Injector\Mono.CSharp.dll" />
+        <None Remove="Injector\Railroader-ModInjector.dll" />
+        <None Remove="Injector\Railroader-ModInterfaces.dll" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Assemblies\Mono.Cecil.dll" />
+        <EmbeddedResource Include="Assemblies\Mono.Cecil.Mdb.dll" />
+        <EmbeddedResource Include="Assemblies\Mono.Cecil.Pdb.dll" />
+        <EmbeddedResource Include="Assemblies\Mono.Cecil.Rocks.dll" />
+        <EmbeddedResource Include="Assemblies\Newtonsoft.Json.dll" />
+        <EmbeddedResource Include="Injector\0Harmony.dll" />
+        <EmbeddedResource Include="Injector\Mono.CSharp.dll" />
+        <EmbeddedResource Include="Injector\Railroader-ModInjector.dll" />
+        <EmbeddedResource Include="Injector\Railroader-ModInterfaces.dll" />
+    </ItemGroup>
+
+</Project>
