@@ -4,34 +4,32 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using JetBrains.Annotations;
-using Railroader.ModInjector.Services;
 using Serilog;
 using UI.Menu;
 
-namespace Railroader.ModInjector.HarmonyPatches;
+namespace Railroader.ModInjector.Features.Menu;
 
+// Inject MainMenuPatch.InjectedButton(this); before this.AddButton("Help", ...); call in MainMenu::Awake method
 [HarmonyPatch]
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal static class MainMenuPatch
 {
-    private static readonly ILogger _Logger = Log.ForContext(typeof(MainMenuPatch));
-
     [HarmonyTranspiler]
     [HarmonyPatch(typeof(MainMenu), "Awake")]
     public static IEnumerable<CodeInstruction> AwakeTranspiler(IEnumerable<CodeInstruction> instructions) {
-        _Logger.Information("Patching MainMenu::Awake");
+        var logger = Log.ForContext("SourceContext", "Railroader.ModInjector");
+        logger.Information("Patching MainMenu::Awake");
 
         var codeInstructions = instructions.ToList();
         var injected         = false;
 
         for (var i = 0; i < codeInstructions.Count; i++) {
-            if (codeInstructions[i]!.opcode != OpCodes.Ldstr || 
+            if (codeInstructions[i]!.opcode != OpCodes.Ldstr ||
                 codeInstructions[i]!.operand?.ToString() != "Help") {
                 continue;
             }
 
-            var newInstructions = new List<CodeInstruction>
-            {
+            var newInstructions = new List<CodeInstruction> {
                 new(OpCodes.Ldarg_0),
                 new(OpCodes.Call, typeof(MainMenuPatch).GetMethod(nameof(InjectedButton), BindingFlags.Static | BindingFlags.NonPublic)!)
             };
@@ -44,15 +42,13 @@ internal static class MainMenuPatch
         }
 
         if (!injected) {
-            _Logger.Error("Failed to patch method MainMenu::Awake");
+            logger.Error("Failed to patch method MainMenu::Awake");
         }
 
         return codeInstructions;
     }
 
     private static void InjectedButton(MainMenu mainMenu) {
-        mainMenu.AddButton("Mods", () => {
-            _Logger.Information("Mods button clicked");
-        });
+        mainMenu.AddButton("Mods", () => mainMenu.OnMainMenuAction?.Invoke((MainMenu.MainMenuAction)(-1)));
     }
 }

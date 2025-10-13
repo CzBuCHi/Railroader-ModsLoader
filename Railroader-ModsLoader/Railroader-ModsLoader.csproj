@@ -36,6 +36,7 @@
         <EmbeddedResource Include="Assemblies\Mono.Cecil.Rocks.dll" />
         <EmbeddedResource Include="Assemblies\Newtonsoft.Json.dll" />
         <EmbeddedResource Include="Injector\0Harmony.dll" />
+        <EmbeddedResource Include="Injector\Mono.Cecil.dll" />
         <EmbeddedResource Include="Injector\Mono.CSharp.dll" />
         <EmbeddedResource Include="Injector\Railroader-ModInjector.dll" />
         <EmbeddedResource Include="Injector\Railroader-ModInterfaces.dll" />

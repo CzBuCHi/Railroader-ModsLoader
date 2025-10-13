@@ -25,11 +25,12 @@ public sealed class PluginLoaderTests
         var assemblyLoader = Substitute.For<IAssemblyLoader>();
         assemblyLoader.Load(Arg.Any<string>()).Throws(new FileNotFoundException());
         var moddingContext = Substitute.For<IModdingContext>();
+        var modDefinition = Substitute.For<IModDefinition>();
         var logger         = Substitute.For<ILogger>();
         var sut            = new PluginLoader(assemblyLoader, logger);
 
         // Act
-        var plugins = sut.LoadPlugins(AssemblyPath, moddingContext).ToArray();
+        var plugins = sut.LoadPlugins(AssemblyPath, moddingContext, modDefinition).ToArray();
 
         // Assert
         plugins.Should().HaveCount(0);
@@ -62,11 +63,12 @@ namespace Foo {
         var assemblyLoader = Substitute.For<IAssemblyLoader>();
         assemblyLoader.Load(Arg.Any<string>()).Returns(assembly);
         var moddingContext = Substitute.For<IModdingContext>();
+        var modDefinition  = Substitute.For<IModDefinition>();
         var logger         = Substitute.For<ILogger>();
         var sut            = new PluginLoader(assemblyLoader, logger);
 
         // Act
-        var plugins = sut.LoadPlugins(AssemblyPath, moddingContext).ToArray();
+        var plugins = sut.LoadPlugins(AssemblyPath, moddingContext, modDefinition).ToArray();
 
         // Assert
         plugins.Should().HaveCount(0);
@@ -102,11 +104,12 @@ namespace Foo {
         var assemblyLoader = Substitute.For<IAssemblyLoader>();
         assemblyLoader.Load(Arg.Any<string>()).Returns(assembly);
         var moddingContext = Substitute.For<IModdingContext>();
+        var modDefinition  = Substitute.For<IModDefinition>();
         var logger         = Substitute.For<ILogger>();
         var sut            = new PluginLoader(assemblyLoader, logger);
 
         // Act
-        var plugins = sut.LoadPlugins(AssemblyPath, moddingContext).ToArray();
+        var plugins = sut.LoadPlugins(AssemblyPath, moddingContext, modDefinition).ToArray();
 
         // Assert
         plugins.Should().HaveCount(0);
@@ -143,11 +146,12 @@ namespace Foo {
         var assemblyLoader = Substitute.For<IAssemblyLoader>();
         assemblyLoader.Load(Arg.Any<string>()).Returns(assembly);
         var moddingContext = Substitute.For<IModdingContext>();
+        var modDefinition  = Substitute.For<IModDefinition>();
         var logger         = Substitute.For<ILogger>();
         var sut            = new PluginLoader(assemblyLoader, logger);
 
         // Act
-        var plugins = sut.LoadPlugins(AssemblyPath, moddingContext).ToArray();
+        var plugins = sut.LoadPlugins(AssemblyPath, moddingContext, modDefinition).ToArray();
 
         // Assert
         plugins.Should().HaveCount(0);
@@ -180,11 +184,12 @@ namespace Foo {
         var assemblyLoader = Substitute.For<IAssemblyLoader>();
         assemblyLoader.Load(Arg.Any<string>()).Returns(assembly);
         var moddingContext = Substitute.For<IModdingContext>();
+        var modDefinition  = Substitute.For<IModDefinition>();
         var logger         = Substitute.For<ILogger>();
         var sut            = new PluginLoader(assemblyLoader, logger);
 
         // Act
-        var plugins = sut.LoadPlugins(AssemblyPath, moddingContext).ToArray();
+        var plugins = sut.LoadPlugins(AssemblyPath, moddingContext, modDefinition).ToArray();
 
         // Assert
         plugins.Should().HaveCount(1);

@@ -10,17 +10,17 @@ namespace Railroader.ModInjector.Services;
 
 public interface IPluginLoader
 {
-    IEnumerable<PluginBase> LoadPlugins(string assemblyPath, IModdingContext moddingContext);
+    IEnumerable<PluginBase> LoadPlugins(string assemblyPath, IModdingContext moddingContext, IModDefinition modDefinition);
 }
 
 public class PluginLoader(IAssemblyLoader assemblyLoader, ILogger logger) : IPluginLoader
 {
     [ExcludeFromCodeCoverage]
-    public PluginLoader() : this(new AssemblyLoader(), Log.ForContext<PluginLoader>()) {
+    public PluginLoader() : this(new AssemblyLoader(), Log.ForContext("SourceContext", "Railroader.ModInjector")) {
     }
 
-    public IEnumerable<PluginBase> LoadPlugins(string assemblyPath, IModdingContext moddingContext) {
-        logger.Information("Loading assembly from {assemblyPath} ...", assemblyPath);
+    public IEnumerable<PluginBase> LoadPlugins(string assemblyPath, IModdingContext moddingContext, IModDefinition modDefinition) {
+        logger.Debug("Loading assembly from {assemblyPath} ...", assemblyPath);
 
         Assembly assembly;
         try {
@@ -38,15 +38,15 @@ public class PluginLoader(IAssemblyLoader assemblyLoader, ILogger logger) : IPlu
 
             logger.Debug("Found PluginBase-derived type: {type}", type);
 
-            var constructor = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null!, [typeof(IModdingContext)], null!);
+            var constructor = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null!, [typeof(IModdingContext), typeof(IModDefinition)], null!);
             if (constructor == null) {
-                logger.Error("No constructor found in {type} that accepts IModdingContext", type);
+                logger.Error("No constructor found in {type} that accepts IModdingContext and IModDefinition", type);
                 continue;
             }
 
             object? pluginInstance;
             try {
-                pluginInstance = constructor.Invoke([moddingContext]);
+                pluginInstance = constructor.Invoke([moddingContext, modDefinition]);
             } catch (TargetInvocationException exc) {
                 logger.Error("Failed to create {type}. error: {error}", type, exc.InnerException);
                 continue;

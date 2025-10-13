@@ -28,17 +28,14 @@ public static class Injector
 
     /// <summary> Injector 'main' function. </summary>
     public static void ModInjectorMain() {
-        _Logger = Log.ForContext(typeof(Injector))!;
+        _Logger = Log.ForContext("SourceContext", "Railroader.ModInjector");
         _Logger.Debug("ModInjectorMain start");
 
         _Mods = new Mod[_ModDefinitions.Length];
 
         for (var i = 0; i < _ModDefinitions.Length; i++) {
             var definition = _ModDefinitions[i];
-            _Logger.Information("definition: {definition}", definition.Id);
             var outputDllPath = CodeCompiler.CompileMod(definition);
-
-            _Logger.Information("DLL: {outputDllPath}", outputDllPath);
             _Mods[i] = new Mod(definition, outputDllPath);
         }
 
@@ -47,7 +44,7 @@ public static class Injector
         _Logger.Debug("moddingContext: {moddingContext}", JsonConvert.SerializeObject(moddingContext));
 
         foreach (var mod in _Mods.Where(o => o.OutputDllPath != null)) {
-            mod.Plugins = PluginLoader.LoadPlugins(mod.OutputDllPath!, moddingContext).ToArray();
+            mod.Plugins = PluginLoader.LoadPlugins(mod.OutputDllPath!, moddingContext, mod.Definition).ToArray();
             mod.IsLoaded = true;
         }
 
@@ -61,10 +58,11 @@ public static class Injector
         harmony.PatchAll(typeof(Injector).Assembly);
 
         // todo: config: ExportPatched = true
-        _Logger.Information("Exporting patched Assembly-CSharp ...");
-        var assemblyCSharp = Path.Combine(Environment.CurrentDirectory, "Railroader_Data", "Managed", "Assembly-CSharp");
 
-        HarmonyExporter.ExportPatchedAssembly(assemblyCSharp + ".dll", harmony, assemblyCSharp + "_Patched.dll");
+        //_Logger.Information("Exporting patched Assembly-CSharp ...");
+        //var assemblyCSharp = Path.Combine(Environment.CurrentDirectory, "Railroader_Data", "Managed", "Assembly-CSharp");
+
+        //HarmonyExporter.ExportPatchedAssembly(assemblyCSharp + ".dll", harmony, assemblyCSharp + "_Patched.dll");
         
         _Logger.Debug("ModInjectorMain end");
     }

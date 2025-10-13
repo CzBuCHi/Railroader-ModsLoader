@@ -12,10 +12,11 @@ public sealed class SingletonPluginBaseTests
     public void ThrowsOnSecondConstructorCall() {
         // Arrange
         var moddingContext = Substitute.For<IModdingContext>();
-        var sut            = new TestPlugin(moddingContext);
+        var modDefinition  = Substitute.For<IModDefinition>();
+        var sut            = new TestPlugin(moddingContext, modDefinition);
 
         // Act
-        var act = () => new TestPlugin(moddingContext);
+        var act = () => new TestPlugin(moddingContext, modDefinition);
 
         // Assert
         act.Should().Throw<InvalidOperationException>().WithMessage($"Cannot create singleton plugin '{typeof(TestPlugin)}' twice.");
@@ -27,5 +28,5 @@ public sealed class SingletonPluginBaseTests
     }
 
 
-    private sealed class TestPlugin(IModdingContext moddingContext) : SingletonPluginBase<TestPlugin>(moddingContext);
+    private sealed class TestPlugin(IModdingContext moddingContext, IModDefinition modDefinition) : SingletonPluginBase<TestPlugin>(moddingContext, modDefinition);
 }

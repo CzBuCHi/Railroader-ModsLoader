@@ -12,7 +12,8 @@ public abstract class SingletonPluginBase<T> : PluginBase where T : SingletonPlu
 
     /// <summary> Creates a new instance of <see cref="T:Railloader.SingletonPluginBase`1" />. </summary>
     /// <param name="moddingContext">Instance of shared <see cref="IModdingContext"/>.</param>
-    protected SingletonPluginBase(IModdingContext moddingContext) : base(moddingContext) {
+    /// <param name="modDefinition">Instance of <see cref="IModDefinition"/> describing current mod.</param>
+    protected SingletonPluginBase(IModdingContext moddingContext, IModDefinition modDefinition) : base(moddingContext, modDefinition) {
         if (Instance != null) {
             throw new InvalidOperationException($"Cannot create singleton plugin '{GetType()}' twice.");
         }

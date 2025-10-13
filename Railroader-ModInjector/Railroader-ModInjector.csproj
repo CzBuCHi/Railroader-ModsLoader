@@ -19,6 +19,7 @@
         <GameAssembly Include="Serilog" />
         <GameAssembly Include="Newtonsoft.Json" />
         <GameAssembly Include="SimpleGraph.Runtime" />
+        <GameAssembly Include="Markroader" />
     </ItemGroup>
     <ItemGroup>
         <Reference Include="Mono.Cecil">

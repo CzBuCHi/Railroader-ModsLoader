@@ -1,18 +1,23 @@
 ﻿using Railroader.DummyMod.Harmony;
 using Railroader.ModInterfaces;
+using Serilog;
 
 namespace Railroader.DummyMod
 {
     public sealed class DummyPlugin : SingletonPluginBase<DummyPlugin>
     {
-        public DummyPlugin(IModdingContext moddingContext)
-            : base(moddingContext) {
-            Logger.Information("DummyPlugin ctor");
+        private readonly ILogger _Logger;
+
+        public DummyPlugin(IModdingContext moddingContext, IModDefinition modDefinition)
+            : base(moddingContext, modDefinition) {
+            
+            _Logger = CreateLogger();
+            _Logger.Information("DummyPlugin ctor : " + modDefinition.Id);
         }
 
         public override void OnEnable() {
             base.OnEnable();
-            Logger.Information("OnEnable: " + MainMenuPatch.Number);
+            _Logger.Information("OnEnable: " + MainMenuPatch.Number);
 
             var harmony = new HarmonyLib.Harmony("Railroader.ModInjector");
             harmony.PatchAll(typeof(DummyPlugin).Assembly);
@@ -20,7 +25,7 @@ namespace Railroader.DummyMod
 
         public override void OnDisable() {
             base.OnDisable();
-            Logger.Information("OnDisable");
+            _Logger.Information("OnDisable");
 
             var harmony = new HarmonyLib.Harmony("Railroader.ModInjector");
             harmony.UnpatchAll("Railroader.ModInjector");

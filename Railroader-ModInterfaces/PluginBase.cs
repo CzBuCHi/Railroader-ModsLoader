@@ -5,11 +5,12 @@ namespace Railroader.ModInterfaces;
 
 /// <summary> The base class for .NET-based plugins. </summary>
 /// <param name="moddingContext">Instance of shared <see cref="IModdingContext"/>.</param>
+/// <param name="moddingContext">Instance of <see cref="IModDefinition"/> describing current mod.</param>
 [PublicAPI]
-public abstract class PluginBase(IModdingContext moddingContext)
+public abstract class PluginBase(IModdingContext moddingContext, IModDefinition modDefinition)
 {
-    /// <summary> Logger instance. </summary>
-    public ILogger Logger => Log.ForContext(GetType())!;
+    /// <summary> Create new logger instance with correct SourceContext </summary>
+    public ILogger CreateLogger() => Log.ForContext("SourceContext", modDefinition.Id)!;
 
     /// <summary> Instance of shared <see cref="IModdingContext"/>. </summary>
     public IModdingContext ModdingContext { get; } = moddingContext;

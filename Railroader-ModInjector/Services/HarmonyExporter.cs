@@ -18,7 +18,7 @@ public interface IHarmonyExporter
 public class HarmonyExporter(ILogger logger) : IHarmonyExporter
 {
     [ExcludeFromCodeCoverage]
-    public HarmonyExporter() : this(Log.ForContext<HarmonyExporter>()){
+    public HarmonyExporter() : this(Log.ForContext("SourceContext", "Railroader.ModInjector")){
         
     }
 

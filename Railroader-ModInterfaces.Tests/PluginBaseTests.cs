@@ -11,7 +11,8 @@ public sealed class PluginBaseTests
     public void CallsOnEnableCorrectly() {
         // Arrange
         var moddingContext = Substitute.For<IModdingContext>();
-        var sut            = new TestPlugin(moddingContext);
+        var modDefinition  = Substitute.For<IModDefinition>();
+        var sut            = new TestPlugin(moddingContext, modDefinition);
         sut.SetIsEnabled(false);
 
         // Act
@@ -28,7 +29,8 @@ public sealed class PluginBaseTests
     public void CallsOnDisableCorrectly() {
         // Arrange
         var moddingContext = Substitute.For<IModdingContext>();
-        var sut            = new TestPlugin(moddingContext);
+        var modDefinition  = Substitute.For<IModDefinition>();
+        var sut            = new TestPlugin(moddingContext, modDefinition);
         sut.SetIsEnabled(true);
 
         // Act
@@ -41,7 +43,7 @@ public sealed class PluginBaseTests
         sut.OnDisableCalls.Should().Be(1);
     }
 
-    private sealed class TestPlugin(IModdingContext moddingContext) : PluginBase(moddingContext)
+    private sealed class TestPlugin(IModdingContext moddingContext, IModDefinition modDefinition) : PluginBase(moddingContext, modDefinition)
     {
         private readonly FieldInfo _IsEnabled = typeof(PluginBase).GetField("_IsEnabled", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
