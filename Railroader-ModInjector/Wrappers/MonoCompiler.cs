@@ -4,13 +4,17 @@ using Mono.CSharp;
 
 namespace Railroader.ModInjector.Wrappers;
 
-// wrapper around mono compiler to simplify testing
-
-public interface IMonoCompiler {
-    bool Compile(string[] args, TextWriter error);
+/// <summary> Wrapper for <see cref="CompilerCallableEntryPoint"/>. </summary>
+internal interface ICompilerCallableEntryPoint
+{
+    /// <inheritdoc cref="Mono.CSharp.CompilerCallableEntryPoint.InvokeCompiler"/>
+    bool InvokeCompiler(string[] args, TextWriter error);
 }
 
+/// <inheritdoc />
 [ExcludeFromCodeCoverage]
-public sealed class MonoCompiler : IMonoCompiler {
-    public bool Compile(string[] args, TextWriter error) => CompilerCallableEntryPoint.InvokeCompiler(args, error);
+internal sealed class CompilerCallableEntryPointWrapper : ICompilerCallableEntryPoint
+{
+    /// <inheritdoc />
+    public bool InvokeCompiler(string[] args, TextWriter error) => CompilerCallableEntryPoint.InvokeCompiler(args, error);
 }

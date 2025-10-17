@@ -2,15 +2,23 @@
 
 namespace Railroader.ModInjector;
 
+/// <summary> Implementation of <see cref="IMod"/> for a loaded mod instance. </summary>
 internal sealed class Mod(IModDefinition modDefinition, string? outputDllPath) : IMod
 {
-    private bool           _IsEnabled;
-    public  string?        OutputDllPath { get; } = outputDllPath;
-    public  IModDefinition Definition    { get; } = modDefinition;
+    /// <inheritdoc />
+    public IModDefinition Definition { get; } = modDefinition;
 
-    public bool IsEnabled {
+    /// <summary> Gets or sets the output DLL path for this mod. </summary>
+    public string? OutputDllPath { get; } = outputDllPath;
+
+    private bool _IsEnabled;
+
+    /// <inheritdoc />
+    public bool IsEnabled
+    {
         get => _IsEnabled;
-        internal set {
+        internal set
+        {
             if (_IsEnabled == value) {
                 return;
             }
@@ -25,6 +33,9 @@ internal sealed class Mod(IModDefinition modDefinition, string? outputDllPath) :
         }
     }
 
-    public bool          IsLoaded  { get; internal set; }
-    public PluginBase[]? Plugins   { get; internal set; }
+    /// <inheritdoc />
+    public bool IsLoaded { get; internal set; }
+
+    /// <inheritdoc />
+    public PluginBase[]? Plugins { get; internal set; }
 }

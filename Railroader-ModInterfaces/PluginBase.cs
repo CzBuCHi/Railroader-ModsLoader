@@ -3,22 +3,31 @@ using Serilog;
 
 namespace Railroader.ModInterfaces;
 
-/// <summary> The base class for .NET-based plugins. </summary>
-/// <param name="moddingContext">Instance of shared <see cref="IModdingContext"/>.</param>
-/// <param name="moddingContext">Instance of <see cref="IModDefinition"/> describing current mod.</param>
+/// <summary> Base class for all plugins, providing common functionality and modding context access. </summary>
+/// <remarks> This class is intended to be inherited by concrete plugin implementations. </remarks>
 [PublicAPI]
-public abstract class PluginBase(IModdingContext moddingContext, IModDefinition modDefinition)
+public abstract class PluginBase(IModdingContext moddingContext, IModDefinition modDefinition) : IPlugin
 {
-    /// <summary> Create new logger instance with correct SourceContext </summary>
-    public ILogger CreateLogger() => Log.ForContext("SourceContext", modDefinition.Id)!;
-
-    /// <summary> Instance of shared <see cref="IModdingContext"/>. </summary>
+    /// <summary> Gets the modding context for this plugin. </summary>
     public IModdingContext ModdingContext { get; } = moddingContext;
+
+    /// <summary> Gets the mod definition for this plugin. </summary>
+    public IModDefinition ModDefinition { get; } = modDefinition;
+
+    /// <summary> Creates a scoped logger for this plugin. </summary>
+    /// <param name="scope">
+    /// The optional scope name to append to the logger context.
+    /// If <see langword="null"/>, only the mod identifier is used.
+    /// </param>
+    /// <returns>A configured logger instance.</returns>
+    public ILogger CreateLogger(string? scope = null) => 
+        Log.ForContext("SourceContext", $"{ModDefinition.Identifier}{(scope != null ? $".{scope}" : "")}");
 
     private bool _IsEnabled;
 
-    /// <summary> Gets or sets whether the plugin has been enabled. </summary>
-    public bool IsEnabled {
+    /// <summary> Gets or sets a value indicating whether this plugin is enabled. </summary>
+    public bool IsEnabled
+    {
         get => _IsEnabled;
         set {
             if (_IsEnabled == value) {
@@ -26,20 +35,16 @@ public abstract class PluginBase(IModdingContext moddingContext, IModDefinition 
             }
 
             _IsEnabled = value;
-
-            if (_IsEnabled) {
-                OnEnable();
-            } else {
-                OnDisable();
-            }
+            OnIsEnabledChanged();
         }
     }
 
-    /// <summary> Called when the mod has been enabled. </summary>
-    public virtual void OnEnable() {
-    }
-
-    /// <summary> Called when the mod has been disabled. </summary>
-    public virtual void OnDisable() {
+    /// <summary> Called when the <see cref="IsEnabled"/> property changes. </summary>
+    /// <remarks>
+    /// Override this method to handle enable/disable events.
+    /// The base implementation does nothing.
+    /// </remarks>
+    protected virtual void OnIsEnabledChanged()
+    {
     }
 }

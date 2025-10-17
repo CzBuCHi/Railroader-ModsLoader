@@ -23,7 +23,7 @@ public sealed class SingletonPluginBaseTests
         TestPlugin.Instance.Should().Be(sut);
 
         typeof(SingletonPluginBase<TestPlugin>)
-            .GetProperty(nameof(SingletonPluginBase<TestPlugin>.Instance), BindingFlags.Static | BindingFlags.Public)!
+            .GetField("_Instance", BindingFlags.Static | BindingFlags.NonPublic)!
             .SetValue(null!, null!);
     }
 

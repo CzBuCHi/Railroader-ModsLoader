@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using FluentAssertions;
 using NSubstitute;
 using Railroader.ModInterfaces;
@@ -21,8 +22,7 @@ public sealed class PluginBaseTests
 
         // Assert
         sut.IsEnabled.Should().BeTrue();
-        sut.OnEnableCalls.Should().Be(1);
-        sut.OnDisableCalls.Should().Be(0);
+        sut.IsEnabledChanges.Should().BeEquivalentTo([true]);
     }
 
     [Fact]
@@ -39,30 +39,20 @@ public sealed class PluginBaseTests
 
         // Assert
         sut.IsEnabled.Should().BeFalse();
-        sut.OnEnableCalls.Should().Be(0);
-        sut.OnDisableCalls.Should().Be(1);
+        sut.IsEnabledChanges.Should().BeEquivalentTo([false]);
     }
 
     private sealed class TestPlugin(IModdingContext moddingContext, IModDefinition modDefinition) : PluginBase(moddingContext, modDefinition)
     {
         private readonly FieldInfo _IsEnabled = typeof(PluginBase).GetField("_IsEnabled", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
-        public void SetIsEnabled(bool value) {
-            _IsEnabled.SetValue(this, value);
-        }
+        public void SetIsEnabled(bool value) => _IsEnabled.SetValue(this, value);
 
-        public int OnEnableCalls;
+        public readonly List<bool> IsEnabledChanges = new();
 
-        public override void OnEnable() {
-            base.OnEnable();
-            OnEnableCalls++;
-        }
-
-        public int OnDisableCalls;
-
-        public override void OnDisable() {
-            base.OnDisable();
-            OnDisableCalls++;
+        protected override void OnIsEnabledChanged() {
+            base.OnIsEnabledChanged();
+            IsEnabledChanges.Add(IsEnabled);
         }
     }
 }

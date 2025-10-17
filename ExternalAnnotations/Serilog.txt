@@ -1,3 +1,4 @@
+M:Serilog.Log.ForContext(System.String,System.Object,System.Boolean)
 M:Serilog.Log.ForContext(System.Type)
 M:Serilog.Log.ForContext``1
 P:Serilog.LoggerConfiguration.WriteTo

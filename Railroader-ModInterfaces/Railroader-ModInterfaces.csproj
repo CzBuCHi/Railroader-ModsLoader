@@ -22,7 +22,6 @@
         <GameAssembly Include="SimpleGraph.Runtime" />
     </ItemGroup>
 
-    
     <ItemGroup>
         <Reference Include="0Harmony">
             <HintPath>..\Railroader-ModsLoader\Injector\0Harmony.dll</HintPath>
@@ -33,8 +32,11 @@
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
             <_Parameter1>$(MSBuildProjectName).Tests</_Parameter1>
         </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>Railroader-ModInjector</_Parameter1>
+        </AssemblyAttribute>
     </ItemGroup>
-
+    
     <Target Name="CopyGeneratedFile" AfterTargets="Build">
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\Railroader-ModsLoader\Injector" SkipUnchangedFiles="false" />
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GameDir)\Railroader_Data\Managed" SkipUnchangedFiles="false" />

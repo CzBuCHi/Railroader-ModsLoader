@@ -1,27 +1,22 @@
 ﻿using System;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using Serilog.Events;
 
 namespace Railroader.ModInterfaces;
 
-/// <summary> Defines some basic information about a mod. This is a subset of the data contained within the Definition.json. </summary>
+/// <summary> Defines the metadata for a mod. Loaded from Definition.json </summary>
 [PublicAPI]
 public interface IModDefinition
 {
-    /// <summary> Defines an unique ID for the mod, used for e.g. referencing other mods. </summary>
-    string Id { get; }
+    /// <summary> Gets the unique identifier for the mod. </summary>
+    string Identifier { get; }
 
-    /// <summary> Name of the mod. </summary>
+    /// <summary> Gets the display name of the mod. </summary>
     string Name { get; }
 
-    /// <summary> Version of the mod. </summary>
+    /// <summary> Gets the version of the mod. </summary>
     Version Version { get; }
 
-    /// <summary> Log level used by mod. <see cref="LogEventLevel.Information"/> is used if missing</summary>
+    /// <summary> Gets the preferred logging level for the mod, or <see langword="null"/> to use <see cref="LogEventLevel.Information"/>. </summary>
     LogEventLevel? LogLevel { get; }
-
-    /// <summary> Path to directory where Definition.json is. </summary>
-    public string DefinitionPath { get; set; }
 }
-

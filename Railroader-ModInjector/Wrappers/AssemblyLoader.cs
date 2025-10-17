@@ -3,15 +3,17 @@ using System.Reflection;
 
 namespace Railroader.ModInjector.Wrappers;
 
-// wrappers around Assembly.LoadFrom method to simplify testing
-
-public interface IAssemblyLoader
+/// <summary> Wrapper for <see cref="Assembly"/>. </summary>
+internal interface IAssemblyWrapper
 {
-    Assembly Load(string assemblyFile);
+    /// <inheritdoc cref="Assembly.LoadFrom(string)"/>
+    Assembly LoadFrom(string assemblyFile);
 }
 
+/// <inheritdoc />
 [ExcludeFromCodeCoverage]
-public sealed class AssemblyLoader : IAssemblyLoader
+internal sealed class AssemblyWrapper : IAssemblyWrapper
 {
-    public Assembly Load(string assemblyFile) => Assembly.LoadFrom(assemblyFile);
+    /// <inheritdoc />
+    public Assembly LoadFrom(string assemblyFile) => Assembly.LoadFrom(assemblyFile);
 }

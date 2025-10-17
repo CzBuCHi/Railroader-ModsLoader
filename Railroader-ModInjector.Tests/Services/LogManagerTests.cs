@@ -4,42 +4,41 @@ using System.Reflection;
 using FluentAssertions;
 using Logging;
 using Railroader.ModInjector;
-using Railroader.ModInterfaces;
+using Railroader.ModInjector.Services;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using LogManager = Railroader.ModInjector.Services.LogManager;
 
 namespace Railroader_ModInterfaces.Tests.Services;
 
-public sealed class LogManagerTests
+public sealed class LogConfiguratorTests
 {
     [Fact]
     public void ConfigureLoggerCorrectly() {
         // Arrange
         var configuration = new LoggerConfiguration().WriteTo.UnityConsole()!;
         var accessor      = new LoggerConfigurationAccessor(configuration);
-        IModDefinition[] definitions = [
-            new ModDefinition {
-                Id = "NoLog",
+        ModDefinition[] definitions = [
+            new() {
+                Identifier = "NoLog",
                 Name = "No log level",
-                DefinitionPath = @"Mods\DummyMod\"
+                BasePath = @"Mods\DummyMod\"
             },
-            new ModDefinition {
-                Id = "DefaultLog",
+            new() {
+                Identifier = "DefaultLog",
                 Name = "Default log level",
-                DefinitionPath = @"Mods\DummyMod\",
+                BasePath = @"Mods\DummyMod\",
                 LogLevel = LogEventLevel.Information
             },
-            new ModDefinition {
-                Id = "CustomLog",
+            new() {
+                Identifier = "CustomLog",
                 Name = "Custom log level",
-                DefinitionPath = @"Mods\DummyMod\",
+                BasePath = @"Mods\DummyMod\",
                 LogLevel = LogEventLevel.Fatal
             }
         ];
 
-        var sut = new LogManager();
+        var sut = new LogConfigurator();
 
         // Act
         sut.ConfigureLogger(configuration, definitions);

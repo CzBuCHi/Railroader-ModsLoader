@@ -1,34 +1,29 @@
-﻿using Railroader.DummyMod.Harmony;
+﻿using System;
+using JetBrains.Annotations;
 using Railroader.ModInterfaces;
 using Serilog;
 
 namespace Railroader.DummyMod
 {
-    public sealed class DummyPlugin : SingletonPluginBase<DummyPlugin>
+    [UsedImplicitly]
+    public class DummyPlugin : SingletonPluginBase<DummyPlugin>, IHarmonyPlugin, ITopRightButtonPlugin
     {
-        private readonly ILogger _Logger;
+        public ILogger Logger { get; }
 
         public DummyPlugin(IModdingContext moddingContext, IModDefinition modDefinition)
             : base(moddingContext, modDefinition) {
-            
-            _Logger = CreateLogger();
-            _Logger.Information("DummyPlugin ctor : " + modDefinition.Id);
+            Logger = CreateLogger();
+            Logger.Information("DummyPlugin ctor : " + modDefinition.Identifier);
         }
 
-        public override void OnEnable() {
-            base.OnEnable();
-            _Logger.Information("OnEnable: " + MainMenuPatch.Number);
-
-            var harmony = new HarmonyLib.Harmony("Railroader.ModInjector");
-            harmony.PatchAll(typeof(DummyPlugin).Assembly);
+        protected override void OnIsEnabledChanged() {
+            base.OnIsEnabledChanged();
+            Logger.Information("OnIsEnabledChanged: " + IsEnabled);
         }
 
-        public override void OnDisable() {
-            base.OnDisable();
-            _Logger.Information("OnDisable");
-
-            var harmony = new HarmonyLib.Harmony("Railroader.ModInjector");
-            harmony.UnpatchAll("Railroader.ModInjector");
-        }
+        string ITopRightButtonPlugin.IconName => "IconName";
+        string ITopRightButtonPlugin.Tooltip  => "Tooltip";
+        int ITopRightButtonPlugin.   Index    => 1;
+        Action ITopRightButtonPlugin.OnClick  => () => { };
     }
 }

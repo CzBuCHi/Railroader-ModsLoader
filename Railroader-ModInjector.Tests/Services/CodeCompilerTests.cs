@@ -18,9 +18,9 @@ public sealed class CodeCompilerTests
     private const string SourceFilePath = @"Mods\DummyMod\A.cs";
 
     private static readonly ModDefinition _ModDefinition = new() {
-        Id = "DummyMod",
+        Identifier = "DummyMod",
         Name = "Dummy Mod Name",
-        DefinitionPath = @"Mods\DummyMod\"
+        BasePath = @"Mods\DummyMod\"
     };
 
     [Fact]
@@ -30,12 +30,12 @@ public sealed class CodeCompilerTests
         directoryInfo.EnumerateFiles("*.cs", SearchOption.AllDirectories).Returns([]);
 
         var fileSystem = Substitute.For<IFileSystem>();
-        fileSystem.DirectoryInfo(_ModDefinition.DefinitionPath).Returns(directoryInfo);
+        fileSystem.DirectoryInfo(_ModDefinition.BasePath).Returns(directoryInfo);
 
-        var monoCompiler = Substitute.For<IMonoCompiler>();
+        var monoCompiler = Substitute.For<ICompilerCallableEntryPoint>();
         var logger       = Substitute.For<ILogger>();
         var sut          = new CodeCompiler(fileSystem, monoCompiler, logger);
-
+        
         // Act
         var actual = sut.CompileMod(_ModDefinition);
 
@@ -43,7 +43,7 @@ public sealed class CodeCompilerTests
         actual.Should().BeNull();
 
         fileSystem.ReceivedCalls().Should().HaveCount(1);
-        fileSystem.Received().DirectoryInfo(_ModDefinition.DefinitionPath);
+        fileSystem.Received().DirectoryInfo(_ModDefinition.BasePath);
 
         directoryInfo.ReceivedCalls().Should().HaveCount(1);
         directoryInfo.Received().EnumerateFiles("*.cs", SearchOption.AllDirectories);
@@ -71,7 +71,7 @@ public sealed class CodeCompilerTests
         fileSystem.DirectoryInfo(Arg.Any<string>()).Returns(directoryInfo);
         fileSystem.File.Returns(file);
 
-        var monoCompiler = Substitute.For<IMonoCompiler>();
+        var monoCompiler = Substitute.For<ICompilerCallableEntryPoint>();
         var logger       = Substitute.For<ILogger>();
         var sut          = new CodeCompiler(fileSystem, monoCompiler, logger);
 
@@ -82,7 +82,7 @@ public sealed class CodeCompilerTests
         actual.Should().Be(OutputDllPath);
 
         fileSystem.ReceivedCalls().Should().HaveCount(3);
-        fileSystem.Received().DirectoryInfo(_ModDefinition.DefinitionPath);
+        fileSystem.Received().DirectoryInfo(_ModDefinition.BasePath);
         _ = fileSystem.Received(2).File;
 
         directoryInfo.ReceivedCalls().Should().HaveCount(1);
@@ -95,7 +95,7 @@ public sealed class CodeCompilerTests
         monoCompiler.ReceivedCalls().Should().HaveCount(0);
 
         logger.ReceivedCalls().Should().HaveCount(1);
-        logger.Received().Information("Using existing mod {identifier} DLL ...", _ModDefinition.Id);
+        logger.Received().Information("Using existing mod {identifier} DLL ...", _ModDefinition.Identifier);
     }
 
     [Fact]
@@ -117,8 +117,8 @@ public sealed class CodeCompilerTests
         fileSystem.DirectoryInfo(Arg.Any<string>()).Returns(directoryInfo);
         fileSystem.File.Returns(file);
 
-        var monoCompiler = Substitute.For<IMonoCompiler>();
-        monoCompiler.Compile(Arg.Any<string[]>(), Arg.Any<TextWriter>()).Returns(false).AndDoes(info => {
+        var monoCompiler = Substitute.For<ICompilerCallableEntryPoint>();
+        monoCompiler.InvokeCompiler(Arg.Any<string[]>(), Arg.Any<TextWriter>()).Returns(false).AndDoes(info => {
             var writer = info.ArgAt<TextWriter>(1);
             writer.Write("ERROR");
         });
@@ -132,7 +132,7 @@ public sealed class CodeCompilerTests
         actual.Should().BeNull();
 
         fileSystem.ReceivedCalls().Should().HaveCount(8);
-        fileSystem.Received().DirectoryInfo(_ModDefinition.DefinitionPath);
+        fileSystem.Received().DirectoryInfo(_ModDefinition.BasePath);
         _ = fileSystem.Received(3).File;
         _ = fileSystem.Received(4).Directory;
 
@@ -145,10 +145,10 @@ public sealed class CodeCompilerTests
         file.Received().Delete(OutputDllPath);
 
         monoCompiler.ReceivedCalls().Should().HaveCount(1);
-        monoCompiler.Received().Compile(Arg.Any<string[]>(), Arg.Any<TextWriter>());
+        monoCompiler.Received().InvokeCompiler(Arg.Any<string[]>(), Arg.Any<TextWriter>());
 
         logger.ReceivedCalls().Should().HaveCount(3);
-        logger.Received().Information("Compiling mod {identifier} ...", _ModDefinition.Id);
+        logger.Received().Information("Compiling mod {identifier} ...", _ModDefinition.Identifier);
         logger.Received().Debug("outputDllPath: {outputDllPath}, Sources: {sources}, references: {references}", OutputDllPath, Arg.Any<string[]>(), Arg.Any<string[]>());
         logger.Received().Error("Compilation failed with error(s):\r\n{errors}", "ERROR");
     }
@@ -172,8 +172,8 @@ public sealed class CodeCompilerTests
         fileSystem.DirectoryInfo(Arg.Any<string>()).Returns(directoryInfo);
         fileSystem.File.Returns(file);
 
-        var monoCompiler = Substitute.For<IMonoCompiler>();
-        monoCompiler.Compile(Arg.Any<string[]>(), Arg.Any<TextWriter>()).Returns(true).AndDoes(_ => { file.Exists(OutputDllPath).Returns(true); });
+        var monoCompiler = Substitute.For<ICompilerCallableEntryPoint>();
+        monoCompiler.InvokeCompiler(Arg.Any<string[]>(), Arg.Any<TextWriter>()).Returns(true).AndDoes(_ => { file.Exists(OutputDllPath).Returns(true); });
         var logger = Substitute.For<ILogger>();
         var sut    = new CodeCompiler(fileSystem, monoCompiler, logger);
 
@@ -184,7 +184,7 @@ public sealed class CodeCompilerTests
         actual.Should().Be(OutputDllPath);
 
         fileSystem.ReceivedCalls().Should().HaveCount(8);
-        fileSystem.Received().DirectoryInfo(_ModDefinition.DefinitionPath);
+        fileSystem.Received().DirectoryInfo(_ModDefinition.BasePath);
         _ = fileSystem.Received(3).File;
         _ = fileSystem.Received(4).Directory;
 
@@ -197,10 +197,10 @@ public sealed class CodeCompilerTests
         file.Received().Delete(OutputDllPath);
 
         monoCompiler.ReceivedCalls().Should().HaveCount(1);
-        monoCompiler.Received().Compile(Arg.Any<string[]>(), Arg.Any<TextWriter>());
+        monoCompiler.Received().InvokeCompiler(Arg.Any<string[]>(), Arg.Any<TextWriter>());
 
         logger.ReceivedCalls().Should().HaveCount(3);
-        logger.Received().Information("Compiling mod {identifier} ...", _ModDefinition.Id);
+        logger.Received().Information("Compiling mod {identifier} ...", _ModDefinition.Identifier);
         logger.Received().Debug("outputDllPath: {outputDllPath}, Sources: {sources}, references: {references}", OutputDllPath, Arg.Any<string[]>(), Arg.Any<string[]>());
         logger.Received().Information("Compilation complete ...");
     }
@@ -228,8 +228,8 @@ public sealed class CodeCompilerTests
         fileSystem.File.Returns(file);
         fileSystem.Directory.Returns(directory);
 
-        var monoCompiler = Substitute.For<IMonoCompiler>();
-        monoCompiler.Compile(Arg.Any<string[]>(), Arg.Any<TextWriter>()).Returns(true).AndDoes(_ => { file.Exists(OutputDllPath).Returns(true); });
+        var monoCompiler = Substitute.For<ICompilerCallableEntryPoint>();
+        monoCompiler.InvokeCompiler(Arg.Any<string[]>(), Arg.Any<TextWriter>()).Returns(true).AndDoes(_ => { file.Exists(OutputDllPath).Returns(true); });
         var logger = Substitute.For<ILogger>();
         var sut = new CodeCompiler(fileSystem, monoCompiler, logger) {
             ReferenceNames = ["Foo", "Bar"]
@@ -241,7 +241,7 @@ public sealed class CodeCompilerTests
         // Assert
         actual.Should().Be(OutputDllPath);
 
-        monoCompiler.Received().Compile(Arg.Is<string[]>(o =>
+        monoCompiler.Received().InvokeCompiler(Arg.Is<string[]>(o =>
             o.Length == 8 &&
             o[0] == SourceFilePath &&
             o[1] == "-target:library" &&
@@ -259,5 +259,34 @@ public sealed class CodeCompilerTests
                 o.Length == 2 &&
                 o[0] == @"CurrentDirectory\Railroader_Data\Managed\Foo.dll" &&
                 o[1] == @"CurrentDirectory\Railroader_Data\Managed\Bar.dll"));
+    }
+
+
+    [Fact]
+    public void RealCode() {
+        // Arrange
+        const string  basePath = @"c:\Program Files (x86)\Steam\steamapps\common\Railroader\";
+        Directory.SetCurrentDirectory(basePath);
+
+        if (File.Exists(basePath + @"Mods\Railroader-DummyMod\DummyMod.dll")) {
+            File.Delete(basePath + @"Mods\Railroader-DummyMod\DummyMod.dll");
+        }
+
+        var logger                     = Substitute.For<ILogger>();
+        var fileSystem                 = new FileSystemWrapper(logger);
+        var compilerCallableEntryPoint = new CompilerCallableEntryPointWrapper();
+        var sut                        = new CodeCompiler(fileSystem, compilerCallableEntryPoint, logger);
+
+        
+
+        var modDefinition = new ModDefinition() {
+            Identifier = "DummyMod",
+            BasePath = basePath + @"Mods\Railroader-DummyMod\"
+        };
+
+        // Act
+        var actual = sut.CompileMod(modDefinition);
+
+        // Assert
     }
 }

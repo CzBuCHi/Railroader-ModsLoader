@@ -22,11 +22,10 @@ public sealed class ModLoaderTests
         var fileSystem = Substitute.For<IFileSystem>();
         fileSystem.Directory.Returns(directory);
 
-        var sut      = new ModLoader(fileSystem);
-        var accessor = new ModLoaderAccessor(sut);
-
+        var sut      = new ModDefinitionLoader();
+        var accessor = new ModDefinitionLoaderAccessor(sut);
         // Act
-        var actual = sut.LoadModDefinitions();
+        var actual = sut.LoadDefinitions();
 
         // Assert
         actual.Should().BeEmpty();
@@ -46,11 +45,11 @@ public sealed class ModLoaderTests
         fileSystem.Directory.Returns(directory);
         fileSystem.File.Returns(file);
 
-        var sut      = new ModLoader(fileSystem);
-        var accessor = new ModLoaderAccessor(sut);
+        var sut      = new ModDefinitionLoader();
+        var accessor = new ModDefinitionLoaderAccessor(sut);
 
         // Act
-        var actual = sut.LoadModDefinitions();
+        var actual = sut.LoadDefinitions();
 
         // Assert
         actual.Should().BeEmpty();
@@ -72,11 +71,11 @@ public sealed class ModLoaderTests
         fileSystem.Directory.Returns(directory);
         fileSystem.File.Returns(file);
 
-        var sut      = new ModLoader(fileSystem);
-        var accessor = new ModLoaderAccessor(sut);
+        var sut      = new ModDefinitionLoader();
+        var accessor = new ModDefinitionLoaderAccessor(sut);
 
         // Act
-        var actual = sut.LoadModDefinitions();
+        var actual = sut.LoadDefinitions();
 
         // Assert
         actual.Should().BeEmpty();
@@ -103,11 +102,11 @@ public sealed class ModLoaderTests
         fileSystem.Directory.Returns(directory);
         fileSystem.File.Returns(file);
 
-        var sut      = new ModLoader(fileSystem);
-        var accessor = new ModLoaderAccessor(sut);
+        var sut      = new ModDefinitionLoader();
+        var accessor = new ModDefinitionLoaderAccessor(sut);
 
         // Act
-        var actual = sut.LoadModDefinitions();
+        var actual = sut.LoadDefinitions();
 
         // Assert
         actual.Should().BeEmpty();
@@ -134,11 +133,11 @@ public sealed class ModLoaderTests
         fileSystem.Directory.Returns(directory);
         fileSystem.File.Returns(file);
 
-        var sut      = new ModLoader(fileSystem);
-        var accessor = new ModLoaderAccessor(sut);
+        var sut      = new ModDefinitionLoader();
+        var accessor = new ModDefinitionLoaderAccessor(sut);
 
         // Act
-        var actual = sut.LoadModDefinitions();
+        var actual = sut.LoadDefinitions();
 
         // Assert
         actual.Should().HaveCount(1);
@@ -163,11 +162,11 @@ public sealed class ModLoaderTests
         fileSystem.Directory.Returns(directory);
         fileSystem.File.Returns(file);
 
-        var sut      = new ModLoader(fileSystem);
-        var accessor = new ModLoaderAccessor(sut);
+        var sut      = new ModDefinitionLoader();
+        var accessor = new ModDefinitionLoaderAccessor(sut);
 
         // Act
-        var actual = sut.LoadModDefinitions();
+        var actual = sut.LoadDefinitions();
 
         // Assert
         actual.Should().HaveCount(1);
@@ -183,8 +182,8 @@ public sealed class ModLoaderTests
         // Arrange
         var fileSystem = Substitute.For<IFileSystem>();
         var logger     = Substitute.For<ILogger>();
-        var sut        = new ModLoader(fileSystem);
-        new ModLoaderAccessor(sut).LogMessages.AddRange([
+        var sut        = new ModDefinitionLoader();
+        new ModDefinitionLoaderAccessor(sut).LogMessages.AddRange([
             (LogEventLevel.Verbose, "Verbose {msg}", ["Verbose"]),
             (LogEventLevel.Debug, "Debug {msg}", ["Debug"]),
             (LogEventLevel.Information, "Information {msg}", ["Information"]),
@@ -211,8 +210,8 @@ public sealed class ModLoaderTests
         // Arrange
         var fileSystem = Substitute.For<IFileSystem>();
         var logger     = Substitute.For<ILogger>();
-        var sut        = new ModLoader(fileSystem);
-        new ModLoaderAccessor(sut).LogMessages.AddRange([
+        var sut        = new ModDefinitionLoader();
+        new ModDefinitionLoaderAccessor(sut).LogMessages.AddRange([
             ((LogEventLevel)42, "", [])
         ]);
 
@@ -223,9 +222,9 @@ public sealed class ModLoaderTests
         act.Should().Throw<Exception>().WithMessage("Invalid log level (42).");
     }
 
-    private sealed class ModLoaderAccessor(ModLoader modLoader)
+    private sealed class ModDefinitionLoaderAccessor(ModDefinitionLoader modLoader)
     {
-        private readonly FieldInfo _LogMessages = typeof(ModLoader).GetField("_LogMessages", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        private readonly FieldInfo _LogMessages = typeof(ModDefinitionLoader).GetField("_LogMessages", BindingFlags.Instance | BindingFlags.NonPublic)!;
 
         public List<(LogEventLevel Level, string Format, object[] Args)> LogMessages => (List<(LogEventLevel Level, string Format, object[] Args)>)_LogMessages.GetValue(modLoader)!;
     }

@@ -2,19 +2,19 @@
 
 namespace Railroader.ModInterfaces;
 
-/// <summary> An interface containing information about a mod.  </summary>
+/// <summary> Represents a loaded mod instance. </summary>
 [PublicAPI]
 public interface IMod
 {
-    /// <summary> Basic information about a mod loaded from Definition.json. </summary>
+    /// <summary> Gets the definition/metadata for this mod. </summary>
     IModDefinition Definition { get; }
 
-    /// <summary> Gets whether the mod has been enabled. Only enabled mods will be loaded. </summary>
+    /// <summary> Gets a value indicating whether this mod is enabled. </summary>
     bool IsEnabled { get; }
 
-    /// <summary> Gets whether the mod has been loaded.  </summary>
+    /// <summary> Gets a value indicating whether this mod is loaded. </summary>
     bool IsLoaded { get; }
 
-    /// <summary> Gets the plugins that have been registered with this mod, if any. </summary>
+    /// <summary> Gets the plugins provided by this mod, or <see langword="null"/> if no plugins are available. </summary>
     PluginBase[]? Plugins { get; }
 }

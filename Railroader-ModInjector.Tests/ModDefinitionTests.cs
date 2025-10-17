@@ -25,7 +25,7 @@ public sealed class ModDefinitionTests
 
         // Assert
         sut.Should().NotBeNull();
-        sut.Id.Should().Be("dummy");
+        sut.Identifier.Should().Be("dummy");
         sut.Name.Should().Be("Dummy name");
         sut.Version.Should().Be(new Version(1, 2, 3));
         sut.VersionValid.Should().BeTrue();
