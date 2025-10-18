@@ -1,4 +1,16 @@
 ﻿// ReSharper disable All
+
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+
 namespace System.Runtime.CompilerServices;
 
-internal sealed class IsExternalInit;
+/// <summary>
+/// Reserved to be used by the compiler for tracking metadata.
+/// This class should not be used by developers in source code.
+/// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
+[ExcludeFromCodeCoverage]
+internal static class IsExternalInit
+{
+}

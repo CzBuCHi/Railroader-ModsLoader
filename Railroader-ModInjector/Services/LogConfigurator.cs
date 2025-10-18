@@ -38,10 +38,8 @@ internal sealed class LogConfigurator : ILogConfigurator
     /// <summary> Removes vanilla Unity console sinks from the configuration. </summary>
     /// <param name="configuration">The logger configuration to modify.</param>
     private static void RemoveUnitySinks(LoggerConfiguration configuration) {
-        var field = typeof(LoggerConfiguration).GetField("_logEventSinks", BindingFlags.NonPublic | BindingFlags.Instance);
-        if (field?.GetValue(configuration) is not IList sinks) {
-            return;
-        }
+        var field = typeof(LoggerConfiguration).GetField("_logEventSinks", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var sinks = (IList)field.GetValue(configuration)!;
 
         foreach (var sink in sinks.OfType<SerilogUnityConsoleEventSink>().ToList()) {
             sinks.Remove(sink);

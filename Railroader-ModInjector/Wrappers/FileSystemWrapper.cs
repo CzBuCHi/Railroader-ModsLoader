@@ -54,7 +54,7 @@ internal interface IFile
 internal interface IDirectoryInfo
 {
     /// <inheritdoc cref="DirectoryInfo.EnumerateFiles(string, SearchOption)"/>
-    IEnumerable<IFileInfo> EnumerateFiles(string searchPattern, SearchOption searchOption);
+    IEnumerable<IFileInfo> EnumerateFiles(string searchPattern, SearchOption searchOption = SearchOption.TopDirectoryOnly);
 }
 
 /// <summary> Wrapper for <see cref="FileInfo"/>. </summary>
@@ -69,13 +69,15 @@ internal interface IFileInfo
 
 /// <inheritdoc />
 [ExcludeFromCodeCoverage]
-internal sealed class FileSystemWrapper(ILogger logger) : IFileSystem
+internal sealed class FileSystemWrapper : IFileSystem
 {
+    public required ILogger Logger { get; init; }
+
     /// <inheritdoc />
     public IDirectory Directory => new DirectoryWrapper();
 
     /// <inheritdoc />
-    public IFile File => new FileWrapper(logger);
+    public IFile File => new FileWrapper(Logger);
 
     /// <inheritdoc />
     public IDirectoryInfo DirectoryInfo(string path) => new DirectoryInfoWrapper(new DirectoryInfo(path));

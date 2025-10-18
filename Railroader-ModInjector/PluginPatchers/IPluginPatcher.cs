@@ -1,7 +1,6 @@
 ﻿using Mono.Cecil;
-using Railroader.ModInterfaces;
 
-namespace Railroader.ModInjector.PluginWrappers;
+namespace Railroader.ModInjector.PluginPatchers;
 
 /// <summary> Defines a contract for patching plugin types in an assembly by modifying or creating the <c>OnIsEnabledChanged</c> method. </summary>
 internal interface IPluginPatcher

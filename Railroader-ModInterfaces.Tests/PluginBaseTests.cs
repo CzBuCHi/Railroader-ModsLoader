@@ -1,52 +1,76 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using Railroader.ModInterfaces;
 
 namespace Railroader_ModInterfaces.Tests;
 
-public sealed class PluginBaseTests
+public sealed class PluginBaseTests : IAsyncLifetime
 {
+    private IModdingContext _ModdingContext = null!;
+    private IMod            _Mod            = null!;
+    private TestPlugin      _Sut            = null!;
+
+    public Task InitializeAsync() {
+        _ModdingContext = Substitute.For<IModdingContext>();
+        _Mod = Substitute.For<IMod>();
+        _Sut = new TestPlugin(_ModdingContext, _Mod);
+        return Task.CompletedTask;
+    }
+
+    public Task DisposeAsync() {
+        TestPlugin.Instance.Cleanup();
+        return Task.CompletedTask;
+    }
+
     [Fact]
     public void CallsOnEnableCorrectly() {
         // Arrange
-        var moddingContext = Substitute.For<IModdingContext>();
-        var modDefinition  = Substitute.For<IModDefinition>();
-        var sut            = new TestPlugin(moddingContext, modDefinition);
-        sut.SetIsEnabled(false);
+        _Sut.SetIsEnabled(false);
 
         // Act
-        sut.IsEnabled = true;
-        sut.IsEnabled = true;
+        _Sut.IsEnabled = true;
+        _Sut.IsEnabled = true;
 
         // Assert
-        sut.IsEnabled.Should().BeTrue();
-        sut.IsEnabledChanges.Should().BeEquivalentTo([true]);
+        _Sut.IsEnabled.Should().BeTrue();
+        _Sut.IsEnabledChanges.Should().BeEquivalentTo([true]);
     }
 
     [Fact]
     public void CallsOnDisableCorrectly() {
         // Arrange
-        var moddingContext = Substitute.For<IModdingContext>();
-        var modDefinition  = Substitute.For<IModDefinition>();
-        var sut            = new TestPlugin(moddingContext, modDefinition);
-        sut.SetIsEnabled(true);
+        _Sut.SetIsEnabled(true);
 
         // Act
-        sut.IsEnabled = false;
-        sut.IsEnabled = false;
+        _Sut.IsEnabled = false;
+        _Sut.IsEnabled = false;
 
         // Assert
-        sut.IsEnabled.Should().BeFalse();
-        sut.IsEnabledChanges.Should().BeEquivalentTo([false]);
+        _Sut.IsEnabled.Should().BeFalse();
+        _Sut.IsEnabledChanges.Should().BeEquivalentTo([false]);
     }
 
-    private sealed class TestPlugin(IModdingContext moddingContext, IModDefinition modDefinition) : PluginBase(moddingContext, modDefinition)
+    [Fact]
+    public void EnsureSingleton() {
+        // Act
+        var act = () => new TestPlugin(_ModdingContext, _Mod);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>().WithMessage($"Cannot create plugin '{typeof(TestPlugin)}' twice.");
+    }
+
+    public sealed class TestPlugin(IModdingContext moddingContext, IMod mod) : PluginBase<TestPlugin>(moddingContext, mod)
     {
-        private readonly FieldInfo _IsEnabled = typeof(PluginBase).GetField("_IsEnabled", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        private readonly FieldInfo _IsEnabled = typeof(PluginBase<TestPlugin>).GetField("_IsEnabled", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        private readonly FieldInfo _Instance  = typeof(PluginBase<TestPlugin>).GetField("_Instance", BindingFlags.Static | BindingFlags.NonPublic)!;
 
         public void SetIsEnabled(bool value) => _IsEnabled.SetValue(this, value);
+
+        public void Cleanup() => _Instance.SetValue(null!, null!);
 
         public readonly List<bool> IsEnabledChanges = new();
 

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using ILogger = Serilog.ILogger;
 using Object = UnityEngine.Object;
 
-namespace Railroader.ModInjector.PluginWrappers;
+namespace Railroader.ModInjector.PluginPatchers;
 
 /// <summary>
 /// Patches types implementing <see cref="ITopRightButtonPlugin"/> to add or configure a UI button in the top-right area
@@ -19,7 +19,7 @@ public sealed class TopRightButtonPluginPatcher(ILogger logger) : PluginPatcherB
     /// <summary> Handles the <c>OnIsEnabledChanged</c> event for the plugin, performing patcher-specific logic when the plugin is enabled or disabled. </summary>
     /// <param name="plugin">The plugin instance. Must not be null.</param>
     [UsedImplicitly]
-    public static void OnIsEnabledChanged(PluginBase plugin) {
+    public static void OnIsEnabledChanged(IPluginBase plugin) {
         var topRightButton = (ITopRightButtonPlugin)plugin;
 
         var topRightArea = Object.FindObjectOfType<UI.TopRightArea>();
@@ -43,7 +43,7 @@ public sealed class TopRightButtonPluginPatcher(ILogger logger) : PluginPatcherB
             texture = new Texture2D(128, 128, TextureFormat.DXT5, false);
             texture.LoadImage(bytes);
         } catch (Exception exc) {
-            plugin.CreateLogger("TopRightButton").Error(exc, "Failed to load texture {0}", path);
+            DI.GetLogger(plugin.Mod.Definition.Identifier + ".HarmonyPluginPatcher").Error(exc, "Failed to load texture {0}", path);
             return;
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using Railroader.ModInterfaces;
@@ -7,6 +8,7 @@ using Serilog.Events;
 namespace Railroader.ModInjector;
 
 /// <summary> Implementation of <see cref="IModDefinition"/> for mod metadata. </summary>
+[DebuggerDisplay("{Identifier,nq} [{Version}] ")]
 internal sealed class ModDefinition : IModDefinition
 {
     /// <inheritdoc />

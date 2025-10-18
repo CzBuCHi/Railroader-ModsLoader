@@ -17,7 +17,7 @@ public sealed class LogConfiguratorTests
     public void ConfigureLoggerCorrectly() {
         // Arrange
         var configuration = new LoggerConfiguration().WriteTo.UnityConsole()!;
-        var accessor      = new LoggerConfigurationAccessor(configuration);
+        var accessor = new LoggerConfigurationAccessor(configuration);
         ModDefinition[] definitions = [
             new() {
                 Identifier = "NoLog",

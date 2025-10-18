@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Railroader.ModInterfaces;
 using UI.Builder;
 using UI.Common;
@@ -13,15 +14,18 @@ internal sealed class ModdingContext(IReadOnlyCollection<IMod> mods) : IModdingC
     public IReadOnlyCollection<IMod> Mods { get; } = mods;
 
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public T? LoadSettings<T>(string identifier) where T : class => throw new NotImplementedException();
 
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public void SaveSettings<T>(string identifier, T settings) where T : class => throw new NotImplementedException();
 
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public Window CreateWindow(string identifier, int width, int height, Window.Position position) => throw new NotImplementedException();
 
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public UIPanel PopulateWindow(Window window, Action<UIPanelBuilder> closure) => throw new NotImplementedException();
 }
-

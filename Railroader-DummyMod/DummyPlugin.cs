@@ -6,14 +6,14 @@ using Serilog;
 namespace Railroader.DummyMod
 {
     [UsedImplicitly]
-    public class DummyPlugin : SingletonPluginBase<DummyPlugin>, IHarmonyPlugin, ITopRightButtonPlugin
+    public class DummyPlugin : PluginBase<DummyPlugin>, IHarmonyPlugin, ITopRightButtonPlugin
     {
         public ILogger Logger { get; }
 
-        public DummyPlugin(IModdingContext moddingContext, IModDefinition modDefinition)
-            : base(moddingContext, modDefinition) {
-            Logger = CreateLogger();
-            Logger.Information("DummyPlugin ctor : " + modDefinition.Identifier);
+        public DummyPlugin(IModdingContext moddingContext, IMod mod)
+            : base(moddingContext, mod) {
+            Logger = mod.CreateLogger();
+            Logger.Information("DummyPlugin ctor : " + mod.Definition.Identifier);
         }
 
         protected override void OnIsEnabledChanged() {

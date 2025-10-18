@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using Newtonsoft.Json;
-using Railroader.ModInjector.Wrappers;
 using Serilog;
 
 namespace Railroader.ModInjector.Services;
@@ -16,8 +15,10 @@ internal interface IModManager
 /// <inheritdoc />
 internal sealed class ModManager : IModManager
 {
-    public ICodeCompiler?  CodeCompiler  { get; set; }
-    public IPluginManager? PluginManager { get; set; }
+    public delegate IPluginManager PluginManagerFactoryDelegate(ModdingContext moddingContext);
+
+    public required ICodeCompiler                CodeCompiler         { get; init; }
+    public required PluginManagerFactoryDelegate PluginManagerFactory { get; init; }
 
     private        Mod[]   _Mods   = null!;
     private static ILogger _Logger = null!;
@@ -26,8 +27,6 @@ internal sealed class ModManager : IModManager
     public void Bootstrap(ModDefinition[] modDefinitions) {
         _Logger = Log.ForContext("SourceContext", "Railroader.ModInjector");
         _Logger.Debug("Bootstrap start");
-
-        CodeCompiler ??= new CodeCompiler(new FileSystemWrapper(_Logger), new CompilerCallableEntryPointWrapper(), _Logger);
 
         _Mods = new Mod[modDefinitions.Length];
 
@@ -41,9 +40,9 @@ internal sealed class ModManager : IModManager
 
         _Logger.Debug("moddingContext: {moddingContext}", JsonConvert.SerializeObject(moddingContext));
 
-        PluginManager ??= new PluginManager(moddingContext);
-        foreach (var mod in _Mods.Where(o => o.OutputDllPath != null)) {
-            mod.Plugins = PluginManager.CreatePlugins(mod).ToArray();
+        var pluginManger = PluginManagerFactory(moddingContext);
+        foreach (var mod in _Mods.Where(o => o.AssemblyPath != null)) {
+            mod.Plugins = pluginManger.CreatePlugins(mod).ToArray();
             mod.IsLoaded = true;
         }
 

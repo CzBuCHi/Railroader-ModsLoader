@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using Serilog;
 
 namespace Railroader.ModInterfaces;
 
@@ -16,5 +17,13 @@ public interface IMod
     bool IsLoaded { get; }
 
     /// <summary> Gets the plugins provided by this mod, or <see langword="null"/> if no plugins are available. </summary>
-    PluginBase[]? Plugins { get; }
+    IPluginBase[]? Plugins { get; }
+
+    /// <summary> Creates a scoped logger for this mod. </summary>
+    /// <param name="scope">
+    /// The optional scope name to append to the logger context.
+    /// If <see langword="null"/>, only the mod identifier is used.
+    /// </param>
+    /// <returns>A configured logger instance.</returns>
+    ILogger CreateLogger(string? scope = null);
 }

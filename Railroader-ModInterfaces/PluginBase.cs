@@ -1,33 +1,57 @@
-﻿using JetBrains.Annotations;
-using Serilog;
+﻿using System;
+using JetBrains.Annotations;
 
 namespace Railroader.ModInterfaces;
+
+[PublicAPI]
+public interface IPluginBase
+{
+    /// <summary> Gets the modding context for this plugin. </summary>
+    IModdingContext ModdingContext { get; }
+
+    /// <summary> Gets the mod for this plugin. </summary>
+    IMod Mod { get; }
+
+    /// <summary> Gets or sets a value indicating whether this plugin is enabled. </summary>
+    bool IsEnabled { get; set; }
+}
 
 /// <summary> Base class for all plugins, providing common functionality and modding context access. </summary>
 /// <remarks> This class is intended to be inherited by concrete plugin implementations. </remarks>
 [PublicAPI]
-public abstract class PluginBase(IModdingContext moddingContext, IModDefinition modDefinition) : IPlugin
+public abstract class PluginBase<T> : IPluginBase where T : PluginBase<T>
 {
-    /// <summary> Gets the modding context for this plugin. </summary>
-    public IModdingContext ModdingContext { get; } = moddingContext;
+    private static T? _Instance;
 
-    /// <summary> Gets the mod definition for this plugin. </summary>
-    public IModDefinition ModDefinition { get; } = modDefinition;
+    /// <summary> Gets the singleton instance of this plugin type. </summary>
+    /// <exception cref="InvalidOperationException"> Thrown if the instance has not been created yet. </exception>
+    public static T Instance => _Instance ?? throw new InvalidOperationException($"{typeof(T).Name} was not created");
 
-    /// <summary> Creates a scoped logger for this plugin. </summary>
-    /// <param name="scope">
-    /// The optional scope name to append to the logger context.
-    /// If <see langword="null"/>, only the mod identifier is used.
-    /// </param>
-    /// <returns>A configured logger instance.</returns>
-    public ILogger CreateLogger(string? scope = null) => 
-        Log.ForContext("SourceContext", $"{ModDefinition.Identifier}{(scope != null ? $".{scope}" : "")}");
+    /// <summary> Initializes a new instance of the <see cref="PluginBase{T}"/> class. </summary>
+    /// <param name="moddingContext">The modding context.</param>
+    /// <param name="mod">The mod definition.</param>
+    /// <exception cref="InvalidOperationException"> Thrown if an instance of this type already exists. </exception>
+    protected PluginBase(IModdingContext moddingContext, IMod mod) {
+        if (_Instance != null) {
+            throw new InvalidOperationException($"Cannot create plugin '{GetType()}' twice.");
+        }
+
+        _Instance = (T)this;
+
+        ModdingContext = moddingContext;
+        Mod = mod;
+    }
+
+    /// <inheritdoc />
+    public IModdingContext ModdingContext { get; }
+
+    /// <inheritdoc />
+    public IMod Mod { get; }
 
     private bool _IsEnabled;
 
-    /// <summary> Gets or sets a value indicating whether this plugin is enabled. </summary>
-    public bool IsEnabled
-    {
+    /// <inheritdoc />
+    public bool IsEnabled {
         get => _IsEnabled;
         set {
             if (_IsEnabled == value) {
@@ -44,7 +68,6 @@ public abstract class PluginBase(IModdingContext moddingContext, IModDefinition 
     /// Override this method to handle enable/disable events.
     /// The base implementation does nothing.
     /// </remarks>
-    protected virtual void OnIsEnabledChanged()
-    {
+    protected virtual void OnIsEnabledChanged() {
     }
 }

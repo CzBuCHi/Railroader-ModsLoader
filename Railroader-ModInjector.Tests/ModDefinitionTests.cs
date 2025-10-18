@@ -9,7 +9,8 @@ namespace Railroader_ModInterfaces.Tests;
 public sealed class ModDefinitionTests
 {
     [Fact]
-    public void LoadFromValidJsonCorrectly() {
+    public void LoadFromValidJsonCorrectly()
+    {
         // Arrange
         var json = """
                    {
@@ -35,7 +36,8 @@ public sealed class ModDefinitionTests
     }
 
     [Fact]
-    public void LoadFromInvalidJson_MissingId() {
+    public void LoadFromInvalidJson_MissingId()
+    {
         // Arrange
         var json = """
                    {
@@ -54,7 +56,8 @@ public sealed class ModDefinitionTests
     }
 
     [Fact]
-    public void LoadFromInvalidJson_MissingName() {
+    public void LoadFromInvalidJson_MissingName()
+    {
         // Arrange
         var json = """
                    {
@@ -73,7 +76,8 @@ public sealed class ModDefinitionTests
     }
 
     [Fact]
-    public void LoadFromInvalidJson_InvalidVersion() {
+    public void LoadFromInvalidJson_InvalidVersion()
+    {
         // Arrange
         var json = """
                    {
@@ -95,7 +99,8 @@ public sealed class ModDefinitionTests
     }
 
     [Fact]
-    public void LoadFromInvalidJson_NullVersion() {
+    public void LoadFromInvalidJson_NullVersion()
+    {
         // Arrange
         var json = """
                    {
@@ -117,7 +122,8 @@ public sealed class ModDefinitionTests
     }
 
     [Fact]
-    public void LoadFromInvalidJson_InvalidLogLevel() {
+    public void LoadFromInvalidJson_InvalidLogLevel()
+    {
         // Arrange
         var json = """
                    {
@@ -139,7 +145,8 @@ public sealed class ModDefinitionTests
     }
 
     [Fact]
-    public void LoadFromInvalidJson_NullLogLevel() {
+    public void LoadFromInvalidJson_NullLogLevel()
+    {
         // Arrange
         var json = """
                    {
