@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace StrykerReportViewer.Models;
+namespace StrykerReportTool.Models;
 
 [PublicAPI]
 public class Report

@@ -1,8 +1,7 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using JetBrains.Annotations;
 
-namespace StrykerReportViewer.Models;
+namespace StrykerReportTool.Models;
 
 [PublicAPI]
 [DebuggerDisplay("Mutant: {Status}")]

@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using JetBrains.Annotations;
 
-namespace StrykerReportViewer.Models;
+namespace StrykerReportTool.Models;
 
 [PublicAPI]
 [DebuggerDisplay("High: {High}, Low: {Low}")]

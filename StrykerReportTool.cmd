@@ -1,0 +1,1 @@
+StrykerReportTool\bin\Debug\StrykerReportTool.exe StrykerOutput %*
