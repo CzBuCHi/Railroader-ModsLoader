@@ -16,63 +16,62 @@ internal static class DI
 {
     /// <summary> Serilog logger instance. </summary>
     public static ILogger Logger { get; set; } = new InitLogger();
-
-    public delegate T Factory<out T>();
-
-    public delegate T Factory<out T, in TArg>(TArg arg);
-
+    
     public delegate ILogger GetLoggerDelegate(string? scope = null);
 
     public static Action<LoggerConfiguration> CreateLogger { get; set; } = configuration => Logger = configuration.CreateLogger()!;
 
     public static GetLoggerDelegate GetLogger { get; set; } = scope => Logger.ForContext("SourceContext", scope ?? "Railroader.ModInjector")!;
 
-    public static Factory<IAssemblyCompiler> AssemblyCompiler { get; set; } =
+    public static Func<IAssemblyCompiler> AssemblyCompiler { get; set; } =
         () => new AssemblyCompiler {
-            CompilerCallableEntryPoint = CompilerCallableEntryPoint(),
+            CompilerCallableEntryPoint = CompilerCallableEntryPoint()!,
             Logger = GetLogger()
         };
 
-    public static Factory<IAssemblyDefinitionWrapper> AssemblyDefinitionWrapper { get; set; } =
+    public static Func<IAssemblyDefinitionWrapper> AssemblyDefinitionWrapper { get; set; } =
         () => new AssemblyDefinitionWrapper();
 
-    public static Factory<IAssemblyWrapper> AssemblyWrapper { get; set; } =
+    public static Func<IAssemblyWrapper> AssemblyWrapper { get; set; } =
         () => new AssemblyWrapper();
 
-    public static Factory<ICodeCompiler> CodeCompiler { get; set; } =
+    public static Func<ICodeCompiler> CodeCompiler { get; set; } =
         () => new CodeCompiler {
-            FileSystem = FileSystem(),
+            FileSystem = FileSystem()!,
             Logger = GetLogger(),
-            AssemblyDefinitionWrapper = AssemblyDefinitionWrapper(),
-            AssemblyCompiler = AssemblyCompiler()
+            AssemblyDefinitionWrapper = AssemblyDefinitionWrapper()!,
+            AssemblyCompiler = AssemblyCompiler()!
         };
 
-    public static Factory<ICompilerCallableEntryPoint> CompilerCallableEntryPoint { get; set; } =
+    public static Func<ICompilerCallableEntryPoint> CompilerCallableEntryPoint { get; set; } =
         () => new CompilerCallableEntryPointWrapper();
 
-    public static Factory<IFileSystem> FileSystem { get; set; } =
+    public static Func<IFileSystem> FileSystem { get; set; } =
         () => new FileSystemWrapper {
             Logger = GetLogger()
         };
 
-    public static Factory<ILogConfigurator> LogConfigurator { get; set; } =
+    public static Func<string, IHarmonyWrapper> HarmonyWrapper { get; set; } =
+        id => new HarmonyWrapper(id);
+
+    public static Func<ILogConfigurator> LogConfigurator { get; set; } =
         () => new LogConfigurator();
 
-    public static Factory<IModDefinitionLoader> ModDefinitionLoader { get; set; } =
+    public static Func<IModDefinitionLoader> ModDefinitionLoader { get; set; } =
         () => new ModDefinitionLoader {
             Logger = GetLogger(),
-            FileSystem = FileSystem()
+            FileSystem = FileSystem()!
         };
 
-    public static Factory<IModManager> ModManager { get; set; } =
+    public static Func<IModManager> ModManager { get; set; } =
         () => new ModManager {
-            CodeCompiler = CodeCompiler(),
-            PluginManagerFactory = o => PluginManager(o)
+            CodeCompiler = CodeCompiler()!,
+            PluginManagerFactory = o => PluginManager(o)!
         };
 
-    public static Factory<IPluginManager, ModdingContext> PluginManager { get; set; } =
+    public static Func<ModdingContext, IPluginManager> PluginManager { get; set; } =
         context => new PluginManager {
-            AssemblyWrapper = AssemblyWrapper(),
+            AssemblyWrapper = AssemblyWrapper()!,
             ModdingContext = context,
             Logger = GetLogger()
         };

@@ -16,7 +16,7 @@ internal static class Injector
 
     namespace Logging;
 
-    public class LogConfigurator : MonoBehaviour
+    public class LogManager : MonoBehaviour
     {
         private void Awake()
         {
@@ -47,9 +47,7 @@ internal static class Injector
     private static ModDefinition[]  _ModDefinitions = [];
 
     /// <summary> Main entry point for mod system initialization. </summary>
-    public static void ModInjectorMain() {
-        DI.ModManager().Bootstrap(_ModDefinitions);
-    }
+    public static void ModInjectorMain() => DI.ModManager()!.Bootstrap(_ModDefinitions);
 
     /// <summary> Creates and configures the mod-aware logger. </summary>
     /// <param name="configuration">The base logger configuration.</param>
@@ -57,9 +55,9 @@ internal static class Injector
     public static Logger? CreateLogger(LoggerConfiguration configuration) {
         var initLogger = (IInitLogger)DI.Logger;
 
-        _ModDefinitions = DI.ModDefinitionLoader().LoadDefinitions();
+        _ModDefinitions = DI.ModDefinitionLoader()!.LoadDefinitions();
 
-        DI.LogConfigurator().ConfigureLogger(configuration, _ModDefinitions);
+        DI.LogConfigurator()!.ConfigureLogger(configuration, _ModDefinitions);
         DI.CreateLogger(configuration);
 
         var injectorLogger = DI.GetLogger();

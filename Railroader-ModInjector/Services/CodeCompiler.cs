@@ -3,7 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
-using Railroader.ModInjector.PluginPatchers;
+using Railroader.ModInjector.Patchers;
+using Railroader.ModInjector.Patchers.Special;
 using Railroader.ModInjector.Wrappers;
 using Railroader.ModInterfaces;
 using ILogger = Serilog.ILogger;
@@ -42,7 +43,7 @@ internal sealed class CodeCompiler : ICodeCompiler
     public required IAssemblyDefinitionWrapper AssemblyDefinitionWrapper { get; init; }
     public required IAssemblyCompiler          AssemblyCompiler          { get; init; }
 
-    private readonly ConcurrentDictionary<Type, IPluginPatcher> _PluginPatchers = new();
+    private readonly ConcurrentDictionary<Type, IMethodPatcher> _PluginPatchers = new();
 
     /// <inheritdoc />
     public List<(Type InterfaceType, Type PluginPatcherType)> PluginPatchers { get; init; } = [
@@ -147,7 +148,7 @@ internal sealed class CodeCompiler : ICodeCompiler
                     foreach (var pair in PluginPatchers) {
                         if (interfaces.Contains(pair.InterfaceType.FullName)) {
                             var patcher = _PluginPatchers.GetOrAdd(pair.InterfaceType,
-                                _ => (IPluginPatcher)Activator.CreateInstance(pair.PluginPatcherType, Logger)!
+                                _ => (IMethodPatcher)Activator.CreateInstance(pair.PluginPatcherType, Logger)!
                             )!;
 
                             patcher.Patch(assemblyDefinition, type);

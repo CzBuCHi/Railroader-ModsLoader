@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -13,6 +14,7 @@ internal interface IModManager
 }
 
 /// <inheritdoc />
+[ExcludeFromCodeCoverage] // TODO: remove this
 internal sealed class ModManager : IModManager
 {
     public delegate IPluginManager PluginManagerFactoryDelegate(ModdingContext moddingContext);

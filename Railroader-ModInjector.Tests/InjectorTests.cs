@@ -30,7 +30,7 @@ public class InjectorTests
     [Fact]
     public void ModInjectorMain() {
         // Arrange
-        var modManager     = Substitute.For<IModManager>();
+        var modManager = Substitute.For<IModManager>();
         DI.ModManager = () => modManager;
 
         InjectorAccessor.SetModDefinitions(_Definitions);
@@ -45,21 +45,36 @@ public class InjectorTests
     [Fact]
     public void CreateLogger() {
         // Arrange
-        
-
         var modDefinitionLoader = Substitute.For<IModDefinitionLoader>();
         modDefinitionLoader.LoadDefinitions().Returns(_Definitions);
 
-        var logConfigurator = Substitute.For<ILogConfigurator>();
-        var initLogger      = Substitute.For<IInitLogger>();
-        var logger          = Substitute.For<ILogger>();
-        var injectorLogger  = Substitute.For<ILogger>();
+        var modDefinitionLoaderFactory = Substitute.For<Func<IModDefinitionLoader>>();
+        modDefinitionLoaderFactory().Returns(modDefinitionLoader);
 
+        DI.ModDefinitionLoader = modDefinitionLoaderFactory;
+
+        var logConfigurator = Substitute.For<ILogConfigurator>();
+
+        var logConfiguratorFactory = Substitute.For<Func<ILogConfigurator>>();
+        logConfiguratorFactory().Returns(logConfigurator);
+
+        DI.LogConfigurator = logConfiguratorFactory;
+
+        var initLogger = Substitute.For<IInitLogger>();
         DI.Logger = initLogger;
-        DI.ModDefinitionLoader = () => modDefinitionLoader;
-        DI.LogConfigurator = () => logConfigurator;
-        DI.CreateLogger = _ => DI.Logger = logger;
-        DI.GetLogger = _ => injectorLogger;
+
+        var logger = Substitute.For<ILogger>();
+
+        var createLogger = Substitute.For<Action<LoggerConfiguration>>();
+        createLogger.When(o => o(Arg.Any<LoggerConfiguration>())).Do(_ => DI.Logger = logger);
+
+        DI.CreateLogger = createLogger;
+
+        var injectorLogger = Substitute.For<ILogger>();
+
+        var getLogger = Substitute.For<DI.GetLoggerDelegate>();
+        getLogger(Arg.Any<string>()).Returns(injectorLogger);
+        DI.GetLogger = getLogger;
 
         var configuration = new LoggerConfiguration();
 
@@ -71,7 +86,13 @@ public class InjectorTests
 
         initLogger.Received().Flush(injectorLogger);
 
-        logger.Information("Log level for {mod} set to {level}", "Second", LogEventLevel.Verbose);
+        injectorLogger.Received().Information("Log level for {mod} set to {level}", "Second", LogEventLevel.Verbose);
+
+        DI.ModDefinitionLoader.Received(1).Invoke();
+        DI.LogConfigurator.Received(1).Invoke();
+        DI.CreateLogger.Received(1).Invoke(Arg.Any<LoggerConfiguration>());
+        DI.GetLogger.Received(1).Invoke();
+        DI.Logger.Should().NotBe(initLogger);
     }
 
     private static class InjectorAccessor

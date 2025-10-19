@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Mono.CSharp;
 using NSubstitute;
@@ -18,6 +19,56 @@ public static class AssemblyTestUtils
 {
     private const string GameDir = @"c:\Program Files (x86)\Steam\steamapps\common\Railroader\";
 
+    public static (Mono.Cecil.AssemblyDefinition AssemblyDefinition, string OutputPath) BuildAssemblyDefinitionX(string source, string? suffix = null, [CallerFilePath] string? callerFilePath = null, [CallerMemberName] string? callerMemberName = null) {
+        var index = callerFilePath!.IndexOf("Railroader-ModInjector.Tests", StringComparison.Ordinal) + "Railroader-ModInjector.Tests".Length;
+        var rootPath = callerFilePath.Substring(0, index);
+
+        var outputPath = Path.Combine(rootPath, "obj", "Temp", Path.GetFileNameWithoutExtension(callerFilePath), callerMemberName + suffix);
+
+        var logger = Substitute.For<ILogger>();
+
+        var compiler = new AssemblyCompiler {
+            CompilerCallableEntryPoint = new CompilerCallableEntryPointWrapper(),
+            Logger = logger
+        };
+
+        if (Directory.Exists(outputPath)) {
+            Directory.Delete(outputPath, true);
+        }
+
+        Directory.CreateDirectory(outputPath);
+
+        var sourcePath = Path.Combine(outputPath, "source.cs");
+        var assemblyPath = Path.Combine(outputPath, "output.dll");
+
+        File.WriteAllText(sourcePath, source);
+
+
+        var sources = new[] { sourcePath };
+        var references = new[] {
+                             "Assembly-CSharp",
+                             "0Harmony",
+                             "Railroader-ModInterfaces",
+                             "Serilog",
+                             "UnityEngine.CoreModule"
+                         }
+                         .Select(o => Path.Combine(GameDir, "Railroader_Data", "Managed", o + ".dll"))
+                         .ToList();
+
+        references.Add(typeof(DateTime).Assembly.Location);
+        references.Add(typeof(AssemblyTestUtils).Assembly.Location);
+
+        var result = compiler.CompileAssembly(assemblyPath, sources, references, out var messages);
+        if (result == false) {
+            throw new InvalidOperationException("Failed to compile source:\r\n" + messages);
+        }
+
+        return (Mono.Cecil.AssemblyDefinition.ReadAssembly(assemblyPath), outputPath);
+    }
+
+  
+
+    [Obsolete]
     public static Mono.Cecil.AssemblyDefinition BuildAssemblyDefinition(string source, string outputPath) {
         var logger = Substitute.For<ILogger>();
 

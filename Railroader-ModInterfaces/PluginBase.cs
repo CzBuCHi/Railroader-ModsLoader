@@ -25,7 +25,7 @@ public abstract class PluginBase<T> : IPluginBase where T : PluginBase<T>
 
     /// <summary> Gets the singleton instance of this plugin type. </summary>
     /// <exception cref="InvalidOperationException"> Thrown if the instance has not been created yet. </exception>
-    public static T Instance => _Instance ?? throw new InvalidOperationException($"{typeof(T).Name} was not created");
+    public static T Instance => _Instance ?? throw new InvalidOperationException($"{typeof(T)} was not created.");
 
     /// <summary> Initializes a new instance of the <see cref="PluginBase{T}"/> class. </summary>
     /// <param name="moddingContext">The modding context.</param>

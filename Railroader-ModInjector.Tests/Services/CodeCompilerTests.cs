@@ -7,10 +7,10 @@ using Mono.Cecil;
 using NSubstitute;
 using Railroader_ModInterfaces.Tests.Wrappers.FileSystemWrapper;
 using Railroader.ModInjector;
+using Railroader.ModInjector.Patchers;
 using Railroader.ModInjector.Services;
 using Railroader.ModInjector.Wrappers;
 using Railroader.ModInterfaces;
-using Railroader.ModInjector.PluginPatchers;
 using Serilog;
 using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
 using TypeDefinition = Mono.Cecil.TypeDefinition;
@@ -316,17 +316,18 @@ public sealed class CodeCompilerTests
         assemblyDefinitionWrapper.ReceivedCalls().Should().HaveCount(1);
     }
 
-
-    private sealed class TestPluginPatcher(ILogger logger) : IPluginPatcher
+    
+    private sealed class TestPluginPatcher(ILogger logger) : IMethodPatcher
     {
-        public void Patch(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition) {
+        public bool Patch(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition) {
             logger.Debug("TestPluginPatcher::Patch | typeDefinition: {type}", typeDefinition.Name);
+            return true;
         }
     }
 
-    private sealed class ThrowingPatcher(ILogger logger) : IPluginPatcher
+    private sealed class ThrowingPatcher(ILogger logger) : IMethodPatcher
     {
-        public void Patch(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition) {
+        public bool Patch(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition) {
             throw new Exception("ThrowingPatcher");
         }
     }

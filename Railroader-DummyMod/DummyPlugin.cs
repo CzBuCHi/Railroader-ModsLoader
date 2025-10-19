@@ -26,4 +26,17 @@ namespace Railroader.DummyMod
         int ITopRightButtonPlugin.   Index    => 1;
         Action ITopRightButtonPlugin.OnClick  => () => { };
     }
+
+    public abstract class CustomPluginBase<TPlugin> : PluginBase<TPlugin>, IHarmonyPlugin
+        where TPlugin : CustomPluginBase<TPlugin>
+    {
+        protected CustomPluginBase(IModdingContext moddingContext, IMod mod) : base(moddingContext, mod) {
+        }
+    }
+
+    public class CustomPlugin : CustomPluginBase<CustomPlugin>
+    {
+        public CustomPlugin(IModdingContext moddingContext, IMod mod) : base(moddingContext, mod) {
+        }
+    }
 }

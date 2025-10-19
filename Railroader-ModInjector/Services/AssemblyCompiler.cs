@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using Railroader.ModInjector.Wrappers;
 using Serilog;
@@ -11,21 +10,25 @@ namespace Railroader.ModInjector.Services;
 
 internal interface IAssemblyCompiler
 {
-    bool CompileAssembly(string outputPath, string[] sources, string[] references);
+    bool CompileAssembly(string outputPath, ICollection<string> sources, ICollection<string> references);
 }
 
 internal class AssemblyCompiler : IAssemblyCompiler
 {
     public required ICompilerCallableEntryPoint CompilerCallableEntryPoint { get; init; }
-    public required ILogger                     Logger                     { get; init; }  
+    public required ILogger                     Logger                     { get; init; }
 
-    public bool CompileAssembly(string outputPath, string[] sources, string[] references) {
+    public bool CompileAssembly(string outputPath, ICollection<string> sources, ICollection<string> references)
+        => CompileAssembly(outputPath, sources, references, out _);
+
+    public bool CompileAssembly(string outputPath, ICollection<string> sources, ICollection<string> references, out string messages) {
         var args = CompilerArguments(outputPath, sources, references).ToArray();
 
         Logger.Information("Compiling assembly {outputPath} ...", outputPath);
         foreach (var reference in references) {
             Logger.Debug("reference: {source}", reference);
         }
+
         foreach (var source in sources) {
             Logger.Debug("source: {source}", source);
         }
@@ -36,7 +39,7 @@ internal class AssemblyCompiler : IAssemblyCompiler
             result = CompilerCallableEntryPoint.InvokeCompiler(args, error);
         }
 
-        var messages = sb.ToString();
+        messages = sb.ToString();
         if (!string.IsNullOrEmpty(messages)) {
             Logger.Information("Compilation messages:\r\n{messages}", messages);
         }
@@ -58,7 +61,7 @@ internal class AssemblyCompiler : IAssemblyCompiler
     [SuppressMessage("ReSharper", "GrammarMistakeInComment")]
     [SuppressMessage("ReSharper", "CommentTypo")]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
-    private static IEnumerable<string> CompilerArguments(string assemblyPath, string[] sources, string[] references) {
+    private static IEnumerable<string> CompilerArguments(string assemblyPath, ICollection<string> sources, ICollection<string> references) {
         foreach (var source in sources) {
             yield return source;
         }

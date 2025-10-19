@@ -22,7 +22,7 @@ public sealed class PluginBaseTests : IAsyncLifetime
     }
 
     public Task DisposeAsync() {
-        TestPlugin.Instance.Cleanup();
+        TestPlugin.Cleanup();
         return Task.CompletedTask;
     }
 
@@ -63,14 +63,26 @@ public sealed class PluginBaseTests : IAsyncLifetime
         act.Should().Throw<InvalidOperationException>().WithMessage($"Cannot create plugin '{typeof(TestPlugin)}' twice.");
     }
 
+    [Fact]
+    public void PrematureInstanceAccess() {
+        // Arrange
+        TestPlugin.Cleanup();
+
+        // Act
+        var act = () => TestPlugin.Instance;
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>().WithMessage($"{typeof(TestPlugin)} was not created.");
+    }
+
     public sealed class TestPlugin(IModdingContext moddingContext, IMod mod) : PluginBase<TestPlugin>(moddingContext, mod)
     {
-        private readonly FieldInfo _IsEnabled = typeof(PluginBase<TestPlugin>).GetField("_IsEnabled", BindingFlags.Instance | BindingFlags.NonPublic)!;
-        private readonly FieldInfo _Instance  = typeof(PluginBase<TestPlugin>).GetField("_Instance", BindingFlags.Static | BindingFlags.NonPublic)!;
+        private static readonly FieldInfo _IsEnabled = typeof(PluginBase<TestPlugin>).GetField("_IsEnabled", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        private static readonly FieldInfo _Instance  = typeof(PluginBase<TestPlugin>).GetField("_Instance", BindingFlags.Static | BindingFlags.NonPublic)!;
 
         public void SetIsEnabled(bool value) => _IsEnabled.SetValue(this, value);
 
-        public void Cleanup() => _Instance.SetValue(null!, null!);
+        public static void Cleanup() => _Instance.SetValue(null!, null!);
 
         public readonly List<bool> IsEnabledChanges = new();
 
