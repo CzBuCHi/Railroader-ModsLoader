@@ -114,6 +114,12 @@
   <member name="M:FluentAssertions.AssertionExtensions.Should``2(System.Collections.Generic.IDictionary{``0,``1})">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
+  <member name="M:FluentAssertions.Collections.GenericCollectionAssertions`3.Contain(System.Linq.Expressions.Expression{System.Func{`1,System.Boolean}},System.String,System.Object[])">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.Collections.GenericCollectionAssertions`3.ContainSingle(System.String,System.Object[])">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
   <member name="M:FluentAssertions.Collections.GenericDictionaryAssertions`4.ContainKey(`1,System.String,System.Object[])">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>

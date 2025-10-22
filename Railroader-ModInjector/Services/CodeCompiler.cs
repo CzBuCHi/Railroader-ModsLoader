@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
+using NSubstitute.FileSystem;
 using Railroader.ModInjector.Patchers;
 using Railroader.ModInjector.Patchers.Special;
 using Railroader.ModInjector.Wrappers;
@@ -63,14 +64,14 @@ internal sealed class CodeCompiler : ICodeCompiler
     /// <inheritdoc />
     public string? CompileMod(ModDefinition definition)
     {
-        var csFiles = FileSystem.DirectoryInfo(definition.BasePath).EnumerateFiles("*.cs", SearchOption.AllDirectories).ToArray();
+        var csFiles = FileSystem.DirectoryInfo(definition.BasePath).EnumerateFiles("*.cs", SearchOption.AllDirectories).OrderByDescending(o => o.LastWriteTime).ToArray();
         if (csFiles.Length == 0) {
             return null;
         }
 
         var assemblyPath = Path.Combine(definition.BasePath, definition.Identifier + ".dll");
         if (FileSystem.File.Exists(assemblyPath)) {
-            var newestFile = csFiles.OrderByDescending(o => o.LastWriteTime).First();
+            var newestFile = csFiles[0];
             if (FileSystem.File.GetLastWriteTime(assemblyPath) > newestFile.LastWriteTime) {
                 Logger.Information("Using existing mod {ModId} DLL at {Path}", definition.Identifier, assemblyPath);
                 return assemblyPath;

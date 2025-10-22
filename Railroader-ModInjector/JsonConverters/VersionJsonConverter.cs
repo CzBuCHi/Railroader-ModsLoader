@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using Newtonsoft.Json;
-using TelegraphPoles;
 
 namespace Railroader.ModInjector.JsonConverters;
 
@@ -39,7 +38,7 @@ internal sealed class VersionJsonConverter : JsonConverter<Version>
             }
 
             case JsonToken.Float: {
-                var raw      = Convert.ToDecimal(reader.Value!);
+                var raw = Convert.ToDecimal(reader.Value!);
                 if (raw < 0) {
                     throw new JsonReaderException($"Unexpected token value '{reader.Value}' when reading {typeof(Version)}. Expected: #, #.#, '#', '#.#', '#.#.#' or '#.#.#.#' (# represents characters 0-9)");
                 }

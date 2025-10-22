@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace System.Runtime.CompilerServices;
 

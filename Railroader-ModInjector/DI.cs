@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
+using NSubstitute.FileSystem;
 using Railroader.ModInjector.Services;
 using Railroader.ModInjector.Wrappers;
 using Serilog;
@@ -47,9 +48,7 @@ internal static class DI
         () => new CompilerCallableEntryPointWrapper();
 
     public static Func<IFileSystem> FileSystem { get; set; } =
-        () => new FileSystemWrapper {
-            Logger = GetLogger()
-        };
+        () => new FileSystemWrapper();
 
     public static Func<string, IHarmonyWrapper> HarmonyWrapper { get; set; } =
         id => new HarmonyWrapper(id);

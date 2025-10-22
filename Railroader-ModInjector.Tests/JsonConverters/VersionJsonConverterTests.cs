@@ -18,21 +18,7 @@ public class VersionJsonConverterTests
             yield return ("""{ "version": 1 }""", new Version(1, 0));
             yield return ("""{ "version": 0.0 }""", new Version(0, 0));
             yield return ("""{ "version": 0.1 }""", new Version(0, 1));
-            yield return ("""{ "version": 1.2 }""", new Version(1, 2));
-
-          // yield return ("""{ "version": 1234567890.1234567890 }""", new Version(1234567890, 12346));
-          // yield return ("""{ "version": 123456789.1234567890 }""", new Version(123456789, 123457));
-          // yield return ("""{ "version": 12345678.1234567890 }""", new Version(12345678, 1234568));
-          // yield return ("""{ "version": 1234567.1234567890 }""", new Version(1234567, 12345679));
-          // yield return ("""{ "version": 123456.1234567890 }""", new Version(123456, 123456789));
-          // yield return ("""{ "version": 12345.1234567890 }""", new Version(12345, 123456789));
-          // yield return ("""{ "version": 1234.1234567890 }""", new Version(1234, 123456789));
-          // yield return ("""{ "version": 123.1234567890 }""", new Version(123, 123456789));
-          // yield return ("""{ "version": 12.1234567890 }""", new Version(12, 123456789));
-          // yield return ("""{ "version": 1.1234567890 }""", new Version(1, 123456789));
-            
-
-
+            yield return ("""{ "version": 42.37 }""", new Version(42, 37));
             yield return ("""{ "version": "1" }""", new Version(1, 0));
             yield return ("""{ "version": "1.2" }""", new Version(1, 2));
             yield return ("""{ "version": "1.2.3" }""", new Version(1, 2, 3));
@@ -88,7 +74,6 @@ public class VersionJsonConverterTests
            .WithMessage("Required property 'version' not found in JSON. *");
     }
 
-    
     public static IEnumerable<object?[]> WriteValidJsonData() {
         return Enumerate().Select(o => new object?[] { o.version, o.expected });
 

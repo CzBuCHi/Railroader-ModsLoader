@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using HarmonyLib;
 using Mono.CSharp;
 using NSubstitute;
 using Railroader.ModInjector.Services;
@@ -33,7 +35,7 @@ public static class AssemblyTestUtils
         };
 
         if (Directory.Exists(outputPath)) {
-            Directory.Delete(outputPath, true);
+            Directory.EnumerateFiles(outputPath, "*.*").Do(File.Delete);
         }
 
         Directory.CreateDirectory(outputPath);
@@ -65,8 +67,6 @@ public static class AssemblyTestUtils
 
         return (Mono.Cecil.AssemblyDefinition.ReadAssembly(assemblyPath), outputPath);
     }
-
-  
 
     [Obsolete]
     public static Mono.Cecil.AssemblyDefinition BuildAssemblyDefinition(string source, string outputPath) {
@@ -152,6 +152,13 @@ public static class AssemblyTestUtils
             }
 
             _Messages.Add(sb.ToString());
+        }
+    }
+
+    public static void Write(Mono.Cecil.AssemblyDefinition assemblyDefinition, string outputPath, string name) {
+        if (Debugger.IsAttached) {
+            assemblyDefinition.Name!.Name = name;
+            assemblyDefinition.Write(Path.Combine(outputPath, name + ".dll"));
         }
     }
 }

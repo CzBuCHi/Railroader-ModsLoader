@@ -99,61 +99,41 @@ public sealed class MethodPatcher<TMarker, TPluginPatcher> : IMethodPatcher
     private MethodDefinition? CreateMethodOverride(TypeDefinition typeDefinition, ModuleDefinition module) {
         _Logger.Debug("{MethodName} method not found in {TypeName}, creating override", _TargetMethod, typeDefinition.FullName);
 
-        var baseTypeRef   = typeDefinition.BaseType!;
         var baseMethodDef = FindVirtualBaseMethod(typeDefinition.BaseType!);
         if (baseMethodDef == null) {
             _Logger.Error("Virtual method '{MethodName}' not found in {TypeName} hierarchy!", _TargetMethod, typeDefinition.FullName);
             return null;
         }
 
-        // 1. BIND base method to constructed type
-        var boundBaseMethodRef = new MethodReference(baseMethodDef.Name!, baseMethodDef.ReturnType!, baseTypeRef) {
-            HasThis = true,
-            CallingConvention = baseMethodDef.CallingConvention
-        };
+        var baseMethodRef = module.ImportReference(baseMethodDef);
 
-        // 2. Create override method
-        var method = new MethodDefinition(
-            _TargetMethod,
-            MethodAttributes.Family | MethodAttributes.Virtual | MethodAttributes.ReuseSlot | MethodAttributes.HideBySig,
-            baseMethodDef.ReturnType!
-        );
+        var methodAttributes = (baseMethodDef.Attributes & ~(MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.NewSlot)) |
+                               MethodAttributes.Virtual | MethodAttributes.ReuseSlot | MethodAttributes.HideBySig;
 
-        // 3. Copy ALL parameters
+        var method = new MethodDefinition(_TargetMethod, methodAttributes, module.ImportReference(baseMethodDef.ReturnType!)!);
+
         foreach (var param in baseMethodDef.Parameters!) {
-            var importedType = module.ImportReference(param.ParameterType!)!;
-            //boundBaseMethodRef.Parameters!.Add(new ParameterDefinition(param.Name!, param.Attributes, importedType));
-            method.Parameters!.Add(new ParameterDefinition(param.Name!, param.Attributes, importedType));
+            method.Parameters!.Add(new ParameterDefinition(param.Name!, param.Attributes, module.ImportReference(param.ParameterType!)!));
         }
-
-        // 4. Add override specification
-        if (!typeDefinition.IsSealed) {
-            method.Overrides!.Add(module.ImportReference(boundBaseMethodRef));
-        }
-
-        // 5. Generate IL: Load THIS + ALL params + Call base
+        
         var il = method.Body!.GetILProcessor()!;
-
-        // Load 'this' (arg 0)
         il.Append(il.Create(OpCodes.Ldarg_0)!);
 
-        // Load ALL parameters (arg 1, 2, 3...)
         for (var i = 0; i < baseMethodDef.Parameters.Count; i++) {
-            var paramInstr = i switch {
-                0 => il.Create(OpCodes.Ldarg_1),
-                1 => il.Create(OpCodes.Ldarg_2),
-                2 => il.Create(OpCodes.Ldarg_3),
-                _ => il.Create(OpCodes.Ldarg, i + 1)! // arg 4+
+
+            var ilCode = i switch {
+                0 => il.Create(OpCodes.Ldarg_1)!,
+                1 => il.Create(OpCodes.Ldarg_2)!,
+                2 => il.Create(OpCodes.Ldarg_3)!,
+                _ => il.Create(OpCodes.Ldarg_S, method.Parameters[i])!,
             };
-            il.Append(paramInstr!);
+            il.Append(ilCode);
         }
 
-        // Call base method
-        il.Append(il.Create(OpCodes.Call, module.ImportReference(boundBaseMethodRef)!)!);
 
-        // Return
+        il.Append(il.Create(OpCodes.Call, baseMethodRef)!);
         il.Append(il.Create(OpCodes.Ret)!);
-
+        
         typeDefinition.Methods!.Add(method);
         _Logger.Debug("Created {MethodName} override with base call in {TypeName}", _TargetMethod, typeDefinition.FullName);
         return method;

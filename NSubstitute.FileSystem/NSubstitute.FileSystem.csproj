@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="NSubstitute" Version="5.3.0" />
+        <PackageReference Include="NSubstitute.Analyzers.CSharp" Version="1.0.17">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <Compile Include="..\Shared\CompilerFeatureRequiredAttribute.cs" Link="Shared\CompilerFeatureRequiredAttribute.cs" />
+        <Compile Include="..\Shared\IsExternalInit.cs" Link="Shared\IsExternalInit.cs" />
+        <Compile Include="..\Shared\JetBrains.Annotations.cs" Link="Shared\JetBrains.Annotations.cs" />
+        <Compile Include="..\Shared\RequiredMemberAttribute.cs" Link="Shared\RequiredMemberAttribute.cs" />
+    </ItemGroup>
+    
+</Project>

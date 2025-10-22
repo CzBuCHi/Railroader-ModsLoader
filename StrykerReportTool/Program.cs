@@ -11,7 +11,12 @@ var strykerOutput =  args[0];
 
 var filter = args.Length > 1 ? args[1] : "";
 
-var newest = new DirectoryInfo(strykerOutput).EnumerateDirectories("*.*").OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
+var directoryInfo = new DirectoryInfo(strykerOutput);
+if (!directoryInfo.Exists) {
+    return;
+}
+
+var newest = directoryInfo.EnumerateDirectories("*.*").OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
 if (newest == null) {
     return;
 }
@@ -19,7 +24,17 @@ if (newest == null) {
 var reportJsonPath = Path.Combine(newest.FullName, "reports", "mutation-report.json");
 var reportHtmlPath = Path.Combine(newest.FullName, "reports", "mutation-report.html");
 
+var outputReportJsonPath = Path.Combine(strykerOutput, "mutation-report.json");
+var outputReportHtmlPath = Path.Combine(strykerOutput,  "mutation-report.html");
+
+
 var reportJson = File.ReadAllText(reportJsonPath);
+var reportHtml = File.ReadAllLines(reportHtmlPath);
+
+
+File.WriteAllText(outputReportJsonPath, reportJson);
+File.WriteAllLines(outputReportHtmlPath, reportHtml);
+
 
 var serializerSettings = new JsonSerializerSettings {
     ContractResolver = new CamelCasePropertyNamesContractResolver()
@@ -54,12 +69,11 @@ foreach (var file in report.Files.Values) {
 
 var clearedReport = JsonConvert.SerializeObject(report, serializerSettings);
 
-File.WriteAllText(Path.ChangeExtension(reportJsonPath, ".clean.json"), clearedReport);
-
-var reportHtml = File.ReadAllLines(reportHtmlPath);
-
 var index = Array.FindLastIndex(reportHtml, o => o.TrimStart().StartsWith("app.report ="));
-
 reportHtml[index] = "app.report = " + clearedReport + ";";
 
-File.WriteAllLines(Path.ChangeExtension(reportHtmlPath, ".clean.html"), reportHtml);
+var errorReportJsonPath = Path.Combine(strykerOutput, "error-report.json");
+var errorReportHtmlPath = Path.Combine(strykerOutput,  "error-report.html");
+
+File.WriteAllText(errorReportJsonPath, clearedReport);
+File.WriteAllLines(errorReportHtmlPath, reportHtml);

@@ -8,6 +8,7 @@ using Railroader.ModInjector.Services;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Formatting.Display;
 
 namespace Railroader_ModInterfaces.Tests.Services;
 
@@ -55,6 +56,10 @@ public sealed class LogConfiguratorTests
         wrapped.Should().NotBeNull();
         var condition = conditionalSink.GetField("_condition", BindingFlags.Instance | BindingFlags.NonPublic);
         condition.Should().NotBeNull();
+        var formatter = typeof(SerilogUnityConsoleEventSink).GetField("_formatter", BindingFlags.Instance | BindingFlags.NonPublic);
+        formatter.Should().NotBeNull();
+        var outputTemplate = typeof(MessageTemplateTextFormatter).GetField("_outputTemplate", BindingFlags.Instance | BindingFlags.NonPublic);
+        outputTemplate.Should().NotBeNull();
 
         accessor.LogEventSinks.Should().AllBeOfType(conditionalSink);
 
@@ -69,9 +74,17 @@ public sealed class LogConfiguratorTests
         condition2(eventWithContext).Should().BeFalse();
         condition2(eventWithoutContext).Should().BeTrue();
 
-        foreach (var sink in accessor.LogEventSinks) {
-            wrapped.GetValue(sink).Should().BeOfType<SerilogUnityConsoleEventSink>();
-        }
+        var unitySink0 = wrapped.GetValue(accessor.LogEventSinks[0]!).Should().BeOfType<SerilogUnityConsoleEventSink>().Which;
+        var unitySink1 = wrapped.GetValue(accessor.LogEventSinks[1]!).Should().BeOfType<SerilogUnityConsoleEventSink>().Which;
+
+        var formatter0 = formatter.GetValue(unitySink0).Should().BeOfType<MessageTemplateTextFormatter>().Which;
+        var formatter1 = formatter.GetValue(unitySink1).Should().BeOfType<MessageTemplateTextFormatter>().Which;
+
+        var outputTemplate0 = outputTemplate.GetValue(formatter0).Should().BeOfType<MessageTemplate>().Which;
+        var outputTemplate1 = outputTemplate.GetValue(formatter1).Should().BeOfType<MessageTemplate>().Which;
+
+        outputTemplate0.Text.Should().Be("[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}");
+        outputTemplate1.Text.Should().Be("[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}");
     }
 
     private sealed class LoggerConfigurationAccessor(LoggerConfiguration configuration)

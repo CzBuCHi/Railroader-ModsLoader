@@ -26,7 +26,7 @@ public sealed class HarmonyPluginPatcher(ILogger logger) : TypePatcher(
 
         _States[plugin] = state with { IsEnabled = plugin.IsEnabled };
 
-        var logger = DI.GetLogger(plugin.Mod.Definition.Identifier + "." + nameof(HarmonyPluginPatcher));
+        var logger = DI.GetLogger();
         if (plugin.IsEnabled) {
             logger.Information("Applying Harmony patch for mod {ModId}", plugin.Mod.Definition.Identifier);
             state.Harmony.PatchAll(plugin.GetType().Assembly);

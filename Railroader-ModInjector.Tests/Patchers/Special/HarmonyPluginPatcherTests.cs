@@ -44,11 +44,20 @@ public sealed class HarmonyPluginPatcherTests
     public void PatchAllWhenEnabled() {
         // Arrange
         var harmony = Substitute.For<IHarmonyWrapper>();
+        DI.HarmonyWrapper = _ => harmony;
 
-        DI.HarmonyWrapper = s => harmony;
+        var logger  = Substitute.For<ILogger>();
+        DI.Logger = logger;
+        var getLoggerScope = "INITIAL";
+        DI.GetLogger = scope => {
+            getLoggerScope = scope;
+            return logger;
+        };
 
+        // act
         var plugin = Substitute.For<IPluginBase>();
         plugin.IsEnabled.Returns(true);
+        plugin.Mod.Returns(new Mod(new ModDefinition { Identifier = "Identifier" }, null));
 
         // Act
         HarmonyPluginPatcher.OnIsEnabledChanged(plugin);
@@ -56,6 +65,10 @@ public sealed class HarmonyPluginPatcherTests
         // Assert
         harmony.Received(1).PatchAll(plugin.GetType().Assembly);
         harmony.ReceivedCalls().Should().HaveCount(1);
+
+        getLoggerScope.Should().BeNull();
+
+        logger.Received().Information("Applying Harmony patch for mod {ModId}", "Identifier");
     }
 
     [Fact]
@@ -69,12 +82,13 @@ public sealed class HarmonyPluginPatcherTests
             return harmony;
         };
 
-        var mod = new Mod(new ModDefinition { Identifier = "Identifier" }, null);
+        var logger  = Substitute.For<ILogger>();
+        DI.Logger = logger;
+        DI.GetLogger = _ => logger;
 
         var plugin = Substitute.For<IPluginBase>();
-        plugin.Mod.Returns(mod);
+        plugin.Mod.Returns(new Mod(new ModDefinition { Identifier = "Identifier" }, null));
 
-        
         // Act
         HarmonyPluginPatcher.OnIsEnabledChanged(plugin);
 
@@ -83,17 +97,23 @@ public sealed class HarmonyPluginPatcherTests
         harmonyId.Should().Be("Identifier");
         harmony.Received(1).UnpatchAll("Identifier");
         harmony.ReceivedCalls().Should().HaveCount(1);
+
+        logger.Received().Information("Removing Harmony patch for mod {ModId}", "Identifier");
     }
 
     [Fact]
     public void IgnoreRepeatCalls() {
         // Arrange
         var harmony = Substitute.For<IHarmonyWrapper>();
-
-        DI.HarmonyWrapper = s => harmony;
+        DI.HarmonyWrapper = _ => harmony;
 
         var plugin = Substitute.For<IPluginBase>();
         plugin.IsEnabled.Returns(true);
+        plugin.Mod.Returns(new Mod(new ModDefinition { Identifier = "Identifier" }, null));
+
+        var logger  = Substitute.For<ILogger>();
+        DI.Logger = logger;
+        DI.GetLogger = _ => logger;
 
         // Act
         HarmonyPluginPatcher.OnIsEnabledChanged(plugin);
@@ -102,5 +122,7 @@ public sealed class HarmonyPluginPatcherTests
         // Assert
         harmony.Received(1).PatchAll(plugin.GetType().Assembly);
         harmony.ReceivedCalls().Should().HaveCount(1);
+
+        logger.Received(1).Information("Applying Harmony patch for mod {ModId}", "Identifier");
     }
 }

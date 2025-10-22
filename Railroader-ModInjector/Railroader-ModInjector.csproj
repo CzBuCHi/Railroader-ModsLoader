@@ -31,6 +31,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\NSubstitute.FileSystem\NSubstitute.FileSystem.csproj" />
       <ProjectReference Include="..\Railroader-ModInterfaces\Railroader-ModInterfaces.csproj" />
     </ItemGroup>
 
@@ -44,7 +45,18 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="..\Shared\CompilerFeatureRequiredAttribute.cs" Link="Shared\CompilerFeatureRequiredAttribute.cs" />
+        <Compile Include="..\Shared\IsExternalInit.cs" Link="Shared\IsExternalInit.cs" />
+        <Compile Include="..\Shared\RequiredMemberAttribute.cs" Link="Shared\RequiredMemberAttribute.cs" />
+    </ItemGroup>
+    
+
+    <ItemGroup>
       <PackageReference Include="Mono.CSharp" Version="4.0.0.143" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Shared\" />
     </ItemGroup>
 
     

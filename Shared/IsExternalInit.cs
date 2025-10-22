@@ -1,6 +1,4 @@
-﻿// ReSharper disable All
-
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace System.Runtime.CompilerServices;
@@ -11,6 +9,4 @@ namespace System.Runtime.CompilerServices;
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 [ExcludeFromCodeCoverage]
-internal static class IsExternalInit
-{
-}
+internal static class IsExternalInit;
