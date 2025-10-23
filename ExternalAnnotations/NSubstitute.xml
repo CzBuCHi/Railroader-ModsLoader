@@ -27,6 +27,9 @@
   <member name="M:NSubstitute.SubstituteExtensions.Returns``1(``0,``0,``0[])">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
+  <member name="M:NSubstitute.SubstituteExtensions.Returns``1(``0,System.Func{NSubstitute.Core.CallInfo,``0},System.Func{NSubstitute.Core.CallInfo,``0}[])">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
   <member name="M:NSubstitute.SubstituteExtensions.Returns``1(System.Threading.Tasks.Task{``0},``0,``0[])">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>

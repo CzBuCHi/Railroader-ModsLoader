@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using Railroader.ModInjector.Wrappers;
 using Railroader.ModInterfaces;
@@ -22,10 +21,8 @@ internal sealed class PluginManager : IPluginManager
 
     /// <inheritdoc />
     public IEnumerable<IPluginBase> CreatePlugins(Mod mod) {
-        Assembly assembly;
-        try {
-            assembly = AssemblyWrapper.LoadFrom(mod.AssemblyPath!);
-        } catch (Exception) {
+        var assembly = AssemblyWrapper.LoadFrom(mod.AssemblyPath!);
+        if (assembly == null) {
             yield break;
         }
 

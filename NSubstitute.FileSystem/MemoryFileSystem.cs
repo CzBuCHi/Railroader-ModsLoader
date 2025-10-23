@@ -23,7 +23,7 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
     public static readonly DateTime Third  = new(2000, 1, 3);
     public static readonly DateTime Fourth = new(2000, 1, 4);
 
-    public MemoryFileSystem(string currentDirectory = @"C:\") {
+    public MemoryFileSystem(string currentDirectory = "C:\\") {
         FileSystem = FileSystemFactory();
         CurrentDirectory = currentDirectory;
     }
@@ -35,7 +35,7 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
     public string CurrentDirectory {
         get => _CurrentDirectory;
         set {
-            var normalized = NormalizePath(value, true);
+            var normalized = NormalizePath(value);
             EnsureDirectory(normalized, First);
             _CurrentDirectory = normalized;
         }
@@ -55,14 +55,14 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
 
     public void Add((string Path, DateTime LastWriteTime, Exception LoadException) file) => AddInternal(new MemoryEntry(file.Path!, false, file.LastWriteTime, null, file.LoadException));
 
-    private static string NormalizePath(string path, bool isDirectory = false) {
+    private static string NormalizePath(string path) {
         if (string.IsNullOrEmpty(path)) {
             throw new ArgumentException("Path cannot be null or empty.");
         }
 
         path = Path.GetFullPath(path);
 
-        if (isDirectory && path.Length == 3) {
+        if (path.Length == 3) {
             return path;
         }
 
@@ -70,7 +70,7 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
     }
 
     private void AddInternal(MemoryEntry entry) {
-        entry = entry with { Path = NormalizePath(entry.Path, entry.IsDirectory) };
+        entry = entry with { Path = NormalizePath(entry.Path) };
 
         if (_Items.ContainsKey(entry.Path)) {
             throw new InvalidOperationException($"Path '{entry.Path}' already exists.");
@@ -106,11 +106,13 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
             }
         }
     }
-    
+
     private IFileSystem FileSystemFactory() {
-        var mock = Substitute.For<IFileSystem>();
-        mock.Directory.Returns(_ => DirectoryFactory());
-        mock.File.Returns(_ => FileFactory());
+        var mock      = Substitute.For<IFileSystem>();
+        var directory = DirectoryFactory();
+        var file      = FileFactory();
+        mock.Directory.Returns(_ => directory);
+        mock.File.Returns(_ => file);
         mock.DirectoryInfo(Arg.Any<string>()).Returns(o => DirectoryInfoFactory(o.Arg<string>()));
         return mock;
     }
@@ -151,14 +153,14 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
         return _Items.TryGetValue(path, out var entry) && entry is { IsDirectory: false };
     }
 
-    private string File_ReadAllText(string path) {
+    private string? File_ReadAllText(string path) {
         path = NormalizePath(path);
         if (_Items.TryGetValue(path, out var entry) && entry is { IsDirectory: false }) {
             if (entry.ReadException != null) {
                 throw entry.ReadException;
             }
 
-            return entry.Content ?? string.Empty;
+            return entry.Content;
         }
 
         throw new FileNotFoundException($"File not found: {path}");
@@ -206,17 +208,15 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
     }
 
     private readonly object _FileCreateLock = new();
+
     private Stream File_Create(string path) {
         path = NormalizePath(path);
 
         lock (_FileCreateLock) {
             Add((path, ""));
-            return new MemoryFileStream(stream => {
-                stream.Seek(0, SeekOrigin.Begin);
-                using var reader  = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
-                var       content = reader.ReadToEnd();
-                _Items[path] = _Items[path]! with { Content = content };
-            });
+
+            var data = new List<byte>();
+            return new MemoryFileStream((buffer, offset, count) => data.AddRange(buffer.Skip(offset).Take(count)), () => { _Items[path] = _Items[path]! with { Content = Encoding.UTF8.GetString(data.ToArray()) }; });
         }
     }
 
@@ -227,7 +227,7 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
         => Directory_Enumerate(path, searchPattern, searchOption).Where(o => !o.IsDirectory).Select(o => FileInfoFactory(o.Path));
 
     private IEnumerable<MemoryEntry> Directory_Enumerate(string path, string searchPattern, SearchOption searchOption = SearchOption.TopDirectoryOnly) {
-        path = NormalizePath(path, true);
+        path = NormalizePath(path);
 
         // _Items.Keys = [@"C:\", @"C:\Foo", @"C:\Test", @"C:\Test\Dir1", @"C:\Test\Dir2", @"C:\Test\File1.txt", @"C:\Test\Dir3", @"C:\Test\Dir3\SubDir", @"C:\Test\Dir3\File2.txt" ]
         // path = @"C:\Test"
@@ -244,7 +244,6 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
         if (searchOption == SearchOption.TopDirectoryOnly) {
             // filter out nested entries
             query = query.Where(o => {
-
                 // o.Key one of = [ @"C:\Test\Dir1", @"C:\Test\Dir2", @"C:\Test\File1.txt", @"C:\Test\Dir3", @"C:\Test\Dir3\SubDir", @"C:\Test\Dir3\File2.txt" ]
                 var index = o.Key!.IndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar], path.Length + 1);
                 if (index == -1) {
@@ -267,7 +266,7 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
 
     private static Regex ToRegex(string searchPattern) {
         var invalidPathChars = Path.GetInvalidFileNameChars();
-        if (searchPattern.Any(o => o != '?' & o != '*' && invalidPathChars.Contains(o))) {
+        if (searchPattern.Any(o => (o != '?') & (o != '*') && invalidPathChars.Contains(o))) {
             throw new ArgumentException("Invalid search pattern.");
         }
 
@@ -298,11 +297,33 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
         public int                      Count => dictionary.Count;
     }
 
-    private sealed class MemoryFileStream(Action<Stream> flushCallback) : MemoryStream
+    [ExcludeFromCodeCoverage]
+    private sealed class MemoryFileStream(Action<byte[], int, int> write, Action dispose) : Stream
     {
         public override void Flush() {
-            base.Flush();
-            flushCallback(this);
         }
+
+        protected override void Dispose(bool disposing) {
+            base.Dispose(disposing);
+            if (disposing) {
+                dispose();
+            }
+        }
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+        public override void SetLength(long value) => throw new NotSupportedException();
+
+        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+        public override void Write(byte[] buffer, int offset, int count) {
+            write(buffer, offset, count);
+        }
+
+        public override bool CanRead  => false;
+        public override bool CanSeek  => false;
+        public override bool CanWrite => true;
+        public override long Length   => 0;
+        public override long Position { get; set; }
     }
 }

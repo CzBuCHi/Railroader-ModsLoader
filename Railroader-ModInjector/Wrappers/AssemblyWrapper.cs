@@ -7,7 +7,7 @@ namespace Railroader.ModInjector.Wrappers;
 internal interface IAssemblyWrapper
 {
     /// <inheritdoc cref="Assembly.LoadFrom(string)"/>
-    Assembly LoadFrom(string assemblyFile);
+    Assembly? LoadFrom(string assemblyFile);
 }
 
 /// <inheritdoc />
@@ -15,5 +15,11 @@ internal interface IAssemblyWrapper
 internal sealed class AssemblyWrapper : IAssemblyWrapper
 {
     /// <inheritdoc />
-    public Assembly LoadFrom(string assemblyFile) => Assembly.LoadFrom(assemblyFile);
+    public Assembly? LoadFrom(string assemblyFile) {
+        try {
+            return Assembly.LoadFrom(assemblyFile);
+        } catch {
+            return null;
+        }
+    }
 }

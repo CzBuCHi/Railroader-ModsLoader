@@ -21,7 +21,7 @@ public static class AssemblyTestUtils
 {
     private const string GameDir = @"c:\Program Files (x86)\Steam\steamapps\common\Railroader\";
 
-    public static (Mono.Cecil.AssemblyDefinition AssemblyDefinition, string OutputPath) BuildAssemblyDefinitionX(string source, string? suffix = null, [CallerFilePath] string? callerFilePath = null, [CallerMemberName] string? callerMemberName = null) {
+    public static (Mono.Cecil.AssemblyDefinition AssemblyDefinition, string OutputPath) BuildAssemblyDefinition(string source, string? suffix = null, [CallerFilePath] string? callerFilePath = null, [CallerMemberName] string? callerMemberName = null) {
         var index = callerFilePath!.IndexOf("Railroader-ModInjector.Tests", StringComparison.Ordinal) + "Railroader-ModInjector.Tests".Length;
         var rootPath = callerFilePath.Substring(0, index);
 
@@ -67,47 +67,6 @@ public static class AssemblyTestUtils
 
         return (Mono.Cecil.AssemblyDefinition.ReadAssembly(assemblyPath), outputPath);
     }
-
-    [Obsolete]
-    public static Mono.Cecil.AssemblyDefinition BuildAssemblyDefinition(string source, string outputPath) {
-        var logger = Substitute.For<ILogger>();
-
-        var compiler = new AssemblyCompiler {
-            CompilerCallableEntryPoint = new CompilerCallableEntryPointWrapper(),
-            Logger = logger
-        };
-
-        if (Directory.Exists(outputPath)) {
-            Directory.Delete(outputPath, true);
-        }
-
-        Directory.CreateDirectory(outputPath);
-
-        var sourcePath = Path.Combine(outputPath, "source.cs");
-        outputPath = Path.Combine(outputPath, "output.dll");
-
-        File.WriteAllText(sourcePath, source);
-
-
-        var sources = new[] { sourcePath };
-        var references = new[] {
-                             "Assembly-CSharp",
-                             "0Harmony",
-                             "Railroader-ModInterfaces",
-                             "Serilog",
-                             "UnityEngine.CoreModule"
-                         }
-                         .Select(o => Path.Combine(GameDir, "Railroader_Data", "Managed", o + ".dll"))
-                         .ToArray();
-
-        var result = compiler.CompileAssembly(outputPath, sources, references);
-        if (result == false) {
-            throw new InvalidOperationException("Failed to compile source");
-        }
-
-        return Mono.Cecil.AssemblyDefinition.ReadAssembly(outputPath);
-    }
-
 
     public static Assembly BuildAssembly(string source) {
         var settings = new CompilerSettings {

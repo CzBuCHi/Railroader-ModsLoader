@@ -1,11 +1,7 @@
 @echo off
 
 if "%~1"=="" (
-    dotnet stryker --threshold-high 100 --threshold-low 95 -r progress -r json -r html
+    dotnet stryker --threshold-high 100 --threshold-low 95 -r progress -r json -r html -o
 ) else (
-    dotnet stryker --threshold-high 100 --threshold-low 95 -r progress -r json -r html -m %*
+    dotnet stryker --threshold-high 100 --threshold-low 95 -r progress -r json -r html -o -m %*
 )
-
-StrykerReportTool\bin\Debug\StrykerReportTool.exe StrykerOutput %*
-
-start StrykerOutput\mutation-report.html

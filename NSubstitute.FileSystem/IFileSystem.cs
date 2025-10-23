@@ -21,10 +21,10 @@ public interface IFileSystem
 public sealed class FileSystemWrapper : IFileSystem
 {
     /// <inheritdoc />
-    public IDirectory Directory => new DirectoryWrapper();
+    public IDirectory Directory { get; } = new DirectoryWrapper();
 
     /// <inheritdoc />
-    public IFile File => new FileWrapper();
+    public IFile File { get; } = new FileWrapper();
 
     /// <inheritdoc />
     public IDirectoryInfo DirectoryInfo(string path) => new DirectoryInfoWrapper(new DirectoryInfo(path));

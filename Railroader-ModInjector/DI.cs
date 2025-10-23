@@ -24,6 +24,9 @@ internal static class DI
 
     public static GetLoggerDelegate GetLogger { get; set; } = scope => Logger.ForContext("SourceContext", scope ?? "Railroader.ModInjector")!;
 
+    public static Func<ICompilerCallableEntryPoint> CompilerCallableEntryPoint { get; set; } =
+        () => new CompilerCallableEntryPointWrapper();
+
     public static Func<IAssemblyCompiler> AssemblyCompiler { get; set; } =
         () => new AssemblyCompiler {
             CompilerCallableEntryPoint = CompilerCallableEntryPoint()!,
@@ -36,6 +39,9 @@ internal static class DI
     public static Func<IAssemblyWrapper> AssemblyWrapper { get; set; } =
         () => new AssemblyWrapper();
 
+    public static Func<IFileSystem> FileSystem { get; set; } =
+        () => new FileSystemWrapper();
+
     public static Func<ICodeCompiler> CodeCompiler { get; set; } =
         () => new CodeCompiler {
             FileSystem = FileSystem()!,
@@ -43,12 +49,6 @@ internal static class DI
             AssemblyDefinitionWrapper = AssemblyDefinitionWrapper()!,
             AssemblyCompiler = AssemblyCompiler()!
         };
-
-    public static Func<ICompilerCallableEntryPoint> CompilerCallableEntryPoint { get; set; } =
-        () => new CompilerCallableEntryPointWrapper();
-
-    public static Func<IFileSystem> FileSystem { get; set; } =
-        () => new FileSystemWrapper();
 
     public static Func<string, IHarmonyWrapper> HarmonyWrapper { get; set; } =
         id => new HarmonyWrapper(id);
@@ -62,16 +62,18 @@ internal static class DI
             FileSystem = FileSystem()!
         };
 
-    public static Func<IModManager> ModManager { get; set; } =
-        () => new ModManager {
-            CodeCompiler = CodeCompiler()!,
-            PluginManagerFactory = o => PluginManager(o)!
-        };
-
     public static Func<ModdingContext, IPluginManager> PluginManager { get; set; } =
         context => new PluginManager {
             AssemblyWrapper = AssemblyWrapper()!,
             ModdingContext = context,
             Logger = GetLogger()
         };
+
+    public static Func<IModManager> ModManager { get; set; } =
+        () => new ModManager {
+            CodeCompiler = CodeCompiler()!,
+            PluginManagerFactory = o => PluginManager(o)!
+        };
+
+
 }

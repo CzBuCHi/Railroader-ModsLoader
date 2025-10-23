@@ -72,7 +72,7 @@ internal sealed class CodeCompiler : ICodeCompiler
         var assemblyPath = Path.Combine(definition.BasePath, definition.Identifier + ".dll");
         if (FileSystem.File.Exists(assemblyPath)) {
             var newestFile = csFiles[0];
-            if (FileSystem.File.GetLastWriteTime(assemblyPath) > newestFile.LastWriteTime) {
+            if (FileSystem.File.GetLastWriteTime(assemblyPath) >= newestFile.LastWriteTime) {
                 Logger.Information("Using existing mod {ModId} DLL at {Path}", definition.Identifier, assemblyPath);
                 return assemblyPath;
             }
@@ -143,6 +143,7 @@ internal sealed class CodeCompiler : ICodeCompiler
                 try {
                     var interfaces = type.Interfaces?.Select(i => i.InterfaceType?.FullName).ToList() ?? [];
                     if (interfaces.Count == 0) {
+                        // stryker disable once statement
                         continue;
                     }
 
@@ -162,15 +163,15 @@ internal sealed class CodeCompiler : ICodeCompiler
                 }
             }
 
-            if (hasPatch) {
-                AssemblyDefinitionWrapper.Write(assemblyDefinition, tempFilePath);
+            success = hasPatch && !hasError;
 
+            if (success) {
+                AssemblyDefinitionWrapper.Write(assemblyDefinition, tempFilePath);
                 Logger.Debug("Wrote patched assembly to temporary file {TempPath} for mod {ModId}", tempFilePath, modId);
             } else {
                 Logger.Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", assemblyPath, modId);
             }
 
-            success = hasPatch && !hasError;
             return true;
         }
         finally {

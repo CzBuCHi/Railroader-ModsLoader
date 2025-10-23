@@ -2,7 +2,6 @@
 using System.Linq;
 using FluentAssertions;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Railroader.ModInjector;
 using Railroader.ModInjector.Services;
 using Railroader.ModInjector.Wrappers;
@@ -21,7 +20,7 @@ public class PluginManagerTests
         var modDefinition   = Substitute.For<IModDefinition>();
         var logger          = Substitute.For<ILogger>();
 
-        assemblyWrapper.LoadFrom(Arg.Any<string>()).Throws<Exception>();
+        assemblyWrapper.LoadFrom(Arg.Any<string>()).Returns(_ => null);
 
         var mod = new Mod(modDefinition, "assemblyPath");
         var sut = new PluginManager {
@@ -38,14 +37,26 @@ public class PluginManagerTests
     }
 
     [Fact]
-    public void CreatePlugins_WhenNoPluginsFound() {
+    public void CreatePlugins_IgnoreAbstractClasses() {
         // Arrange
         var moddingContext  = Substitute.For<IModdingContext>();
         var assemblyWrapper = Substitute.For<IAssemblyWrapper>();
         var modDefinition   = Substitute.For<IModDefinition>();
         var logger          = Substitute.For<ILogger>();
-        assemblyWrapper.LoadFrom(Arg.Any<string>()).Returns(AssemblyTestUtils.BuildAssembly(""));
-
+        assemblyWrapper.LoadFrom(Arg.Any<string>()).Returns(AssemblyTestUtils.BuildAssembly(
+            """
+            using Railroader.ModInterfaces;
+            
+            public abstract class Foo  {};
+            
+            public abstract class Bar : PluginBase<Bar> {
+                public Bar(IModdingContext moddingContext, IMod mod) 
+                    : base(moddingContext, mod) {
+                }
+            };
+            """
+        ));
+        
         var mod = new Mod(modDefinition, "assemblyPath");
         var sut = new PluginManager {
             ModdingContext = moddingContext,
@@ -58,6 +69,71 @@ public class PluginManagerTests
 
         // Assert
         plugins.Should().BeEmpty();
+        logger.ReceivedCalls().Should().BeEmpty();
+    }
+
+    [Fact]
+    public void CreatePlugins_IgnoreClassesNotDerivedFromPluginBase() {
+        // Arrange
+        var moddingContext  = Substitute.For<IModdingContext>();
+        var assemblyWrapper = Substitute.For<IAssemblyWrapper>();
+        var modDefinition   = Substitute.For<IModDefinition>();
+        var logger          = Substitute.For<ILogger>();
+        assemblyWrapper.LoadFrom(Arg.Any<string>()).Returns(AssemblyTestUtils.BuildAssembly(
+            """
+            public class Foo {
+            }
+            """
+        ));
+        
+        var mod = new Mod(modDefinition, "assemblyPath");
+        var sut = new PluginManager {
+            ModdingContext = moddingContext,
+            AssemblyWrapper = assemblyWrapper,
+            Logger = logger
+        };
+
+        // Act
+        var plugins = sut.CreatePlugins(mod);
+
+        // Assert
+        plugins.Should().BeEmpty();
+        logger.ReceivedCalls().Should().BeEmpty();
+    }
+
+    [Fact]
+    public void CreatePlugins_IgnoreClassesNotDerivedFromPluginBase_AndWarnIfIPluginBaseIsImplemented() {
+        // Arrange
+        var moddingContext  = Substitute.For<IModdingContext>();
+        var assemblyWrapper = Substitute.For<IAssemblyWrapper>();
+        var modDefinition   = Substitute.For<IModDefinition>();
+        var logger          = Substitute.For<ILogger>();
+        assemblyWrapper.LoadFrom(Arg.Any<string>()).Returns(AssemblyTestUtils.BuildAssembly(
+            """
+            using Railroader.ModInterfaces;
+            
+            public class Foo : IPluginBase {
+                public IModdingContext ModdingContext { get; }
+                public IMod Mod { get; }
+                public bool IsEnabled { get; set; }
+            }
+            """
+        ));
+        
+        var mod = new Mod(modDefinition, "assemblyPath");
+        var sut = new PluginManager {
+            ModdingContext = moddingContext,
+            AssemblyWrapper = assemblyWrapper,
+            Logger = logger
+        };
+
+        // Act
+        var plugins = sut.CreatePlugins(mod);
+
+        // Assert
+        plugins.Should().BeEmpty();
+
+        logger.Received().Warning("Type {type} inherits IPluginBase but not PluginBase<> in mod {ModId}", Arg.Is<Type>(o => o.Name == "Foo"), mod.Definition.Identifier);
     }
 
     [Theory]
@@ -83,7 +159,7 @@ public class PluginManagerTests
                     }
                 }
                 """)]
-    public void CreatePlugins_DiscardInvalidPlugins(string source) {
+    public void CreatePlugins_IgnorePluginsWithInvalidConstructor(string source) {
         // Arrange
         var moddingContext  = Substitute.For<IModdingContext>();
         var assemblyWrapper = Substitute.For<IAssemblyWrapper>();
@@ -109,50 +185,7 @@ public class PluginManagerTests
         logger.Received().Warning("Cannot find constructor that accepts IModdingContext, IMod parameters on plugin {plugin} in mod {ModId}", Arg.Is<Type>(o => o.Name == "TestPlugin"), mod.Definition.Identifier);
 
     }
-
-    [Fact]
-    public void CreatePlugins_WarnIFIPluginBaseUsed() {
-        // Arrange
-        var moddingContext  = Substitute.For<IModdingContext>();
-        var assemblyWrapper = Substitute.For<IAssemblyWrapper>();
-        var modDefinition   = Substitute.For<IModDefinition>();
-        var logger          = Substitute.For<ILogger>();
-
-        const string source = """
-                              using Railroader.ModInterfaces;
-                              using Serilog;
-
-                              namespace Foo.Bar
-                              {
-                                  public sealed class TestPlugin : IPluginBase
-                                  {
-                                      public IModdingContext ModdingContext { get; }
-                                      public IMod Mod                       { get; }
-                                      public bool IsEnabled                 { get; set; }
-                                  }
-                              }
-                              """;
-
-
-        assemblyWrapper.LoadFrom(Arg.Any<string>()).Returns(AssemblyTestUtils.BuildAssembly(source));
-
-        var mod = new Mod(modDefinition, "assemblyPath");
-        var sut = new PluginManager {
-            ModdingContext = moddingContext,
-            AssemblyWrapper = assemblyWrapper,
-            Logger = logger
-        };
-
-        // Act
-        var plugins = sut.CreatePlugins(mod);
-
-        // Assert
-        plugins.Should().BeEmpty();
-
-        logger.Received().Warning("Type {type} inherits IPluginBase but not PluginBase<> in mod {ModId}", Arg.Is<Type>(o => o.Name == "TestPlugin"), mod.Definition.Identifier);
-
-    }
-
+    
     [Fact]
     public void CreatePlugins_ReturnValidInstances() {
         // Arrange

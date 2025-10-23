@@ -24,7 +24,7 @@ public sealed class MemoryFileSystemTests
     [SuppressMessage("ReSharper", "UseObjectOrCollectionInitializer")]
     public void CurrentDirectory_SetNormalizesPath() {
         // Arrange
-        var sut  = new MemoryFileSystem();
+        var sut = new MemoryFileSystem();
 
         // Act
         sut.CurrentDirectory = @"C:\Test\Path\";
@@ -61,7 +61,7 @@ public sealed class MemoryFileSystemTests
     [SuppressMessage("ReSharper", "UseObjectOrCollectionInitializer")]
     public void Add_Directory_CreatesDirectoryEntry() {
         // Arrange
-        var sut  = new MemoryFileSystem();
+        var sut = new MemoryFileSystem();
 
         // Act
         sut.Add(@"C:\Test\Dir");
@@ -93,7 +93,7 @@ public sealed class MemoryFileSystemTests
     [SuppressMessage("ReSharper", "UseObjectOrCollectionInitializer")]
     public void Add_DirectoryWithLastWriteTime_CreatesDirectoryEntry() {
         // Arrange
-        var sut    = new MemoryFileSystem();
+        var sut = new MemoryFileSystem();
 
         // Act
         sut.Add((Path: @"C:\Test\Dir", LastWriteTime: MemoryFileSystem.Second));
@@ -110,7 +110,7 @@ public sealed class MemoryFileSystemTests
     [SuppressMessage("ReSharper", "UseObjectOrCollectionInitializer")]
     public void Add_File_CreatesFileEntry() {
         // Arrange
-        var sut  = new MemoryFileSystem();
+        var sut = new MemoryFileSystem();
 
         // Act
         sut.Add((Path: @"C:\Test\File.txt", Content: "Hello, World!"));
@@ -127,7 +127,7 @@ public sealed class MemoryFileSystemTests
     [SuppressMessage("ReSharper", "UseObjectOrCollectionInitializer")]
     public void Add_FileWithLastWriteTime_CreatesFileEntry() {
         // Arrange
-        var sut  = new MemoryFileSystem();
+        var sut = new MemoryFileSystem();
 
         // Act
         sut.Add((Path: @"C:\Test\File.txt", LastWriteTime: MemoryFileSystem.Second, Content: "Hello"));
@@ -211,6 +211,20 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
+    public void File_Exists_ReturnsFalseForDirectory() {
+        // Arrange
+        var sut = new MemoryFileSystem {
+            @"C:\Test\Dir"
+        };
+
+        // Act
+        var result = sut.FileSystem.File.Exists(@"C:\Test\Dir");
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
     public void File_ReadAllText_ReturnsContentForExistingFile() {
         // Arrange
         var sut = new MemoryFileSystem { (Path: @"C:\Test\File.txt", Content: "Test Content") };
@@ -232,6 +246,20 @@ public sealed class MemoryFileSystemTests
 
         // Assert
         act.Should().Throw<FileNotFoundException>().WithMessage(@"File not found: C:\Test\NonExisting.txt");
+    }
+
+    [Fact]
+    public void File_ReadAllText_ThrowsFileNotFoundForDirectory() {
+        // Arrange
+        var sut = new MemoryFileSystem {
+            @"C:\Test\Dir"
+        };
+
+        // Act
+        Action act = () => sut.FileSystem.File.ReadAllText(@"C:\Test\Dir");
+
+        // Assert
+        act.Should().Throw<FileNotFoundException>().WithMessage(@"File not found: C:\Test\Dir");
     }
 
     [Fact]
@@ -273,10 +301,24 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
+    public void File_GetLastWriteTime_ThrowsFileNotFoundForDirectory() {
+        // Arrange
+        var sut = new MemoryFileSystem { 
+            @"C:\Test\Dir"
+        };
+
+        // Act
+        Action act = () => sut.FileSystem.File.GetLastWriteTime(@"C:\Test\Dir");
+
+        // Assert
+        act.Should().Throw<FileNotFoundException>().WithMessage(@"File not found: C:\Test\Dir");
+    }
+
+    [Fact]
     public void FileInfo_GetLastWriteTime_ReturnsLastWriteTimeForExistingFile() {
         // Arrange
         var sut = new MemoryFileSystem { (Path: @"C:\Test\File.txt", LastWriteTime: MemoryFileSystem.Second, Content: "Test") };
-        
+
         // Act
         var fileInfo = sut.FileSystem.DirectoryInfo(@"C:\Test").EnumerateFiles("*.*").First();
 
@@ -336,6 +378,36 @@ public sealed class MemoryFileSystemTests
 
         // Assert
         act.Should().Throw<InvalidOperationException>().WithMessage(@"Destination path already exists: C:\Test\File2.txt");
+    }
+
+    [Fact]
+    public void File_Delete_DoNothingWhenPathIsDirectory() {
+        // Arrange
+        var sut = new MemoryFileSystem { @"C:\Test\Dir" };
+
+        // Act
+        sut.FileSystem.File.Delete(@"C:\Test\Dir");
+
+        // Assert
+        sut.Should().BeEquivalentTo([
+            new MemoryEntry(@"C:\", true, MemoryFileSystem.First, null, null),
+            new MemoryEntry(@"C:\Test", true, MemoryFileSystem.First, null, null),
+            new MemoryEntry(@"C:\Test\Dir", true, MemoryFileSystem.First, null, null)
+        ]);
+    }
+
+    [Fact]
+    public void Directory_ReadAllText_ThrowsInvalidOperationException() {
+        // Arrange
+        var sut = new MemoryFileSystem {
+            @"C:\Test\Dir"
+        };
+
+        // Act
+        var act = () => sut.FileSystem.File.ReadAllText(@"C:\Test\Dir");
+
+        // Assert
+        act.Should().Throw<FileNotFoundException>().WithMessage(@"File not found: C:\Test\Dir");
     }
 
     [Fact]
@@ -407,27 +479,33 @@ public sealed class MemoryFileSystemTests
         files.Should().BeEquivalentTo(@"C:\Test\File1.txt", @"C:\Test\SubDir\File2.txt");
     }
 
-    [Fact]
-    public void Directory_EnumerateFiles_WithPattern_ReturnsMatchingFiles() {
+    [Theory]
+    [InlineData("Foo.*", new[] { @"C:\Test\Foo.fiz", @"C:\Test\Foo.fizz", @"C:\Test\Foo.doc" })]
+    [InlineData("Foo.???", new[] { @"C:\Test\Foo.fiz",  @"C:\Test\Foo.doc" })]
+    [InlineData("???.*", new[] { @"C:\Test\Foo.fiz", @"C:\Test\Foo.fizz", @"C:\Test\Foo.doc", @"C:\Test\Buz.txt" })]
+    [InlineData("B?z.*", new[] {  @"C:\Test\Buz.txt" })]
+    public void Directory_EnumerateFiles_WithPattern_ReturnsMatchingFiles(string searchPattern, string[] expected) {
         // Arrange
         var sut = new MemoryFileSystem {
-            (Path: @"C:\Test\File1.txt", Content: "Test1"),
-            (Path: @"C:\Test\File2.doc", Content: "Test2")
+            (Path: @"C:\Test\Foo.fiz", Content: ""),
+            (Path: @"C:\Test\Foo.fizz", Content: ""),
+            (Path: @"C:\Test\Foo.doc", Content: ""),
+            (Path: @"C:\Test\Buzz.txt", Content: ""),
+            (Path: @"C:\Test\Buz.txt", Content: ""),
         };
 
         // Act
         var files = sut.FileSystem.DirectoryInfo(@"C:\Test")
-                       .EnumerateFiles("*.txt")
+                       .EnumerateFiles(searchPattern)
                        .Select(f => f.FullName)
                        .ToList();
 
         // Assert
-        files.Should().BeEquivalentTo(@"C:\Test\File1.txt");
+        files.Should().BeEquivalentTo(expected);
     }
 
     [Fact]
-    public void Directory_EnumerateFiles_InvalidFileNameCharInPattern_ThrowsArgumentException()
-    {
+    public void Directory_EnumerateFiles_InvalidFileNameCharInPattern_ThrowsArgumentException() {
         // Arrange
         var sut = new MemoryFileSystem();
 
@@ -473,27 +551,40 @@ public sealed class MemoryFileSystemTests
         // Arrange
         var sut = new MemoryFileSystem {
             @"C:\Test\Dir",
-            (Path: @"C:\Test\File.txt", Content: "Test")
+            (Path: @"C:\Test\Foo.txt", Content: "Foo"),
+            (Path: @"C:\Test\Bar.txt", Content: "Bar"),
+            (Path: @"C:\Test\Baz.txt", Content: "Baz")
+        };
+
+        var expected = new MemoryEntry[] {
+            new(@"C:\", true, MemoryFileSystem.First, null, null),
+            new(@"C:\Test", true, MemoryFileSystem.First, null, null),
+            new(@"C:\Test\Bar.txt", false, MemoryFileSystem.First, "Bar", null),
+            new(@"C:\Test\Baz.txt", false, MemoryFileSystem.First, "Baz", null),
+            new(@"C:\Test\Dir", true, MemoryFileSystem.First, null, null),
+            new(@"C:\Test\Foo.txt", false, MemoryFileSystem.First, "Foo", null)
         };
 
         // Act
         var entries = sut.ToList();
 
         // Assert
-        entries.Select(e => e.Path).Should().BeEquivalentTo(@"C:\", @"C:\Test", @"C:\Test\Dir", @"C:\Test\File.txt");
-
+        var enumerator = entries.GetEnumerator();
+        var i          = 0;
+        while (enumerator.MoveNext()) {
+            enumerator.Current.Should().BeEquivalentTo(expected[i]);
+            ++i;
+        }
     }
 
     [Fact]
-    public void File_Create_NewFile_WritesContent()
-    {
+    public void File_Create_NewFile_WritesContent() {
         // Arrange
         var sut = new MemoryFileSystem();
 
         // Act
-        using (var stream = sut.FileSystem.File.Create(@"C:\Test\File.txt"))
-        {
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
+        using (var stream = sut.FileSystem.File.Create(@"C:\Test\File.txt")) {
+            using var writer = new StreamWriter(stream, Encoding.ASCII);
             writer.Write("Hello, World!");
         }
 
@@ -506,15 +597,14 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
-    public void File_Create_NewFile_EmptyContent()
-    {
+    public void File_Create_NewFile_EmptyContent() {
         // Arrange
-        var sut = new MemoryFileSystem();
+        var sut  = new MemoryFileSystem();
         var path = @"C:\Test\File.txt";
 
         // Act
-        using (sut.FileSystem.File.Create(path))
-        {
+        using (sut.FileSystem.File.Create(path)) {
+            sut.Should().ContainEquivalentOf(new MemoryEntry(@"C:\Test\File.txt", false, MemoryFileSystem.First, "", null));
             // No writing to the stream
         }
 
@@ -527,11 +617,9 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
-    public void File_Create_ExistingFile_ThrowsInvalidOperationException()
-    {
+    public void File_Create_ExistingFile_ThrowsInvalidOperationException() {
         // Arrange
-        var sut = new MemoryFileSystem
-        {
+        var sut = new MemoryFileSystem {
             (Path: @"C:\Test\File.txt", Content: "Existing")
         };
         var path = @"C:\Test\File.txt";
@@ -549,17 +637,15 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
-    public void File_Create_NestedPath_CreatesParentDirectories()
-    {
+    public void File_Create_NestedPath_CreatesParentDirectories() {
         // Arrange
-        var sut = new MemoryFileSystem();
-        var path = @"C:\Test\SubDir\File.txt";
+        var sut     = new MemoryFileSystem();
+        var path    = @"C:\Test\SubDir\File.txt";
         var content = "Nested content";
 
         // Act
-        using (var stream = sut.FileSystem.File.Create(path))
-        {
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
+        using (var stream = sut.FileSystem.File.Create(path)) {
+            using var writer = new StreamWriter(stream, Encoding.ASCII);
             writer.Write(content);
             writer.Flush();
         }
@@ -574,21 +660,18 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
-    public void File_Create_MultipleWrites_UpdatesContentCorrectly()
-    {
+    public void File_Create_MultipleWrites_UpdatesContentCorrectly() {
         // Arrange
-        var sut = new MemoryFileSystem();
-        var path = @"C:\Test\File.txt";
+        var sut      = new MemoryFileSystem();
+        var path     = @"C:\Test\File.txt";
         var content1 = "First write.";
         var content2 = "Second write.";
 
         // Act
-        using (var stream = sut.FileSystem.File.Create(path))
-        {
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
+        using (var stream = sut.FileSystem.File.Create(path)) {
+            using var writer = new StreamWriter(stream, Encoding.ASCII);
             writer.Write(content1);
             writer.Write(content2);
-            writer.Flush();
         }
 
         // Assert
@@ -600,8 +683,7 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
-    public void File_Create_NullPath_ThrowsArgumentException()
-    {
+    public void File_Create_NullPath_ThrowsArgumentException() {
         // Arrange
         var sut = new MemoryFileSystem();
 
@@ -616,10 +698,9 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
-    public void File_Create_InvalidPathChars_ThrowsArgumentException()
-    {
+    public void File_Create_InvalidPathChars_ThrowsArgumentException() {
         // Arrange
-        var sut = new MemoryFileSystem();
+        var sut  = new MemoryFileSystem();
         var path = @"C:\Test\File*.txt";
 
         // Act
@@ -633,21 +714,19 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
-    public void File_Create_MultipleDispose_DoesNotThrow()
-    {
+    public void File_Create_MultipleDispose_DoesNotThrow() {
         // Arrange
-        var sut = new MemoryFileSystem();
-        var path = @"C:\Test\File.txt";
+        var sut     = new MemoryFileSystem();
+        var path    = @"C:\Test\File.txt";
         var content = "Test content";
 
         // Act
         var stream = sut.FileSystem.File.Create(path);
-        using (var writer = new StreamWriter(stream, Encoding.UTF8))
-        {
+        using (var writer = new StreamWriter(stream, Encoding.ASCII)) {
             writer.Write(content);
-            writer.Flush();
         }
-        stream.Dispose(); // First dispose
+
+        stream.Dispose();                 // First dispose
         var act = () => stream.Dispose(); // Second dispose
 
         // Assert
@@ -660,19 +739,16 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
-    public void File_Create_LargeContent_WritesCorrectly()
-    {
+    public void File_Create_LargeContent_WritesCorrectly() {
         // Arrange
-        var sut = new MemoryFileSystem();
-        var path = @"C:\Test\File.txt";
+        var sut          = new MemoryFileSystem();
+        var path         = @"C:\Test\File.txt";
         var largeContent = new string('A', 10000); // 10KB content
 
         // Act
-        using (var stream = sut.FileSystem.File.Create(path))
-        {
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
+        using (var stream = sut.FileSystem.File.Create(path)) {
+            using var writer = new StreamWriter(stream, Encoding.ASCII);
             writer.Write(largeContent);
-            writer.Flush();
         }
 
         // Assert
@@ -682,5 +758,4 @@ public sealed class MemoryFileSystemTests
             new MemoryEntry(path, false, MemoryFileSystem.First, largeContent, null)
         ]);
     }
-
 }

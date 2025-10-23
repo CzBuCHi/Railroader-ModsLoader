@@ -69,7 +69,7 @@ public sealed class MethodPatcherTests
                      """)]
     public void SkipNotMarkedTypes(string suffix, string source) {
         // Arrange
-        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinitionX(source, suffix);
+        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source, suffix);
         var typeDefinition = assemblyDefinition.MainModule!.Types!.First(o => o.FullName == "Foo.Bar.TargetType");
 
         var logger = Substitute.For<ILogger>();
@@ -97,7 +97,7 @@ public sealed class MethodPatcherTests
                               }
                               """;
 
-        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinitionX(source);
+        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source);
         var typeDefinition = assemblyDefinition.MainModule!.Types!.First(o => o.FullName == "Foo.Bar.TargetType");
 
         var logger = Substitute.For<ILogger>();
@@ -133,7 +133,7 @@ public sealed class MethodPatcherTests
                               """;
         var targetMethod = "TargetMethod" + suffix;
        
-        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinitionX(source, suffix);
+        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source, suffix);
         var typeDefinition = assemblyDefinition.MainModule!.Types!.First(o => o.FullName == "Foo.Bar.TargetType");
 
         var logger = Substitute.For<ILogger>();
@@ -222,7 +222,7 @@ public sealed class MethodPatcherTests
                               }
                               """;
 
-        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinitionX(source);
+        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source);
         var typeDefinition = assemblyDefinition.MainModule!.Types!.First(o => o.FullName == "Foo.Bar.TargetType");
 
         var logger = Substitute.For<ILogger>();
@@ -256,7 +256,7 @@ public sealed class MethodPatcherTests
                               }
                               """;
 
-        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinitionX(source);
+        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source);
         var typeDefinition = assemblyDefinition.MainModule!.Types!.First(o => o.FullName == "Foo.Bar.TargetType");
 
         var logger = Substitute.For<ILogger>();
