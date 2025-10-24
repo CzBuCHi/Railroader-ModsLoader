@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -10,46 +8,32 @@ namespace Railroader_ModInterfaces.Tests.JsonConverters;
 
 public class VersionJsonConverterTests
 {
-    public static IEnumerable<object?[]> ReadValidJsonData() {
-        return Enumerate().Select(o => new object?[] { o.json, o.expected });
-
-        IEnumerable<(string json, Version expected)> Enumerate() {
-            yield return ("""{ "version": 0 }""", new Version(0, 0));
-            yield return ("""{ "version": 1 }""", new Version(1, 0));
-            yield return ("""{ "version": 0.0 }""", new Version(0, 0));
-            yield return ("""{ "version": 0.1 }""", new Version(0, 1));
-            yield return ("""{ "version": 42.37 }""", new Version(42, 37));
-            yield return ("""{ "version": "1" }""", new Version(1, 0));
-            yield return ("""{ "version": "1.2" }""", new Version(1, 2));
-            yield return ("""{ "version": "1.2.3" }""", new Version(1, 2, 3));
-            yield return ("""{ "version": "1.2.3.4" }""", new Version(1, 2, 3, 4));
-            
-        }
-    }
+    private const string Expected = "Expected a valid System.Version (e.g., '1', '1.2', '1.2.3' or '1.2.3.4').";
 
     [Theory]
-    [MemberData(nameof(ReadValidJsonData))]
-    public void ReadValidJson(string json, Version expected) {
+    [InlineData("""{ "version": "1" }""", "1.0")]
+    [InlineData("""{ "version": "1.2" }""", "1.2")]
+    [InlineData("""{ "version": "1.2.3" }""", "1.2.3")]
+    [InlineData("""{ "version": "1.2.3.4" }""", "1.2.3.4")]
+    public void ReadValidJson(string json, string version) {
         // Act
         var actual = JsonConvert.DeserializeObject<TestData>(json);
 
         // Assert
         actual.Should().NotBeNull();
-        actual.Version.Should().Be(expected);
+        actual.Version.ToString().Should().Be(version);
     }
 
     [Theory]
     [InlineData("""{ "version": "invalid" }""", "invalid")]
     [InlineData("""{ "version": "-1" }""", "-1")]
-    [InlineData("""{ "version": -1 }""", "-1")]
-    [InlineData("""{ "version": -1.1 }""", "-1,1")]
     public void ReadInvalidValue(string json, string value) {
         // Act
         var act = () => JsonConvert.DeserializeObject<TestData>(json);
 
         // Assert
-        act.Should().Throw<JsonReaderException>()
-           .WithMessage($"Unexpected token value '{value}' when reading {typeof(Version)}. Expected: #, #.#, '#', '#.#', '#.#.#' or '#.#.#.#' (# represents characters 0-9)");
+        act.Should().Throw<JsonSerializationException>()
+           .WithMessage($"Invalid version format '{value}'. {Expected}");
     }
 
     [Theory]
@@ -60,8 +44,8 @@ public class VersionJsonConverterTests
         var act = () => JsonConvert.DeserializeObject<TestData>(json);
 
         // Assert
-        act.Should().Throw<JsonReaderException>()
-           .WithMessage($"Unexpected token type {jsonToken} when reading {typeof(Version)}. Expected: {JsonToken.String} or {JsonToken.Integer} or {JsonToken.Float}.");
+        act.Should().Throw<JsonSerializationException>()
+           .WithMessage($"Invalid version token {jsonToken}. {Expected}");
     }
 
     [Fact]
@@ -74,24 +58,13 @@ public class VersionJsonConverterTests
            .WithMessage("Required property 'version' not found in JSON. *");
     }
 
-    public static IEnumerable<object?[]> WriteValidJsonData() {
-        return Enumerate().Select(o => new object?[] { o.version, o.expected });
-
-        IEnumerable<(Version version, string expected)> Enumerate() {
-            yield return (new Version(1, 2), """{"version":"1.2"}""");
-            yield return (new Version(1, 2, 3), """{"version":"1.2.3"}""");
-            yield return (new Version(1, 2, 3, 4), """{"version":"1.2.3.4"}""");
-        }
-    }
-
-    [Theory]
-    [MemberData(nameof(WriteValidJsonData))]
-    public void WriteValidJson(Version version, string expected) {
+    [Fact]
+    public void WriteJsonNotSupported() {
         // Act
-        var actual = JsonConvert.SerializeObject(new TestData { Version = version });
+        var act = () => JsonConvert.SerializeObject(new TestData { Version = new Version() });
 
         // Assert
-        actual.Should().Be(expected);
+        act.Should().Throw<NotSupportedException>();
     }
 
     [UsedImplicitly]

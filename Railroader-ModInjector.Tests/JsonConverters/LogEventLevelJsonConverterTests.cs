@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using Mono.Cecil;
 using Newtonsoft.Json;
 using Railroader.ModInjector.JsonConverters;
@@ -47,29 +48,13 @@ public class LogEventLevelJsonConverterTests
            .WithMessage($"Unexpected token type {JsonToken.Integer} when reading {typeof(LogEventLevel?)}. Expected: {JsonToken.Null} or {JsonToken.String}.");
     }
 
-    [Theory]
-    [InlineData(LogEventLevel.Verbose, """{"logLevel":"Verbose"}""")]
-    [InlineData(LogEventLevel.Debug, """{"logLevel":"Debug"}""")]
-    [InlineData(LogEventLevel.Information, """{"logLevel":"Information"}""")]
-    [InlineData(LogEventLevel.Warning, """{"logLevel":"Warning"}""")]
-    [InlineData(LogEventLevel.Error, """{"logLevel":"Error"}""")]
-    [InlineData(LogEventLevel.Fatal, """{"logLevel":"Fatal"}""")]
-    [InlineData(null!, """{"logLevel":null}""")]
-    public void WriteJson(LogEventLevel? level, string expected) {
-        // Act
-        var actual = JsonConvert.SerializeObject(new TestData { LogLevel = level });
-
-        // Assert
-        actual.Should().Be(expected);
-    }
-
     [Fact]
-    public void WriteJsonInvalidValue() {
+    public void WriteJsonNotSupported() {
         // Act
-        var act = () => JsonConvert.SerializeObject(new TestData { LogLevel =  (LogEventLevel?)(-1) });
+        var act = () => JsonConvert.SerializeObject(new TestData { LogLevel = LogEventLevel.Debug });
 
         // Assert
-        act.Should().Throw<JsonWriterException>().WithMessage($"Unexpected value of {typeof(LogEventLevel?)} enum: {-1}");
+        act.Should().Throw<NotSupportedException>();
     }
 
     private sealed class TestData

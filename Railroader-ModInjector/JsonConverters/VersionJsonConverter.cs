@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using Newtonsoft.Json;
 
 namespace Railroader.ModInjector.JsonConverters;
@@ -7,50 +6,34 @@ namespace Railroader.ModInjector.JsonConverters;
 /// <summary> JsonConverter for <see cref="Version"/>. </summary>
 internal sealed class VersionJsonConverter : JsonConverter<Version>
 {
+    private const string Expected = "Expected a valid System.Version (e.g., '1', '1.2', '1.2.3' or '1.2.3.4').";
+
     /// <inheritdoc />
     public override void WriteJson(JsonWriter writer, Version? value, JsonSerializer serializer) {
-        writer.WriteValue(value!.ToString());
+        throw new NotSupportedException();
     }
 
     /// <inheritdoc />
-    public override Version? ReadJson(JsonReader reader, Type objectType, Version? existingValue, bool hasExistingValue, JsonSerializer serializer) {
-        switch (reader.TokenType) {
-            case JsonToken.String: {
-                var raw = Convert.ToString(reader.Value!);
-                if (raw.IndexOf('.') == -1) { // to support "version": "1" instead of "1.0"
-                    raw += ".0";
-                }
+    public override Version ReadJson(JsonReader reader, Type objectType, Version? existingValue, bool hasExistingValue, JsonSerializer serializer) {
+        if (reader.TokenType == JsonToken.String) {
+            var value   = Convert.ToString(reader.Value!);
 
-                if (!Version.TryParse(raw, out var parsed)) {
-                    throw new JsonReaderException($"Unexpected token value '{reader.Value}' when reading {typeof(Version)}. Expected: #, #.#, '#', '#.#', '#.#.#' or '#.#.#.#' (# represents characters 0-9)");
-                }
-
-                return parsed;
+            var version = ParseString(value);
+            if (version == null) {
+                throw new JsonSerializationException($"Invalid version format '{value}'. {Expected}");
             }
 
-            case JsonToken.Integer: {
-                var raw = Convert.ToInt32(reader.Value!);
-                if (raw < 0) {
-                    throw new JsonReaderException($"Unexpected token value '{reader.Value}' when reading {typeof(Version)}. Expected: #, #.#, '#', '#.#', '#.#.#' or '#.#.#.#' (# represents characters 0-9)");
-                }
-
-                return new Version(raw, 0);
-            }
-
-            case JsonToken.Float: {
-                var raw = Convert.ToDecimal(reader.Value!);
-                if (raw < 0) {
-                    throw new JsonReaderException($"Unexpected token value '{reader.Value}' when reading {typeof(Version)}. Expected: #, #.#, '#', '#.#', '#.#.#' or '#.#.#.#' (# represents characters 0-9)");
-                }
-
-                var major = (int)Math.Floor(raw);
-                var rest  = raw - major;
-                var minor = rest > 0 ? int.Parse(rest.ToString(CultureInfo.InvariantCulture).Substring(2)) : 0;
-                return new Version(major, minor);
-            }
-
-            default:
-                throw new JsonReaderException($"Unexpected token type {reader.TokenType} when reading {typeof(Version)}. Expected: {JsonToken.String} or {JsonToken.Integer} or {JsonToken.Float}.");
+            return version;
         }
+
+        throw new JsonSerializationException($"Invalid version token {reader.TokenType}. {Expected}");
+    }
+
+    internal static Version? ParseString(string value) {
+        if (value.IndexOf('.') == -1) { // to support "version": "1" instead of "1.0"
+            value += ".0";
+        }
+
+        return Version.TryParse(value, out var version) ? version! : null;
     }
 }
