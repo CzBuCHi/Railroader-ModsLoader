@@ -2,5 +2,5 @@
     "id": "DummyMod",
     "name": "Dummy mod",
     "version": "1.0.0",
-    "logLevel": "Debug"
+    "logLevel": "Debug"    
 }

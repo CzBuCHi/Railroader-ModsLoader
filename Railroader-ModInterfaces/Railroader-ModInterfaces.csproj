@@ -36,6 +36,16 @@
             <_Parameter1>Railroader-ModInjector</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="..\Shared\CompilerFeatureRequiredAttribute.cs" Link="Shared\CompilerFeatureRequiredAttribute.cs" />
+      <Compile Include="..\Shared\IsExternalInit.cs" Link="Shared\IsExternalInit.cs" />
+      <Compile Include="..\Shared\RequiredMemberAttribute.cs" Link="Shared\RequiredMemberAttribute.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Shared\" />
+    </ItemGroup>
     
     <Target Name="CopyGeneratedFile" AfterTargets="Build">
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\Railroader-ModsLoader\Injector" SkipUnchangedFiles="false" />

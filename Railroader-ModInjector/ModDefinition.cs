@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using Railroader.ModInjector.JsonConverters;
@@ -28,6 +29,16 @@ internal sealed class ModDefinition : IModDefinition
     [JsonProperty("logLevel")]
     [JsonConverter(typeof(LogEventLevelJsonConverter))]
     public LogEventLevel? LogLevel { get; set; }
+
+    /// <inheritdoc />
+    [JsonProperty("requires")]
+    [JsonConverter(typeof(ModReferenceJsonConverter))]
+    public Dictionary<string, FluentVersion?> Requires { get; set; } = null!;
+
+    /// <inheritdoc />
+    [JsonProperty("conflictsWith")]
+    [JsonConverter(typeof(ModReferenceJsonConverter))]
+    public Dictionary<string, FluentVersion?> ConflictsWith { get; set; } = null!;
 
     /// <summary> Gets or sets the base directory path for the mod. </summary>
     [JsonIgnore]
