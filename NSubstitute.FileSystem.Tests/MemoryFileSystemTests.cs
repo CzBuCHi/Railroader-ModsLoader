@@ -340,6 +340,39 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
+    public void File_Delete_ThrowsWhenFileLocked() {
+        // Arrange
+        var sut = new MemoryFileSystem { (Path: @"C:\Test\File.txt", Content: "Test") };
+        sut.LockFile(@"C:\Test\File.txt");
+
+        // Act
+        var act = () => sut.FileSystem.File.Delete(@"C:\Test\File.txt");
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>().WithMessage(@"File C:\Test\File.txt is locked");
+    }
+
+    [Fact]
+    public void File_Delete_RemovesExistingFileWhenUnlocked() {
+        // Arrange
+        var sut = new MemoryFileSystem { (Path: @"C:\Test\File.txt", Content: "Test") };
+        sut.LockFile(@"C:\Test\File.txt");
+
+        // Act
+        var act = () => sut.FileSystem.File.Delete(@"C:\Test\File.txt");
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>().WithMessage(@"File C:\Test\File.txt is locked");
+
+        // Act
+        sut.UnlockFile(@"C:\Test\File.txt");
+        sut.FileSystem.File.Delete(@"C:\Test\File.txt");
+
+        // Assert
+        sut.FileSystem.File.Exists(@"C:\Test\File.txt").Should().BeFalse();
+    }
+
+    [Fact]
     public void File_Move_MovesFileToNewPath() {
         // Arrange
         var sut = new MemoryFileSystem { (Path: @"C:\Test\File.txt", Content: "Test") };
@@ -366,6 +399,20 @@ public sealed class MemoryFileSystemTests
     }
 
     [Fact]
+    public void File_Move_SourceIsDirectory_ThrowsInvalidOperationException() {
+        // Arrange
+        var sut = new MemoryFileSystem {
+            @"C:\Test\Dir"
+        };
+
+        // Act
+        var act = () => sut.FileSystem.File.Move(@"C:\Test\Dir", @"C:\Test\File2.txt");
+
+        // Assert
+        act.Should().Throw<FileNotFoundException>().WithMessage(@"Source file not found: C:\Test\Dir");
+    }
+
+    [Fact]
     public void File_Move_DestinationExists_ThrowsInvalidOperationException() {
         // Arrange
         var sut = new MemoryFileSystem {
@@ -378,6 +425,19 @@ public sealed class MemoryFileSystemTests
 
         // Assert
         act.Should().Throw<InvalidOperationException>().WithMessage(@"Destination path already exists: C:\Test\File2.txt");
+    }
+
+    [Fact]
+    public void File_Move_ThrowsWhenSourceFileLocked() {
+        // Arrange
+        var sut = new MemoryFileSystem { (Path: @"C:\Test\File.txt", Content: "Test") };
+        sut.LockFile(@"C:\Test\File.txt");
+        
+        // Act
+        var act = () => sut.FileSystem.File.Move(@"C:\Test\File.txt", @"C:\Test\File2.txt");
+        
+        // Assert
+        act.Should().Throw<InvalidOperationException>().WithMessage(@"File C:\Test\File.txt is locked");
     }
 
     [Fact]

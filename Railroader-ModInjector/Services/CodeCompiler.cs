@@ -49,7 +49,7 @@ internal sealed class CodeCompiler : ICodeCompiler
     /// <inheritdoc />
     public List<(Type InterfaceType, Type PluginPatcherType)> PluginPatchers { get; init; } = [
         (typeof(ITopRightButtonPlugin), typeof(TopRightButtonPluginPatcher)),
-        (typeof(IHarmonyPlugin), typeof(HarmonyPluginPatcher)),
+        (typeof(IHarmonyPlugin), typeof(HarmonyPluginPatcher))
     ];
 
     /// <inheritdoc />
@@ -62,8 +62,7 @@ internal sealed class CodeCompiler : ICodeCompiler
     ];
 
     /// <inheritdoc />
-    public string? CompileMod(ModDefinition definition)
-    {
+    public string? CompileMod(ModDefinition definition) {
         var csFiles = FileSystem.DirectoryInfo(definition.BasePath).EnumerateFiles("*.cs", SearchOption.AllDirectories).OrderByDescending(o => o.LastWriteTime).ToArray();
         if (csFiles.Length == 0) {
             return null;
@@ -83,7 +82,7 @@ internal sealed class CodeCompiler : ICodeCompiler
 
         Logger.Information("Compiling mod {ModId} ...", definition.Identifier);
 
-        var sources = csFiles.Select(o => o.FullName).ToArray();
+        var sources    = csFiles.Select(o => o.FullName).ToArray();
         var references = ReferenceNames.Select(o => Path.Combine(FileSystem.Directory.GetCurrentDirectory(), "Railroader_Data", "Managed", o + ".dll")).ToArray();
 
         if (!AssemblyCompiler.CompileAssembly(assemblyPath, sources, references)) {
@@ -102,7 +101,7 @@ internal sealed class CodeCompiler : ICodeCompiler
             }
 
             Logger.Information("Patching complete for mod {ModId}", definition.Identifier);
-        } 
+        }
 
         return assemblyPath;
     }
@@ -137,25 +136,18 @@ internal sealed class CodeCompiler : ICodeCompiler
                 return false;
             }
 
-            bool hasPatch = false;
-            bool hasError = false;
+            var hasPatch = false;
+            var hasError = false;
             foreach (var type in assemblyDefinition.MainModule?.Types ?? Enumerable.Empty<TypeDefinition>()) {
                 try {
-                    var interfaces = type.Interfaces?.Select(i => i.InterfaceType?.FullName).ToList() ?? [];
-                    if (interfaces.Count == 0) {
-                        // stryker disable once statement
-                        continue;
-                    }
-
-                    foreach (var pair in PluginPatchers) {
-                        if (interfaces.Contains(pair.InterfaceType.FullName)) {
-                            var patcher = _PluginPatchers.GetOrAdd(pair.InterfaceType,
-                                _ => (IMethodPatcher)Activator.CreateInstance(pair.PluginPatcherType, Logger)!
-                            )!;
-
-                            patcher.Patch(assemblyDefinition, type);
-                            hasPatch = true;
-                        }
+                    var interfaces = type.Interfaces?.Select(i => i.InterfaceType?.FullName).ToList()!;
+                    var patchers = PluginPatchers.Where(pair => interfaces.Contains(pair.InterfaceType!.FullName))
+                                                 .Select(pair => _PluginPatchers.GetOrAdd(pair.InterfaceType,
+                                                     _ => (IMethodPatcher)Activator.CreateInstance(pair.PluginPatcherType!, Logger)!
+                                                 ));
+                    foreach (var patcher in patchers) {
+                        patcher!.Patch(assemblyDefinition, type);
+                        hasPatch = true;
                     }
                 } catch (Exception ex) {
                     Logger.Error(ex, "Failed to patch type {TypeName} for mod {ModId}", type.FullName, modId);
@@ -173,8 +165,7 @@ internal sealed class CodeCompiler : ICodeCompiler
             }
 
             return true;
-        }
-        finally {
+        } finally {
             assemblyDefinition?.Dispose();
             if (success) {
                 FileSystem.File.Delete(assemblyPath);

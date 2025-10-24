@@ -12,7 +12,7 @@ using JetBrains.Annotations;
 
 namespace NSubstitute.FileSystem;
 
-public sealed record MemoryEntry(string Path, bool IsDirectory, DateTime LastWriteTime, string? Content, Exception? ReadException);
+public sealed record MemoryEntry(string Path, bool IsDirectory, DateTime LastWriteTime, string? Content, Exception? ReadException, bool Locked = false);
 
 [PublicAPI]
 //[DebuggerStepThrough]
@@ -54,6 +54,16 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
     public void Add((string Path, Exception LoadException) file) => AddInternal(new MemoryEntry(file.Path!, false, First, null, file.LoadException));
 
     public void Add((string Path, DateTime LastWriteTime, Exception LoadException) file) => AddInternal(new MemoryEntry(file.Path!, false, file.LastWriteTime, null, file.LoadException));
+
+    public void LockFile(string path) {
+        path = NormalizePath(path);
+        _Items[path] = _Items[path]! with { Locked = true };
+    }
+
+    public void UnlockFile(string path) {
+        path = NormalizePath(path);
+        _Items[path] = _Items[path]! with { Locked = false };
+    }
 
     private static string NormalizePath(string path) {
         if (string.IsNullOrEmpty(path)) {
@@ -178,6 +188,10 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
     private void File_Delete(string path) {
         path = NormalizePath(path);
         if (_Items.TryGetValue(path, out var entry) && entry is { IsDirectory: false }) {
+            if (entry.Locked) {
+                throw new InvalidOperationException($"File {path} is locked");
+            }
+
             _Items.TryRemove(path, out _);
         }
     }
@@ -189,7 +203,7 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
         destFileName = NormalizePath(destFileName);
 
         lock (_FileMoveLock) {
-            if (!_Items.TryGetValue(sourceFileName, out var entry) || entry is { IsDirectory: true }) {
+            if (!_Items.TryGetValue(sourceFileName, out var sourceFile) || sourceFile is not { IsDirectory: false }) {
                 throw new FileNotFoundException($"Source file not found: {sourceFileName}");
             }
 
@@ -197,11 +211,15 @@ public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
                 throw new InvalidOperationException($"Destination path already exists: {destFileName}");
             }
 
-            var removed = _Items.TryRemove(sourceFileName, out var sourceFile);
+            if (sourceFile.Locked) {
+                throw new InvalidOperationException($"File {sourceFileName} is locked");
+            }
+
+            var removed = _Items.TryRemove(sourceFileName, out _);
             // Stryker disable once statement, string
             Debug.Assert(removed, $"Failed to remove source file '{sourceFileName}'.");
 
-            var added = _Items.TryAdd(destFileName, sourceFile! with { Path = destFileName });
+            var added = _Items.TryAdd(destFileName, sourceFile with { Path = destFileName });
             // Stryker disable once statement, string
             Debug.Assert(added, $"Failed to add destination file '{destFileName}'.");
         }

@@ -199,7 +199,7 @@ public sealed class CodeCompilerTests
         logger.ReceivedCalls().Should().HaveCount(3);
 
         memory.FileSystem.File.Received().Delete(AssemblyPath);
-        memory.Should().ContainEquivalentOf(new MemoryEntry(AssemblyPath, false, MemoryFileSystem.First, "Compiled DLL", null));
+        memory.Should().ContainEquivalentOf(new MemoryEntry(AssemblyPath, false, MemoryFileSystem.First, "Compiled DLL", null, false));
     }
 
     [Fact]
