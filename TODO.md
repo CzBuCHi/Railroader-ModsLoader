@@ -1,0 +1,9 @@
+- extract zipped mod from Mods\*.zip to Mods\*
+- ModdingContext implementation
+- ModManager tests
+- convert my mods to this manager
+    - CarInspectorTweaks
+    - SwitchNormalizer
+    - Teleporter
+    - TurntableControl
+- support for game-graph.json (try load StrangeCustoms?)
