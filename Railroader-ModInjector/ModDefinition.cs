@@ -33,12 +33,12 @@ internal sealed class ModDefinition : IModDefinition
     /// <inheritdoc />
     [JsonProperty("requires")]
     [JsonConverter(typeof(ModReferenceJsonConverter))]
-    public Dictionary<string, FluentVersion?> Requires { get; set; } = null!;
+    public Dictionary<string, FluentVersion?>? Requires { get; set; } = null!;
 
     /// <inheritdoc />
     [JsonProperty("conflictsWith")]
     [JsonConverter(typeof(ModReferenceJsonConverter))]
-    public Dictionary<string, FluentVersion?> ConflictsWith { get; set; } = null!;
+    public Dictionary<string, FluentVersion?>? ConflictsWith { get; set; } = null!;
 
     /// <summary> Gets or sets the base directory path for the mod. </summary>
     [JsonIgnore]

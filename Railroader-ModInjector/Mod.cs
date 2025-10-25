@@ -1,4 +1,6 @@
-﻿using Railroader.ModInterfaces;
+﻿using System.Linq;
+using Newtonsoft.Json;
+using Railroader.ModInterfaces;
 using Serilog;
 
 namespace Railroader.ModInjector;
@@ -38,7 +40,11 @@ internal sealed class Mod(IModDefinition modDefinition, string? assemblyPath) : 
     public bool IsLoaded { get; internal set; }
 
     /// <inheritdoc />
+    [JsonIgnore]
     public IPluginBase[]? Plugins { get; internal set; }
+
+    [JsonProperty("Plugins")]
+    internal string[]? PluginNames => Plugins?.Select(o => o.GetType().FullName).ToArray();
 
     /// <inheritdoc />
     public ILogger CreateLogger(string? scope = null)

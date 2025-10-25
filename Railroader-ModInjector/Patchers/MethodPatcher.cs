@@ -107,8 +107,7 @@ public sealed class MethodPatcher<TMarker, TPluginPatcher> : IMethodPatcher
 
         var baseMethodRef = module.ImportReference(baseMethodDef);
 
-        var methodAttributes = (baseMethodDef.Attributes & ~(MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.NewSlot)) |
-                               MethodAttributes.Virtual | MethodAttributes.ReuseSlot | MethodAttributes.HideBySig;
+        var methodAttributes = (baseMethodDef.Attributes & ~(MethodAttributes.Final | MethodAttributes.NewSlot)) | MethodAttributes.HideBySig;
 
         var method = new MethodDefinition(_TargetMethod, methodAttributes, module.ImportReference(baseMethodDef.ReturnType!)!);
 

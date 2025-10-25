@@ -9,7 +9,9 @@ namespace Railroader.ModInjector.JsonConverters;
 internal sealed class LogEventLevelJsonConverter : JsonConverter<LogEventLevel?>
 {
     /// <inheritdoc />
-    public override void WriteJson(JsonWriter writer, LogEventLevel? value, JsonSerializer serializer) => throw new NotSupportedException();
+    public override void WriteJson(JsonWriter writer, LogEventLevel? value, JsonSerializer serializer) {
+        writer.WriteValue(value!.ToString());
+    }
 
     /// <inheritdoc />
     public override LogEventLevel? ReadJson(JsonReader reader, Type objectType, LogEventLevel? existingValue, bool hasExistingValue, JsonSerializer serializer) {

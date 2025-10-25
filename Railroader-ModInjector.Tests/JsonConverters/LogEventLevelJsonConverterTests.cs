@@ -51,10 +51,10 @@ public class LogEventLevelJsonConverterTests
     [Fact]
     public void WriteJsonNotSupported() {
         // Act
-        var act = () => JsonConvert.SerializeObject(new TestData { LogLevel = LogEventLevel.Debug });
+        var actual= JsonConvert.SerializeObject(new TestData { LogLevel = LogEventLevel.Debug });
 
         // Assert
-        act.Should().Throw<NotSupportedException>();
+        actual.Should().Be("""{"logLevel":"Debug"}""");
     }
 
     private sealed class TestData

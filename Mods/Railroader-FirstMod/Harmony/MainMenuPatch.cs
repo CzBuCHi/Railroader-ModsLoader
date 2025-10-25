@@ -2,7 +2,7 @@
 using JetBrains.Annotations;
 using UI.Menu;
 
-namespace Railroader.DummyMod.Harmony
+namespace Railroader.FirstMod.Harmony
 {
     [HarmonyPatch]
     [UsedImplicitly]
@@ -11,14 +11,14 @@ namespace Railroader.DummyMod.Harmony
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MainMenu), "ShouldShowEditor")]
         public static bool ShouldShowEditorPrefix() {
-            DummyPlugin.Instance.Logger.Information("--- MainMenu::ShouldShowEditor::Prefix patch from dummy called: " + DummyPlugin.Instance?.IsEnabled);
+            FirstPlugin.Instance.Logger.Information("--- MainMenu::ShouldShowEditor::Prefix patch from dummy called: " + FirstPlugin.Instance?.IsEnabled);
             return true;
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(MainMenu), "ShouldShowEditor")]
         public static void ShouldShowEditorPostfix() {
-            DummyPlugin.Instance.Logger.Information("--- MainMenu::ShouldShowEditor::Postfix patch from dummy called: " + DummyPlugin.Instance?.IsEnabled);
+            FirstPlugin.Instance.Logger.Information("--- MainMenu::ShouldShowEditor::Postfix patch from dummy called: " + FirstPlugin.Instance?.IsEnabled);
         }
     }
 }

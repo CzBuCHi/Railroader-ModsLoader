@@ -44,7 +44,7 @@ internal sealed class CodeCompiler : ICodeCompiler
     public required IAssemblyDefinitionWrapper AssemblyDefinitionWrapper { get; init; }
     public required IAssemblyCompiler          AssemblyCompiler          { get; init; }
 
-    private readonly ConcurrentDictionary<Type, IMethodPatcher> _PluginPatchers = new();
+    private readonly ConcurrentDictionary<Type, ITypePatcher> _PluginPatchers = new();
 
     /// <inheritdoc />
     public List<(Type InterfaceType, Type PluginPatcherType)> PluginPatchers { get; init; } = [
@@ -63,7 +63,10 @@ internal sealed class CodeCompiler : ICodeCompiler
 
     /// <inheritdoc />
     public string? CompileMod(ModDefinition definition) {
-        var csFiles = FileSystem.DirectoryInfo(definition.BasePath).EnumerateFiles("*.cs", SearchOption.AllDirectories).OrderByDescending(o => o.LastWriteTime).ToArray();
+        var csFiles = FileSystem.DirectoryInfo(definition.BasePath)
+                                .EnumerateFiles("*.cs", SearchOption.AllDirectories)
+                                .OrderByDescending(o => o.LastWriteTime)
+                                .ToArray();
         if (csFiles.Length == 0) {
             return null;
         }
@@ -82,10 +85,19 @@ internal sealed class CodeCompiler : ICodeCompiler
 
         Logger.Information("Compiling mod {ModId} ...", definition.Identifier);
 
-        var sources    = csFiles.Select(o => o.FullName).ToArray();
-        var references = ReferenceNames.Select(o => Path.Combine(FileSystem.Directory.GetCurrentDirectory(), "Railroader_Data", "Managed", o + ".dll")).ToArray();
+        var sources = csFiles.Select(o => o.FullName).ToArray();
 
-        if (!AssemblyCompiler.CompileAssembly(assemblyPath, sources, references)) {
+        var managedPath = Path.Combine(FileSystem.Directory.GetCurrentDirectory(), "Railroader_Data", "Managed");
+        var references  = ReferenceNames.Select(o => Path.Combine(managedPath, o + ".dll")).ToList();
+
+        if (definition.Requires?.Count > 0) {
+            Logger.Information("Adding references to {Mods} ...", definition.Requires.Keys);
+            var modsPath   = Path.Combine(FileSystem.Directory.GetCurrentDirectory(), "Mods");
+            var modReferences = definition.Requires.Keys.Select(o => Path.Combine(modsPath, o, o + ".dll"));
+            references.AddRange(modReferences);
+        }
+
+        if (!AssemblyCompiler.CompileAssembly(assemblyPath, sources, references.ToArray())) {
             Logger.Error("Compilation failed for mod {ModId} ...", definition.Identifier);
             return null;
         }
@@ -143,7 +155,7 @@ internal sealed class CodeCompiler : ICodeCompiler
                     var interfaces = type.Interfaces?.Select(i => i.InterfaceType?.FullName).ToList()!;
                     var patchers = PluginPatchers.Where(pair => interfaces.Contains(pair.InterfaceType!.FullName))
                                                  .Select(pair => _PluginPatchers.GetOrAdd(pair.InterfaceType,
-                                                     _ => (IMethodPatcher)Activator.CreateInstance(pair.PluginPatcherType!, Logger)!
+                                                     _ => (ITypePatcher)Activator.CreateInstance(pair.PluginPatcherType!, Logger)!
                                                  ));
                     foreach (var patcher in patchers) {
                         patcher!.Patch(assemblyDefinition, type);

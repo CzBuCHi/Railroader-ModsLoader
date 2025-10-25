@@ -45,7 +45,7 @@ internal sealed class ModManager : IModManager
 
         var moddingContext = new ModdingContext(_Mods);
 
-        logger.Debug("moddingContext: {moddingContext}", JsonConvert.SerializeObject(moddingContext));
+        logger.Debug("mods: {mods}", JsonConvert.SerializeObject(moddingContext.Mods));
 
         var pluginManger = PluginManagerFactory(moddingContext);
         foreach (var mod in _Mods.Where(o => o.AssemblyPath != null)) {

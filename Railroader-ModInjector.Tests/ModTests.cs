@@ -24,6 +24,7 @@ public sealed class ModTests
         sut.IsEnabled.Should().BeFalse();
         sut.IsLoaded.Should().BeFalse();
         sut.Plugins.Should().BeNull();
+        sut.PluginNames.Should().BeNull();
     }
 
     [Fact]
@@ -32,6 +33,7 @@ public sealed class ModTests
         var modDefinition = Substitute.For<IModDefinition>();
         var sut           = new Mod(modDefinition, "assemblyPath");
         var plugin        = Substitute.For<IPluginBase>();
+        
         sut.Plugins = [plugin];
 
         // Act
@@ -44,6 +46,7 @@ public sealed class ModTests
         // Assert
         plugin.Received(2).IsEnabled = true;
         plugin.Received(1).IsEnabled = false;
+        sut.PluginNames.Should().BeEquivalentTo(plugin.GetType().FullName!);
     }
 
     [Theory]

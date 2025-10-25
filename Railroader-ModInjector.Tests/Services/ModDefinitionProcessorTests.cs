@@ -18,8 +18,8 @@ public class ModDefinitionProcessorTests
             Identifier = id,
             Name = $"{id} Mod",
             Version = VersionJsonConverter.ParseString(version)!,
-            Requires = requires ?? new Dictionary<string, FluentVersion?>(),
-            ConflictsWith = conflicts ?? new Dictionary<string, FluentVersion?>()
+            Requires = requires,
+            ConflictsWith = conflicts
         };
 
     [Fact]
@@ -40,7 +40,7 @@ public class ModDefinitionProcessorTests
         sut.Errors.Should().BeEmpty();
         modDefinitions.Select(mod => mod.Identifier).Should().Equal("C", "B", "A");
     }
-
+    
     [Fact]
     public void MissingRequirement() {
         // Arrange

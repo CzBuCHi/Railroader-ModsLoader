@@ -4,6 +4,7 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using Railroader.ModInjector.JsonConverters;
 using Railroader.ModInterfaces;
+using Serilog.Events;
 
 namespace Railroader_ModInterfaces.Tests.JsonConverters;
 
@@ -94,18 +95,19 @@ public class ModReferenceJsonConverterTests
     }
 
     [Fact]
-    public void WriteJsonNotSupported() {
+    public void WriteJson() {
         // Arrange
         var testData = new TestData {
             Data = new Dictionary<string, FluentVersion?> {
-                { "foo", new FluentVersion(new Version(1, 0, 0), VersionOperator.GreaterOrEqual) }
+                { "foo", new FluentVersion(new Version(1, 2, 3), VersionOperator.GreaterOrEqual) },
+                { "bar", null },
             }
         };
 
         // Act
-        var act = () => JsonConvert.SerializeObject(testData);
+        var actual = JsonConvert.SerializeObject(testData);
 
         // Assert
-        act.Should().Throw<NotSupportedException>();
+        actual.Should().Be("""{"data":{"bar":null,"foo":">=1.2.3"}}""");
     }
 }

@@ -33,7 +33,7 @@ public interface IModDefinition
     /// </list>
     /// For example, <c>"foo": "1.0.1"</c> requires mod "foo" with version 1.0.1 or higher, <c>"foo": "=1.0.1"</c> requires exactly version 1.0.1, and <c>"foo": ""</c> requires mod "foo" with any version. Version strings must be valid <see cref="System.Version"/> formats, except for the empty string case.
     /// </remarks>
-    Dictionary<string, FluentVersion?> Requires { get; }
+    Dictionary<string, FluentVersion?>? Requires { get; }
 
     /// <summary>Gets the dictionary of mod identifiers and their version constraints that this mod conflicts with.</summary>
     /// <remarks>
@@ -47,5 +47,5 @@ public interface IModDefinition
     /// For example, <c>"second": "&lt;1.2.3"</c> means versions of mod "second" less than 1.2.3 are incompatible, <c>"second": "=1.0.1"</c> means only version 1.0.1 is incompatible, and <c>"second": ""</c> means any version of mod "second" is incompatible.
     /// Version strings must be valid <see cref="System.Version"/> formats, except for the empty string case.
     /// </remarks>
-    Dictionary<string, FluentVersion?> ConflictsWith { get; }
+    Dictionary<string, FluentVersion?>? ConflictsWith { get; }
 }

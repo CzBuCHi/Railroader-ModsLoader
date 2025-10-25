@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-DummyMod", "Railroader-DummyMod\Railroader-DummyMod.csproj", "{3FA4165B-E959-41CE-84AC-ABE36E0AEC3E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-ModInjector", "Railroader-ModInjector\Railroader-ModInjector.csproj", "{797B6FF5-1096-47BB-B251-215DBA5DF273}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-ModInjector.Tests", "Railroader-ModInjector.Tests\Railroader-ModInjector.Tests.csproj", "{79DCAB4F-E19A-4BAB-B652-8A3F6E622382}"
@@ -42,16 +40,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryFileSystem.Tests", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stryker", "Stryker\Stryker.csproj", "{5376BC7F-5AA5-C127-BF09-7A32E0E3BFBF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-FirstMod", "Mods\Railroader-FirstMod\Railroader-FirstMod.csproj", "{817BC061-B1C4-6599-C46A-57128BBAFE8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-SecondMod", "Mods\Railroader-SecondMod\Railroader-SecondMod.csproj", "{311A99B0-B235-1C51-0552-76CA42982495}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3FA4165B-E959-41CE-84AC-ABE36E0AEC3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3FA4165B-E959-41CE-84AC-ABE36E0AEC3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3FA4165B-E959-41CE-84AC-ABE36E0AEC3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3FA4165B-E959-41CE-84AC-ABE36E0AEC3E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{797B6FF5-1096-47BB-B251-215DBA5DF273}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{797B6FF5-1096-47BB-B251-215DBA5DF273}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{797B6FF5-1096-47BB-B251-215DBA5DF273}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -90,12 +88,19 @@ Global
 		{5376BC7F-5AA5-C127-BF09-7A32E0E3BFBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5376BC7F-5AA5-C127-BF09-7A32E0E3BFBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5376BC7F-5AA5-C127-BF09-7A32E0E3BFBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{817BC061-B1C4-6599-C46A-57128BBAFE8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{817BC061-B1C4-6599-C46A-57128BBAFE8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{817BC061-B1C4-6599-C46A-57128BBAFE8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{817BC061-B1C4-6599-C46A-57128BBAFE8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{311A99B0-B235-1C51-0552-76CA42982495}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{311A99B0-B235-1C51-0552-76CA42982495}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{311A99B0-B235-1C51-0552-76CA42982495}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{311A99B0-B235-1C51-0552-76CA42982495}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{3FA4165B-E959-41CE-84AC-ABE36E0AEC3E} = {7C92241D-E081-41E1-B519-63E0BF15E869}
 		{797B6FF5-1096-47BB-B251-215DBA5DF273} = {7EA7E276-EC85-429E-A358-46FC99B5F769}
 		{79DCAB4F-E19A-4BAB-B652-8A3F6E622382} = {951B46DF-AC6C-4BBD-82BF-DCA8CE1BAED6}
 		{C0EBBA8B-207E-49E7-A2A7-5CDB0B8EE9C5} = {7EA7E276-EC85-429E-A358-46FC99B5F769}
@@ -106,6 +111,8 @@ Global
 		{17964381-469C-4E46-BD84-D4FC40612C2B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{EA3B34B7-E88A-4A01-92FA-BC6D488A8FAE} = {951B46DF-AC6C-4BBD-82BF-DCA8CE1BAED6}
 		{5376BC7F-5AA5-C127-BF09-7A32E0E3BFBF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{817BC061-B1C4-6599-C46A-57128BBAFE8B} = {7C92241D-E081-41E1-B519-63E0BF15E869}
+		{311A99B0-B235-1C51-0552-76CA42982495} = {7C92241D-E081-41E1-B519-63E0BF15E869}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3E9DAAED-6A69-4753-8BB3-37E7B3841F09}

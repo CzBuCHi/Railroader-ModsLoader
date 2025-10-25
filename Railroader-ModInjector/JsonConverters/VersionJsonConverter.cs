@@ -10,7 +10,7 @@ internal sealed class VersionJsonConverter : JsonConverter<Version>
 
     /// <inheritdoc />
     public override void WriteJson(JsonWriter writer, Version? value, JsonSerializer serializer) {
-        throw new NotSupportedException();
+        writer.WriteValue(value!.ToString());
     }
 
     /// <inheritdoc />

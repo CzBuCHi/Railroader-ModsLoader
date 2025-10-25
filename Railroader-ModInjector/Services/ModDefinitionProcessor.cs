@@ -37,21 +37,25 @@ internal sealed class ModDefinitionProcessor : IModDefinitionProcessor
 
         foreach (var mod in modDefinitions) {
             // Verify Requirements
-            foreach (var (requiredId, fluentVersion) in mod.Requires) {
-                if (!modMap.TryGetValue(requiredId, out var requiredMod)) {
-                    Errors.Add($"Mod '{mod.Identifier}' requires mod '{requiredId}', but it is not present.");
-                }
+            if (mod.Requires != null) {
+                foreach (var (requiredId, fluentVersion) in mod.Requires) {
+                    if (!modMap.TryGetValue(requiredId, out var requiredMod)) {
+                        Errors.Add($"Mod '{mod.Identifier}' requires mod '{requiredId}', but it is not present.");
+                    }
 
-                if (fluentVersion != null && !IsVersionSatisfied(requiredMod!.Version, fluentVersion)) {
-                    Errors.Add($"Mod '{mod.Identifier}' requires mod '{requiredId}' with version constraint '{fluentVersion}', but found version '{requiredMod.Version}'.");
+                    if (fluentVersion != null && !IsVersionSatisfied(requiredMod!.Version, fluentVersion)) {
+                        Errors.Add($"Mod '{mod.Identifier}' requires mod '{requiredId}' with version constraint '{fluentVersion}', but found version '{requiredMod.Version}'.");
+                    }
                 }
             }
 
             // Verify Conflicts
-            foreach (var (conflictId, fluentVersion) in mod.ConflictsWith) {
-                if (modMap.TryGetValue(conflictId, out var conflictingMod)) {
-                    if (fluentVersion == null || IsVersionSatisfied(conflictingMod!.Version, fluentVersion)) {
-                        Errors.Add($"Mod '{mod.Identifier}' conflicts with mod '{conflictId}' (version: '{conflictingMod!.Version}'{(fluentVersion != null ? $", constraint: '{fluentVersion}'" : "")}).");
+            if (mod.ConflictsWith != null) {
+                foreach (var (conflictId, fluentVersion) in mod.ConflictsWith) {
+                    if (modMap.TryGetValue(conflictId, out var conflictingMod)) {
+                        if (fluentVersion == null || IsVersionSatisfied(conflictingMod!.Version, fluentVersion)) {
+                            Errors.Add($"Mod '{mod.Identifier}' conflicts with mod '{conflictId}' (version: '{conflictingMod!.Version}'{(fluentVersion != null ? $", constraint: '{fluentVersion}'" : "")}).");
+                        }
                     }
                 }
             }
@@ -92,11 +96,13 @@ internal sealed class ModDefinitionProcessor : IModDefinitionProcessor
             path.Push(mod.Identifier);
 
             var isValid = true;
-            foreach (var requiredId in mod.Requires.Keys) {
-                if (invalidMods.Contains(requiredId)) {
-                    Errors.Add($"Mod '{mod.Identifier}' cannot resolve mod '{requiredId}' because mod '{requiredId}' is part of a cyclic dependency.");
-                } else if (!Visit(modMap[requiredId]!, path)) {
-                    isValid = false;
+            if (mod.Requires != null) {
+                foreach (var requiredId in mod.Requires.Keys) {
+                    if (invalidMods.Contains(requiredId)) {
+                        Errors.Add($"Mod '{mod.Identifier}' cannot resolve mod '{requiredId}' because mod '{requiredId}' is part of a cyclic dependency.");
+                    } else if (!Visit(modMap[requiredId]!, path)) {
+                        isValid = false;
+                    }
                 }
             }
 

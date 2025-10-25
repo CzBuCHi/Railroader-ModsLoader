@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Mono.CSharp;
+using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Railroader.ModInterfaces;
@@ -11,7 +11,17 @@ namespace Railroader.ModInjector.JsonConverters;
 public sealed class ModReferenceJsonConverter : JsonConverter<Dictionary<string, FluentVersion?>>
 {
     /// <inheritdoc />
-    public override void WriteJson(JsonWriter writer, Dictionary<string, FluentVersion?>? value, JsonSerializer serializer) => throw new NotSupportedException();
+    public override void WriteJson(JsonWriter writer, Dictionary<string, FluentVersion?>? value, JsonSerializer serializer) {
+        writer.WriteStartObject();
+        foreach (var pair in value!.OrderBy(o => o.Key)) {
+            writer.WritePropertyName(pair.Key!);
+            if (pair.Value == null) {
+                writer.WriteNull();
+            } else {
+                writer.WriteValue(pair.Value.ToString());
+            }
+        }
+    }
 
     /// <inheritdoc />
     public override Dictionary<string, FluentVersion?> ReadJson(JsonReader reader, Type objectType, Dictionary<string, FluentVersion?>? existingValue, bool hasExistingValue, JsonSerializer serializer) {
@@ -46,10 +56,10 @@ public sealed class ModReferenceJsonConverter : JsonConverter<Dictionary<string,
             return null;
         }
 
-        
+
         var (op, skip) = constraint[0] switch {
             '>' => constraint.Length > 1 && constraint[1] == '=' ? (VersionOperator.GreaterOrEqual, 2) : (VersionOperator.GreaterThan, 1),
-            '<' => constraint.Length > 1 &&constraint[1] == '=' ? (VersionOperator.LessOrEqual, 2) : (VersionOperator.LessThan, 1),
+            '<' => constraint.Length > 1 && constraint[1] == '=' ? (VersionOperator.LessOrEqual, 2) : (VersionOperator.LessThan, 1),
             '=' => (VersionOperator.Equal, 1),
             '0' or '1' or '2' or '3' or '4' or '5' or '6' or '7' or '8' or '9'
                 => (VersionOperator.GreaterOrEqual, 0),
@@ -62,7 +72,7 @@ public sealed class ModReferenceJsonConverter : JsonConverter<Dictionary<string,
                 return new FluentVersion(version, op);
             }
         }
-        
+
 
         throw new JsonSerializationException($"Invalid version constraint '{constraint}' for mod '{identifier}'. Expected a valid System.Version or an operator (=, >, >=, <, <=) followed by a version.");
     }

@@ -149,8 +149,10 @@ public sealed class CodeCompilerTests
         memory.FileSystem.File.Received().Delete(AssemblyPath);
     }
 
-    [Fact]
-    public void CompileMod_Compilation_Successful() {
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CompileMod_Compilation_Successful(bool hasEmptyRequires) {
         // Arrange
         var memory = new MemoryFileSystem(@"C:\Current") {
             (AssemblyPath, _OldDate, ""),
@@ -160,6 +162,13 @@ public sealed class CodeCompilerTests
 
         var logger           = Substitute.For<ILogger>();
         var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
+
+        var modDefinition = new ModDefinition {
+            Identifier = "DummyMod",
+            Name = "Dummy Mod Name",
+            BasePath = @"C:\Current\Mods\DummyMod",
+            Requires = hasEmptyRequires ? new Dictionary<string, FluentVersion?>() : null
+        };
 
         string[] sources = [@"C:\Current\Mods\DummyMod\source1.cs", @"C:\Current\Mods\DummyMod\source2.cs"];
         string[] references = [
@@ -182,7 +191,7 @@ public sealed class CodeCompilerTests
         };
 
         // Act
-        var actual = sut.CompileMod(_ModDefinition);
+        var actual = sut.CompileMod(modDefinition);
 
         // Assert
         actual.Should().Be(AssemblyPath);
@@ -562,7 +571,76 @@ public sealed class CodeCompilerTests
         assemblyDefinitionWrapper.ReceivedCalls().Should().HaveCount(1);
     }
 
-    private sealed class TestPluginPatcher(ILogger logger) : IMethodPatcher
+    [Fact]
+    public void CompileMod_Compilation_WithValidModReferences() {
+        // Arrange
+        var memory = new MemoryFileSystem(@"C:\Current") {
+            (AssemblyPath, _OldDate, ""),
+            (@"C:\Current\Mods\DummyMod\source.cs", _NewDate, ""),
+            (@"C:\Current\Mods\DepMod1\DepMod1.dll", _OldDate, ""),
+            (@"C:\Current\Mods\DepMod2\DepMod2.dll", _OldDate, "")
+        };
+
+        var modDefinition = new ModDefinition {
+            Identifier = "DummyMod",
+            Name = "Dummy Mod Name",
+            BasePath = @"C:\Current\Mods\DummyMod",
+            Requires = new Dictionary<string, FluentVersion?> {
+                { "DepMod1", null },
+                { "DepMod2", null }
+            }
+        };
+
+        var logger           = Substitute.For<ILogger>();
+        var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
+        assemblyCompiler.CompileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>())
+                        .Returns(true)
+                        .AndDoes(_ => { memory.Add((AssemblyPath, "Compiled DLL")); });
+
+        var assemblyDefinitionWrapper = Substitute.For<IAssemblyDefinitionWrapper>();
+        var sut = new CodeCompiler {
+            FileSystem = memory.FileSystem,
+            Logger = logger,
+            AssemblyCompiler = assemblyCompiler,
+            AssemblyDefinitionWrapper = assemblyDefinitionWrapper,
+            PluginPatchers = []
+        };
+
+        string[] sources = [@"C:\Current\Mods\DummyMod\source.cs"];
+        string[] expectedReferences = [
+            @"C:\Current\Railroader_Data\Managed\Assembly-CSharp.dll",
+            @"C:\Current\Railroader_Data\Managed\0Harmony.dll",
+            @"C:\Current\Railroader_Data\Managed\Railroader-ModInterfaces.dll",
+            @"C:\Current\Railroader_Data\Managed\Serilog.dll",
+            @"C:\Current\Railroader_Data\Managed\UnityEngine.CoreModule.dll",
+            @"C:\Current\Mods\DepMod1\DepMod1.dll",
+            @"C:\Current\Mods\DepMod2\DepMod2.dll"
+        ];
+
+        string[] expectedRequiredMods = ["DepMod1", "DepMod2"];
+
+        // Act
+        var actual = sut.CompileMod(modDefinition);
+
+        // Assert
+        actual.Should().Be(AssemblyPath);
+
+        logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", modDefinition.Identifier, AssemblyPath);
+        logger.Received().Information("Compiling mod {ModId} ...", modDefinition.Identifier);
+        logger.Received().Information("Adding references to {Mods} ...", Arg.Is<ICollection<string>>(o => o.SequenceEqual(expectedRequiredMods)));
+        logger.Received().Information("Compilation complete for mod {ModId}", modDefinition.Identifier);
+        logger.ReceivedCalls().Should().HaveCount(4);
+
+        assemblyCompiler.Received().CompileAssembly(AssemblyPath,
+            Arg.Is<string[]>(o => o.SequenceEqual(sources)),
+            Arg.Is<string[]>(o => o.SequenceEqual(expectedReferences))
+        );
+
+        memory.FileSystem.File.Received().Delete(AssemblyPath);
+        memory.Should().ContainEquivalentOf(new MemoryEntry(AssemblyPath, false, MemoryFileSystem.First, "Compiled DLL", null, false));
+    }
+
+    private sealed class TestPluginPatcher(ILogger logger) : ITypePatcher
     {
         public bool Patch(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition) {
             logger.Debug("TestPluginPatcher::Patch | typeDefinition: {type}", typeDefinition.Name);
@@ -571,7 +649,7 @@ public sealed class CodeCompilerTests
     }
 
 #pragma warning disable CS9113 // Parameter is unread.
-    private sealed class ThrowingPatcher(ILogger logger) : IMethodPatcher
+    private sealed class ThrowingPatcher(ILogger logger) : ITypePatcher
 #pragma warning restore CS9113 // Parameter is unread.
     {
         public bool Patch(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition) => throw new Exception("ThrowingPatcher");

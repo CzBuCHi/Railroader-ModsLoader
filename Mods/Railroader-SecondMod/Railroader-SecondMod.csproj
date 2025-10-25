@@ -18,6 +18,7 @@
       <GameAssembly Include="UnityEngine.CoreModule" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Railroader-ModInterfaces\Railroader-ModInterfaces.csproj" />
+    <ProjectReference Include="..\..\Railroader-ModInterfaces\Railroader-ModInterfaces.csproj" />
+    <ProjectReference Include="..\Railroader-FirstMod\Railroader-FirstMod.csproj" />
   </ItemGroup>
 </Project>

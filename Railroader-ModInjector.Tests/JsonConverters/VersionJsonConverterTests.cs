@@ -59,12 +59,12 @@ public class VersionJsonConverterTests
     }
 
     [Fact]
-    public void WriteJsonNotSupported() {
+    public void WriteJson() {
         // Act
-        var act = () => JsonConvert.SerializeObject(new TestData { Version = new Version() });
+        var actual = JsonConvert.SerializeObject(new TestData { Version = new Version(1,2,3) });
 
         // Assert
-        act.Should().Throw<NotSupportedException>();
+        actual.Should().Be("""{"version":"1.2.3"}""");
     }
 
     [UsedImplicitly]

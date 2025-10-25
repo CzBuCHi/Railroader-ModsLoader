@@ -1,0 +1,9 @@
+{
+    "id": "Railroader-SecondMod",
+    "name": "Second Mod",
+    "version": "1.0.0",
+    "logLevel": "Debug",
+    "requires": {
+        "Railroader-FirstMod": "1.0.0"
+    }
+}
