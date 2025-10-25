@@ -1,79 +1,132 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using StrykerReportTool.Models;
-using File = System.IO.File;
+﻿using System.Diagnostics;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks.Dataflow;
 
-if (args.Length == 0) {
-    Console.WriteLine("USAGE: StrykerReportTool path-to-StrykerOutput [filter]" );
-}
+try {
+    var strykerOutput = args.Length == 1
+        ? Path.GetFullPath(args[0])
+        : Path.Combine(Directory.GetCurrentDirectory(), "StrykerOutput", "mutation-report.json");
 
-var strykerOutput =  args[0];
-
-var filter = args.Length > 1 ? args[1] : "";
-
-var directoryInfo = new DirectoryInfo(strykerOutput);
-if (!directoryInfo.Exists) {
-    return;
-}
-
-var newest = directoryInfo.EnumerateDirectories("*.*").OrderByDescending(o => o.LastWriteTime).FirstOrDefault();
-if (newest == null) {
-    return;
-}
-
-var reportJsonPath = Path.Combine(newest.FullName, "reports", "mutation-report.json");
-var reportHtmlPath = Path.Combine(newest.FullName, "reports", "mutation-report.html");
-
-var outputReportJsonPath = Path.Combine(strykerOutput, "mutation-report.json");
-var outputReportHtmlPath = Path.Combine(strykerOutput,  "mutation-report.html");
-
-
-var reportJson = File.ReadAllText(reportJsonPath);
-var reportHtml = File.ReadAllLines(reportHtmlPath);
-
-
-File.WriteAllText(outputReportJsonPath, reportJson);
-File.WriteAllLines(outputReportHtmlPath, reportHtml);
-
-
-var serializerSettings = new JsonSerializerSettings {
-    ContractResolver = new CamelCasePropertyNamesContractResolver()
-};
-
-var report = JsonConvert.DeserializeObject<Report>(reportJson, serializerSettings)!;
-
-if (filter != "") {
-    foreach (var path in report.Files.Keys.ToArray()) {
-        if (!path.EndsWith(filter)) {
-            report.Files.Remove(path);
-        }
+    if (!System.IO.File.Exists(strykerOutput)) {
+        Console.WriteLine($"Cannot find report file at '{strykerOutput}'");
+        return;
     }
 
-    var relatedRests = new HashSet<Guid>(report.Files.Values.SelectMany(o => o.Mutants).SelectMany(o => o.CoveredBy.Concat(o.KilledBy)));
+    // 1. Load Stryker JSON report
+    Console.WriteLine("Load Stryker JSON report ...");
+    var reportJson = System.IO.File.ReadAllText(strykerOutput);
 
-    foreach (var path in report.TestFiles.Keys.ToArray()) {
-        var testFile = report.TestFiles[path];
-        if (!testFile.Tests.Any(o => relatedRests.Contains(o.Id))) {
-            report.TestFiles.Remove(path);
-        }
+    var options = new JsonSerializerOptions {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+    var report = JsonSerializer.Deserialize<Report>(reportJson, options);
+    if (report == null) {
+        Console.WriteLine("Failed to deserialize mutation report!");
+        return;
     }
+
+    // 2. Remove mutants that were killed or ignored
+    Console.WriteLine("Remove mutants that were killed or ignored ...");
+    string[] statuses = [
+        "Killed",
+        "Ignored",
+        "CompileError"
+    ];
+
+    foreach (var pair in report.Files) {
+        var mutants = pair.Value.Mutants
+                          .Where(m => !statuses.Contains(m.Status, StringComparer.OrdinalIgnoreCase))
+                          .ToArray();
+
+        report.Files[pair.Key] = pair.Value with { Mutants = mutants };
+    }
+
+    // 3. Remove files with no mutants
+    Console.WriteLine("Remove files with no mutants ...");
+    var filesToRemove = report.Files
+                              .Where(o => o.Value.Mutants.Length == 0)
+                              .Select(o => o.Key)
+                              .ToArray();
+
+    foreach (var fileName in filesToRemove) {
+        report.Files.Remove(fileName);
+    }
+
+
+    // 4. Remove tests not used by any remaining file
+    Console.WriteLine("Remove tests not used by any remaining file ...");
+    var usedTestIds = report.Files.Values
+                            .SelectMany(f => f.Mutants)
+                            .SelectMany(m => m.CoveredBy.Concat(m.KilledBy))
+                            .Distinct()
+                            .ToHashSet();
+
+    foreach (var pair in report.TestFiles) {
+        var tests = pair.Value.Tests
+                        .Where(t => usedTestIds.Contains(t.Id))
+                        .ToArray();
+
+        report.TestFiles[pair.Key] = pair.Value with { Tests = tests };
+    }
+
+    // 5. Remove test files with no tests
+    Console.WriteLine("Remove test files with no tests ...");
+    var testFilesToRemove = report.TestFiles
+                                  .Where(o => o.Value.Tests.Length == 0)
+                                  .Select(o => o.Key);
+
+    foreach (var testFileName in testFilesToRemove) {
+        report.TestFiles.Remove(testFileName);
+    }
+
+
+    // 6. Save the modified report
+    Console.WriteLine("Save the modified report ...");
+    var outputPath = Path.ChangeExtension(strykerOutput, ".filtered.json");
+    var outputJson = JsonSerializer.Serialize(report, options);
+    System.IO.File.WriteAllText(outputPath, outputJson);
+
+    var       reportPath   = Path.ChangeExtension(strykerOutput, ".filtered.html");
+    using var fileStream   = System.IO.File.Create(reportPath);
+    using var prefixStream = typeof(Program).Assembly.GetManifestResourceStream("StrykerReportTool.mutation-report_prefix.txt")!;
+    prefixStream.CopyTo(fileStream);
+
+    fileStream.Write(Encoding.UTF8.GetBytes(outputJson));
+
+    using var suffixStream = typeof(Program).Assembly.GetManifestResourceStream("StrykerReportTool.mutation-report_suffix.txt")!;
+    suffixStream.CopyTo(fileStream);
+
+    Console.WriteLine("DONE");
+} catch (Exception exc) {
+    Console.WriteLine("ERROR:" + exc);
 }
 
-foreach (var file in report.Files.Values) {
-    foreach (var mutant in file.Mutants.ToArray()) {
-        if (mutant.Status is "Killed" or "Ignored") {
-            file.Mutants.Remove(mutant);
-        }
-    }
-}
+#if DEBUG
+Console.WriteLine("Press any key to exit ...");
+Console.ReadKey();
+#endif
 
-var clearedReport = JsonConvert.SerializeObject(report, serializerSettings);
+// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable NotAccessedPositionalProperty.Global
+#pragma warning disable CA1050
 
-var index = Array.FindLastIndex(reportHtml, o => o.TrimStart().StartsWith("app.report ="));
-reportHtml[index] = "app.report = " + clearedReport + ";";
+public sealed record Report(Dictionary<string, File> Files, string ProjectRoot, string SchemaVersion, Dictionary<string, TestFile> TestFiles, Thresholds Thresholds);
 
-var errorReportJsonPath = Path.Combine(strykerOutput, "error-report.json");
-var errorReportHtmlPath = Path.Combine(strykerOutput,  "error-report.html");
+public sealed record File(string Language, string Source, Mutant[] Mutants);
 
-File.WriteAllText(errorReportJsonPath, clearedReport);
-File.WriteAllLines(errorReportHtmlPath, reportHtml);
+[DebuggerDisplay("{Status,nq} {MutatorName,nq} at {Location}")]
+public sealed record Mutant(string Id, string MutatorName, string Replacement, Location Location, string Status, string StatusReason, bool Static, Guid[] CoveredBy, Guid[] KilledBy);
+
+public sealed record TestFile(string Language, string Source, Test[] Tests);
+
+public sealed record Test(Guid Id, string Name, Location Location);
+
+[DebuggerDisplay("{Start} - {End}")]
+public sealed record Location(Position Start, Position End);
+
+[DebuggerDisplay("{Line}:{Column}")]
+public sealed record Position(int Line, int Column);
+
+public sealed record Thresholds(int High, int Low);

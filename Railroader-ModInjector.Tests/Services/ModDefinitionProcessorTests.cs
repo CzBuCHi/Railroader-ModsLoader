@@ -65,101 +65,46 @@ public class ModDefinitionProcessorTests
         logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(sut.Errors)));
     }
 
-    [Fact]
-    public void VersionMismatch_Equal() {
+    [Theory]
+    [InlineData("1.0.0", "1.0.0", VersionOperator.Equal, true)]
+    [InlineData("1.0.0", "1.0.1", VersionOperator.Equal, false)]
+    [InlineData("1.0.0", "1.0.0", VersionOperator.GreaterThan, false)]
+    [InlineData("1.0.0", "1.0.1", VersionOperator.GreaterThan, false)]
+    [InlineData("1.0.1", "1.0.0", VersionOperator.GreaterThan, true)]
+    [InlineData("1.0.0", "1.0.0", VersionOperator.GreaterOrEqual, true)]
+    [InlineData("1.0.0", "1.0.1", VersionOperator.GreaterOrEqual, false)]
+    [InlineData("1.0.1", "1.0.0", VersionOperator.GreaterOrEqual, true)]
+    [InlineData("1.0.0", "1.0.0", VersionOperator.LessOrEqual, true)]
+    [InlineData("1.0.1", "1.0.0", VersionOperator.LessOrEqual, false)]
+    [InlineData("1.0.0", "1.0.1", VersionOperator.LessOrEqual, true)]
+    [InlineData("1.0.0", "1.0.0", VersionOperator.LessThan, false)]
+    [InlineData("1.0.1", "1.0.0", VersionOperator.LessThan, false)]
+    [InlineData("1.0.0", "1.0.1", VersionOperator.LessThan, true)]
+    public void RequiredVersion(string version, string requiredVersion, VersionOperator @operator, bool isValid) {
         // Arrange
+        var fluentVersion = new FluentVersion(Version.Parse(requiredVersion), @operator);
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", new FluentVersion(new Version(2, 0, 0)) } }),
-            CreateModDefinition("B", "1.0.0")
+            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", fluentVersion } }),
+            CreateModDefinition("B", version)
         };
-        var      sut      = new ModDefinitionProcessor();
-        string[] expected = ["Mod 'A' requires mod 'B' with version constraint '2.0.0', but found version '1.0.0'."];
-
+        var sut = new ModDefinitionProcessor();
+        
         // Act
         var result = sut.PreprocessModDefinitions(ref modDefinitions);
 
         // Assert
-        result.Should().BeFalse();
-        sut.Errors.Should().BeEquivalentTo(expected, o => o.WithStrictOrdering());
-        modDefinitions.Should().BeEmpty();
+        if (isValid) {
+            result.Should().BeTrue();
+            sut.Errors.Should().BeEmpty();
+            modDefinitions.Select(mod => mod.Identifier).Should().Equal("B", "A");
+        } else {
+            string[] expected = [$"Mod 'A' requires mod 'B' with version constraint '{fluentVersion}', but found version '{version}'."];
+            result.Should().BeFalse();
+            sut.Errors.Should().BeEquivalentTo(expected, o => o.WithStrictOrdering());
+            modDefinitions.Should().BeEmpty();
+        }
     }
-
-    [Fact]
-    public void VersionMismatch_GreaterThan() {
-        // Arrange
-        var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", new FluentVersion(new Version(1, 0, 0), VersionOperator.GreaterThan) } }),
-            CreateModDefinition("B", "1.0.0")
-        };
-        var      sut      = new ModDefinitionProcessor();
-        string[] expected = ["Mod 'A' requires mod 'B' with version constraint '>1.0.0', but found version '1.0.0'."];
-
-        // Act
-        var result = sut.PreprocessModDefinitions(ref modDefinitions);
-
-        // Assert
-        result.Should().BeFalse();
-        sut.Errors.Should().BeEquivalentTo(expected, o => o.WithStrictOrdering());
-        modDefinitions.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void VersionMismatch_GreaterOrEqual() {
-        // Arrange
-        var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", new FluentVersion(new Version(2, 0, 0), VersionOperator.GreaterOrEqual) } }),
-            CreateModDefinition("B", "1.0.0")
-        };
-        var      sut      = new ModDefinitionProcessor();
-        string[] expected = ["Mod 'A' requires mod 'B' with version constraint '>=2.0.0', but found version '1.0.0'."];
-
-        // Act
-        var result = sut.PreprocessModDefinitions(ref modDefinitions);
-
-        // Assert
-        result.Should().BeFalse();
-        sut.Errors.Should().BeEquivalentTo(expected, o => o.WithStrictOrdering());
-        modDefinitions.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void VersionMismatch_LessThan() {
-        // Arrange
-        var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", new FluentVersion(new Version(1, 0, 0), VersionOperator.LessThan) } }),
-            CreateModDefinition("B", "2.0.0")
-        };
-        var      sut      = new ModDefinitionProcessor();
-        string[] expected = ["Mod 'A' requires mod 'B' with version constraint '<1.0.0', but found version '2.0.0'."];
-
-        // Act
-        var result = sut.PreprocessModDefinitions(ref modDefinitions);
-
-        // Assert
-        result.Should().BeFalse();
-        sut.Errors.Should().BeEquivalentTo(expected, o => o.WithStrictOrdering());
-        modDefinitions.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void VersionMismatch_LessOrEqual() {
-        // Arrange
-        var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", new FluentVersion(new Version(1, 0, 0), VersionOperator.LessOrEqual) } }),
-            CreateModDefinition("B", "2.0.0")
-        };
-        var      sut      = new ModDefinitionProcessor();
-        string[] expected = ["Mod 'A' requires mod 'B' with version constraint '<=1.0.0', but found version '2.0.0'."];
-
-        // Act
-        var result = sut.PreprocessModDefinitions(ref modDefinitions);
-
-        // Assert
-        result.Should().BeFalse();
-        sut.Errors.Should().BeEquivalentTo(expected, o => o.WithStrictOrdering());
-        modDefinitions.Should().BeEmpty();
-    }
-
+  
     [Fact]
     public void ConflictDetected() {
         // Arrange
@@ -203,10 +148,16 @@ public class ModDefinitionProcessorTests
         // Arrange
         var modDefinitions = new[] {
             CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", null } }),
-            CreateModDefinition("B", "1.0.0", new Dictionary<string, FluentVersion?> { { "A", null } })
+            CreateModDefinition("B", "1.0.0", new Dictionary<string, FluentVersion?> { { "C", null } }),
+            CreateModDefinition("C", "1.0.0", new Dictionary<string, FluentVersion?> { { "A", null } }),
+            CreateModDefinition("D", "1.0.0", new Dictionary<string, FluentVersion?> { { "E", null } }),
+            CreateModDefinition("E", "1.0.0", new Dictionary<string, FluentVersion?> { { "D", null } }),
         };
         var      sut      = new ModDefinitionProcessor();
-        string[] expected = ["Cyclic dependency detected: A -> B -> A"];
+        string[] expected = [
+            "Cyclic dependency detected: A -> B -> C -> A",
+            "Cyclic dependency detected: D -> E -> D",
+        ];
 
         // Act
         var result = sut.PreprocessModDefinitions(ref modDefinitions);
@@ -216,7 +167,7 @@ public class ModDefinitionProcessorTests
         sut.Errors.Should().BeEquivalentTo(expected, o => o.WithStrictOrdering());
         modDefinitions.Should().BeEmpty();
     }
-
+    
     [Fact]
     public void MissingDependencyInSort() {
         // Arrange
@@ -309,7 +260,7 @@ public class ModDefinitionProcessorTests
             CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", null } }),
             CreateModDefinition("B", "1.0.0", new Dictionary<string, FluentVersion?> { { "C", null } }),
             CreateModDefinition("C", "1.0.0", new Dictionary<string, FluentVersion?> { { "A", null } }),
-            CreateModDefinition("D", "1.0.0", new Dictionary<string, FluentVersion?> { { "C", null } })
+            CreateModDefinition("D", "1.0.0", new Dictionary<string, FluentVersion?> { { "C", null } }),
         };
         var sut = new ModDefinitionProcessor();
         string[] expected = [
@@ -324,5 +275,26 @@ public class ModDefinitionProcessorTests
         result.Should().BeFalse();
         sut.Errors.Should().BeEquivalentTo(expected, o => o.WithStrictOrdering());
         modDefinitions.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void NonCyclicRevisitedMod()
+    {
+        // Arrange
+        var modDefinitions = new[] {
+            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", null }, { "C", null } }),
+            CreateModDefinition("B", "1.0.0", new Dictionary<string, FluentVersion?> { { "D", null } }),
+            CreateModDefinition("C", "1.0.0", new Dictionary<string, FluentVersion?> { { "D", null } }),
+            CreateModDefinition("D", "1.0.0")
+        };
+        var sut = new ModDefinitionProcessor();
+
+        // Act
+        var result = sut.PreprocessModDefinitions(ref modDefinitions);
+
+        // Assert
+        result.Should().BeTrue();
+        sut.Errors.Should().BeEmpty();
+        modDefinitions.Select(mod => mod.Identifier).Should().Equal("D", "B", "C", "A");
     }
 }

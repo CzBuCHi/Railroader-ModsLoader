@@ -2,7 +2,6 @@
   "profiles": {
     "StrykerReportTool": {
       "commandName": "Project",
-      "commandLineArgs": "StrykerOutput",
       "workingDirectory": "c:\\projects\\Railroader\\Railroader-ModsLoader\\"
     }
   }

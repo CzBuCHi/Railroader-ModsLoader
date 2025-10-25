@@ -68,7 +68,6 @@ internal sealed class ModDefinitionProcessor : IModDefinitionProcessor
 
         var sorted         = new List<ModDefinition>();
         var visited        = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var recursionStack = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var invalidMods    = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var mod in modDefinitions) {
@@ -80,11 +79,9 @@ internal sealed class ModDefinitionProcessor : IModDefinitionProcessor
         return sorted.ToArray();
 
         bool Visit(ModDefinition mod, Stack<string> path) {
-            if (recursionStack.Contains(mod.Identifier)) {
+            if (path.Contains(mod.Identifier)) {
                 path.Push(mod.Identifier);
                 Errors.Add($"Cyclic dependency detected: {string.Join(" -> ", path.Reverse())}");
-                path.Pop();
-                invalidMods.Add(mod.Identifier);
                 return false;
             }
 
@@ -92,20 +89,17 @@ internal sealed class ModDefinitionProcessor : IModDefinitionProcessor
                 return !invalidMods.Contains(mod.Identifier);
             }
 
-            recursionStack.Add(mod.Identifier);
             path.Push(mod.Identifier);
 
             var isValid = true;
             foreach (var requiredId in mod.Requires.Keys) {
                 if (invalidMods.Contains(requiredId)) {
                     Errors.Add($"Mod '{mod.Identifier}' cannot resolve mod '{requiredId}' because mod '{requiredId}' is part of a cyclic dependency.");
-                    isValid = false;
                 } else if (!Visit(modMap[requiredId]!, path)) {
                     isValid = false;
                 }
             }
 
-            recursionStack.Remove(mod.Identifier);
             path.Pop();
 
             if (isValid) {
