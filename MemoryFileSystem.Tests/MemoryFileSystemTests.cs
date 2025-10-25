@@ -525,8 +525,8 @@ public sealed class MemoryFileSystemTests
     public void Directory_EnumerateFiles_AllDirectories_ReturnsAllFiles() {
         // Arrange
         var sut = new MemoryFileSystem {
+            (Path: @"C:\Test\SubDir\File2.txt", Content: "Test2"),
             (Path: @"C:\Test\File1.txt", Content: "Test1"),
-            (Path: @"C:\Test\SubDir\File2.txt", Content: "Test2")
         };
 
         // Act
@@ -536,7 +536,7 @@ public sealed class MemoryFileSystemTests
                        .ToList();
 
         // Assert
-        files.Should().BeEquivalentTo(@"C:\Test\File1.txt", @"C:\Test\SubDir\File2.txt");
+        files.Should().BeEquivalentTo([@"C:\Test\File1.txt", @"C:\Test\SubDir\File2.txt"], o => o.WithStrictOrdering());
     }
 
     [Theory]

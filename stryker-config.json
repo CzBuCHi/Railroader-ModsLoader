@@ -1,0 +1,17 @@
+{
+  "stryker-config": {    
+    "solution": "Railroader-ModsLoader.sln",
+    "target-framework": "net48",
+    "thresholds": {
+      "high": 100,
+      "low": 95,
+      "break": 0
+    },
+    "verbosity": "info",
+    "reporters": [
+      "Progress",
+      "Html",
+      "Json"
+    ]    
+  }
+}

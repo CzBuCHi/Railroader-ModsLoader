@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Stryker": {
+      "commandName": "Project",
+      "workingDirectory": "c:\\projects\\Railroader\\Railroader-ModsLoader_New\\"
+    }
+  }
+}

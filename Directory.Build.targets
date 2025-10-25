@@ -51,6 +51,13 @@
         <Copy SourceFiles="@(DefinitionJson)" DestinationFolder="$(GameModDir)" SkipUnchangedFiles="true" />
         <Copy SourceFiles="@(ModFiles)" DestinationFiles="@(ModFiles->'$(GameModDir)\src\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
     </Target>
+
+    <Target Name="CopyNetStandard" AfterTargets="Build" Condition="'$(IsTestProject)' == 'true'">
+        <Copy
+            SourceFiles="$(GameManagedDir)\netstandard.dll"
+            DestinationFolder="$(OutputPath)"
+            SkipUnchangedFiles="true" />
+    </Target>
     
     <!-- TODO: Publish the mod as a neat zip file: this code zips output dlls instead of source code ... -->
     <Target Name="PackageMod" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release' And '$(PackageMod)' == 'enable'">

@@ -1,0 +1,11 @@
+;
+
+            function updateTheme() {
+                document.body.style.backgroundColor = app.themeBackgroundColor;
+            }
+            app.addEventListener('theme-changed', updateTheme);
+            updateTheme();
+        </script>
+    </body>
+</html>
+

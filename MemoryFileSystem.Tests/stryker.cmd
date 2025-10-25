@@ -1,0 +1,1 @@
+dotnet stryker -f ..\stryker-config.json -s ..\Railroader-ModsLoader.sln -O ..\StrykerOutput\MemoryFileSystem

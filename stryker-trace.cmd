@@ -1,1 +1,1 @@
-dotnet stryker -V trace -L 
+Stryker -L -V trace 
