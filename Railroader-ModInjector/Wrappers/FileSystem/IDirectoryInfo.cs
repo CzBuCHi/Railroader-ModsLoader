@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
-namespace NSubstitute.FileSystem;
+namespace Railroader.ModInjector.Wrappers.FileSystem;
 
 /// <summary> Wrapper for <see cref="DirectoryInfo"/>. </summary>
 public interface IDirectoryInfo

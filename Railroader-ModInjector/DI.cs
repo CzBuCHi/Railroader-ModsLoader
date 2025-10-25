@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
-using NSubstitute.FileSystem;
 using Railroader.ModInjector.Services;
 using Railroader.ModInjector.Wrappers;
+using Railroader.ModInjector.Wrappers.FileSystem;
 using Serilog;
 
 namespace Railroader.ModInjector;
@@ -69,10 +69,13 @@ internal static class DI
             Logger = GetLogger()
         };
 
+    public static Func<IModDefinitionProcessor> ModDefinitionProcessor { get; set; } = () => new ModDefinitionProcessor();
+
     public static Func<IModManager> ModManager { get; set; } =
         () => new ModManager {
             CodeCompiler = CodeCompiler()!,
-            PluginManagerFactory = o => PluginManager(o)!
+            PluginManagerFactory = o => PluginManager(o)!,
+            ModDefinitionProcessor = ModDefinitionProcessor()!
         };
 
 

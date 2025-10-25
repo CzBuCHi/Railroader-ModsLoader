@@ -31,7 +31,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\NSubstitute.FileSystem\NSubstitute.FileSystem.csproj" />
       <ProjectReference Include="..\Railroader-ModInterfaces\Railroader-ModInterfaces.csproj" />
     </ItemGroup>
 

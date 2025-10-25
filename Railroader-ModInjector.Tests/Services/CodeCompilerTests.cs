@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using FluentAssertions;
 using Mono.Cecil;
@@ -298,8 +299,7 @@ public sealed class CodeCompilerTests
 
         // Act
         var actual = sut.CompileMod(_ModDefinition);
-        AssemblyTestUtils.Write(assemblyDefinition, outputPath, "patched");
-
+        
         // Assert
         actual.Should().Be(AssemblyPath);
         logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
@@ -321,6 +321,16 @@ public sealed class CodeCompilerTests
 
         memory.FileSystem.File.Received(2).Delete(AssemblyPath);
         memory.FileSystem.File.Received().Move(@"C:\Current\Mods\DummyMod\DummyMod.patched.dll", AssemblyPath);
+
+        // verify assemblyDefinition.Dispose as called ...
+        var imageField  = typeof(ModuleDefinition).GetField("Image", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var image       = imageField.GetValue(assemblyDefinition.MainModule!)!;// Mono.Cecil.PE.Image
+        var streamField = image.GetType().GetField("Stream", BindingFlags.Instance | BindingFlags.Public)!;
+        var disposable  = streamField.GetValue(image)!; // Mono.Disposable<System.IO.Stream>
+        var valueField  = disposable.GetType().GetField("value", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var stream      = (Stream)valueField.GetValue(disposable)!;
+        stream.CanRead.Should().BeFalse();
+        stream.CanWrite.Should().BeFalse();
     }
 
     [Fact]

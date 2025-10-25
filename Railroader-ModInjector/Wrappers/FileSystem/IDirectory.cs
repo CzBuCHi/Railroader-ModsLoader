@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace NSubstitute.FileSystem;
+namespace Railroader.ModInjector.Wrappers.FileSystem;
 
 /// <summary> Wrapper for <see cref="Directory"/>. </summary>
 public interface IDirectory

@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using NSubstitute;
 using NSubstitute.FileSystem;
 using Railroader.ModInjector.Services;
+using Railroader.ModInjector.Wrappers.FileSystem;
 using Serilog;
 using Serilog.Events;
 

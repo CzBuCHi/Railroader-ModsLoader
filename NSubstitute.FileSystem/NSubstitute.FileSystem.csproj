@@ -15,4 +15,8 @@
         <Compile Include="..\Shared\RequiredMemberAttribute.cs" Link="Shared\RequiredMemberAttribute.cs" />
     </ItemGroup>
     
+    <ItemGroup>
+      <ProjectReference Include="..\Railroader-ModInjector\Railroader-ModInjector.csproj" />
+    </ItemGroup>
+    
 </Project>

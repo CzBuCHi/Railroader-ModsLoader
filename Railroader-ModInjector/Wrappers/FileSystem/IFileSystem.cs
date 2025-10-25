@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace NSubstitute.FileSystem;
+namespace Railroader.ModInjector.Wrappers.FileSystem;
 
 /// <summary> Wrapper for types in System.IO namespace. </summary>
 public interface IFileSystem

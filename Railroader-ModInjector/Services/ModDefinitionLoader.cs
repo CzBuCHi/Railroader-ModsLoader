@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NSubstitute.FileSystem;
-using Railroader.ModInjector.Wrappers;
+using Railroader.ModInjector.Wrappers.FileSystem;
 using Serilog;
 using Path = System.IO.Path;
 

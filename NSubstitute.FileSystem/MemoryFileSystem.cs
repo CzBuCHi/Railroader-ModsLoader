@@ -9,13 +9,14 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
+using Railroader.ModInjector.Wrappers.FileSystem;
 
 namespace NSubstitute.FileSystem;
 
 public sealed record MemoryEntry(string Path, bool IsDirectory, DateTime LastWriteTime, string? Content, Exception? ReadException, bool Locked = false);
 
 [PublicAPI]
-//[DebuggerStepThrough]
+[DebuggerStepThrough]
 public sealed class MemoryFileSystem : IEnumerable<MemoryEntry>
 {
     public static readonly DateTime First  = new(2000, 1, 1);
