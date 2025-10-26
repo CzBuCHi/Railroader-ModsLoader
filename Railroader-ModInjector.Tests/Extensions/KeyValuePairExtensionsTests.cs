@@ -2,9 +2,9 @@
 using FluentAssertions;
 using Railroader.ModInjector.Extensions;
 
-namespace Railroader_ModInterfaces.Tests.Extensions;
+namespace Railroader.ModInjector.Tests.Extensions;
 
-public class KeyValuePairExtensionsTests
+public sealed class KeyValuePairExtensionsTests
 {
     [Fact]
     public void Deconstruct() {

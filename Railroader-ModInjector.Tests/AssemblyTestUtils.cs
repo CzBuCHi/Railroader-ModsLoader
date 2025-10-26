@@ -14,7 +14,7 @@ using Railroader.ModInjector.Services;
 using Railroader.ModInjector.Wrappers;
 using Serilog;
 
-namespace Railroader_ModInterfaces.Tests;
+namespace Railroader.ModInjector.Tests;
 
 [ExcludeFromCodeCoverage]
 public static class AssemblyTestUtils

@@ -48,6 +48,9 @@
   <member name="M:FluentAssertions.AssertionExtensions.Should(System.Int64)">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
+  <member name="M:FluentAssertions.AssertionExtensions.Should(System.IO.Stream)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
   <member name="M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.Boolean})">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
@@ -129,6 +132,15 @@
   <member name="M:FluentAssertions.EnumAssertionsExtensions.Should``1(System.Nullable{``0})">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
+  <member name="M:FluentAssertions.Equivalency.EquivalencyAssertionOptions`1.Excluding(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.Equivalency.SelfReferenceEquivalencyAssertionOptions`1.WithStrictOrdering">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:FluentAssertions.Equivalency.SelfReferenceEquivalencyOptions`1.WithStrictOrdering">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
   <member name="M:FluentAssertions.ExceptionAssertionsExtensions.WithMessage``1(System.Threading.Tasks.Task{FluentAssertions.Specialized.ExceptionAssertions{``0}},System.String,System.String,System.Object[])">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
@@ -150,7 +162,13 @@
   <member name="P:FluentAssertions.AndWhichConstraint`2.Which">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
+  <member name="P:FluentAssertions.AssertionConfiguration.Current">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
   <member name="P:FluentAssertions.Collections.WhoseValueConstraint`4.WhoseValue">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:FluentAssertions.Configuration.GlobalConfiguration.Equivalency">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
   <member name="P:FluentAssertions.Primitives.ReferenceTypeAssertions`2.Subject">

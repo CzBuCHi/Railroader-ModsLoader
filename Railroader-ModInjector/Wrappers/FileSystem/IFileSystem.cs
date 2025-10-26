@@ -14,6 +14,9 @@ public interface IFileSystem
 
     /// <inheritdoc cref="System.IO.DirectoryInfo(string)"/>
     IDirectoryInfo DirectoryInfo(string path);
+
+    /// <inheritdoc cref="System.IO.Compression.ZipFile"/>
+    IZipFile ZipFile { get; }
 }
 
 /// <inheritdoc />
@@ -28,4 +31,7 @@ public sealed class FileSystemWrapper : IFileSystem
 
     /// <inheritdoc />
     public IDirectoryInfo DirectoryInfo(string path) => new DirectoryInfoWrapper(new DirectoryInfo(path));
+
+    /// <inheritdoc />
+    public IZipFile ZipFile { get; } = new ZipFileWrapper();
 }

@@ -24,5 +24,3 @@ internal sealed class DirectoryWrapper : IDirectory
     /// <inheritdoc />
     public string GetCurrentDirectory() => Directory.GetCurrentDirectory();
 }
-
-

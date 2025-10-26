@@ -13,7 +13,7 @@ internal interface IAssemblyCompiler
     bool CompileAssembly(string outputPath, ICollection<string> sources, ICollection<string> references);
 }
 
-internal class AssemblyCompiler : IAssemblyCompiler
+internal sealed class AssemblyCompiler : IAssemblyCompiler
 {
     public required ICompilerCallableEntryPoint CompilerCallableEntryPoint { get; init; }
     public required ILogger                     Logger                     { get; init; }

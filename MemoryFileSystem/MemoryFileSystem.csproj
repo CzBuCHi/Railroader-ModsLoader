@@ -18,5 +18,9 @@
     <ItemGroup>
       <ProjectReference Include="..\Railroader-ModInjector\Railroader-ModInjector.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+        <GameAssembly Include="Newtonsoft.Json" />
+    </ItemGroup>
     
 </Project>

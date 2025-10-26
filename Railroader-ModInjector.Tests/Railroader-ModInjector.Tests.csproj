@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <RootNamespace>Railroader_ModInterfaces.Tests</RootNamespace>
+        <RootNamespace>Railroader.ModInjector.Tests</RootNamespace>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
     </PropertyGroup>
@@ -32,6 +32,7 @@
             <HintPath>..\Railroader-ModsLoader\Assemblies\Mono.Cecil.dll</HintPath>
         </Reference>
     </ItemGroup>
+
 
 
     <ItemGroup>

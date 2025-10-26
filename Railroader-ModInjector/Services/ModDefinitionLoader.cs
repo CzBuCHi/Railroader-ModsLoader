@@ -17,7 +17,7 @@ internal interface IModDefinitionLoader
     ModDefinition[] LoadDefinitions();
 }
 
-internal class ModDefinitionLoader : IModDefinitionLoader
+internal sealed class ModDefinitionLoader : IModDefinitionLoader
 {
     public required IFileSystem FileSystem { get; init; }
     public required ILogger     Logger     { get; init; }

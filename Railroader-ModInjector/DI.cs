@@ -71,11 +71,19 @@ internal static class DI
 
     public static Func<IModDefinitionProcessor> ModDefinitionProcessor { get; set; } = () => new ModDefinitionProcessor();
 
+    public static Func<IModExtractorService> ModExtractorService { get; set; } = () => new ModExtractorService {
+        FileSystem = FileSystem()!,
+        Logger = GetLogger()
+    };
+
+    
+
     public static Func<IModManager> ModManager { get; set; } =
         () => new ModManager {
             CodeCompiler = CodeCompiler()!,
             PluginManagerFactory = o => PluginManager(o)!,
-            ModDefinitionProcessor = ModDefinitionProcessor()!
+            ModDefinitionProcessor = ModDefinitionProcessor()!,
+            ModExtractorService = ModExtractorService()!,
         };
 
 

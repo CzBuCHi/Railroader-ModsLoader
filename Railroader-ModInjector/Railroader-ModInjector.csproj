@@ -20,6 +20,8 @@
         <GameAssembly Include="Newtonsoft.Json" />
         <GameAssembly Include="SimpleGraph.Runtime" />
         <GameAssembly Include="Markroader" />
+        <GameAssembly Include="System.IO.Compression" />
+        <GameAssembly Include="System.IO.Compression.FileSystem" />
     </ItemGroup>
     <ItemGroup>
         <Reference Include="Mono.Cecil">

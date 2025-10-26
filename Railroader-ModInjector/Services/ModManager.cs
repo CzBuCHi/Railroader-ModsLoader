@@ -22,14 +22,15 @@ internal sealed class ModManager : IModManager
     public required ICodeCompiler                CodeCompiler           { get; init; }
     public required PluginManagerFactoryDelegate PluginManagerFactory   { get; init; }
     public required IModDefinitionProcessor      ModDefinitionProcessor { get; init; }
+    public required IModExtractorService         ModExtractorService    { get; init; }
 
-    private        Mod[]   _Mods   = null!;
+    private Mod[] _Mods = null!;
     
-
     /// <inheritdoc />
     public void Bootstrap(ModDefinition[] modDefinitions) {
         var logger = DI.GetLogger();
         logger.Debug("Bootstrap start");
+        ModExtractorService.ExtractMods();
 
         if (!ModDefinitionProcessor.PreprocessModDefinitions(ref modDefinitions)) {
             return;

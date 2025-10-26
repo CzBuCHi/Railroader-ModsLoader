@@ -13,6 +13,7 @@ M:FluentAssertions.AssertionExtensions.Should(System.Guid)
 M:FluentAssertions.AssertionExtensions.Should(System.Int16)
 M:FluentAssertions.AssertionExtensions.Should(System.Int32)
 M:FluentAssertions.AssertionExtensions.Should(System.Int64)
+M:FluentAssertions.AssertionExtensions.Should(System.IO.Stream)
 M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.Boolean})
 M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.DateTimeOffset})
 M:FluentAssertions.AssertionExtensions.Should(System.Nullable{System.Int32})
@@ -37,6 +38,9 @@ M:FluentAssertions.Collections.GenericCollectionAssertions`3.ContainSingle(Syste
 M:FluentAssertions.Collections.GenericDictionaryAssertions`4.ContainKey(`1,System.String,System.Object[])
 M:FluentAssertions.EnumAssertionsExtensions.Should``1(``0)
 M:FluentAssertions.EnumAssertionsExtensions.Should``1(System.Nullable{``0})
+M:FluentAssertions.Equivalency.EquivalencyAssertionOptions`1.Excluding(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})
+M:FluentAssertions.Equivalency.SelfReferenceEquivalencyAssertionOptions`1.WithStrictOrdering
+M:FluentAssertions.Equivalency.SelfReferenceEquivalencyOptions`1.WithStrictOrdering
 M:FluentAssertions.ExceptionAssertionsExtensions.WithMessage``1(System.Threading.Tasks.Task{FluentAssertions.Specialized.ExceptionAssertions{``0}},System.String,System.String,System.Object[])
 M:FluentAssertions.Primitives.ReferenceTypeAssertions`2.BeOfType``1(System.String,System.Object[])
 M:FluentAssertions.Primitives.ReferenceTypeAssertions`2.NotBeNull(System.String,System.Object[])
@@ -44,6 +48,8 @@ M:FluentAssertions.Specialized.AsyncFunctionAssertions`2.ThrowAsync``1(System.St
 M:FluentAssertions.Specialized.DelegateAssertions`2.Throw``1(System.String,System.Object[])
 P:FluentAssertions.AndConstraint`1.And
 P:FluentAssertions.AndWhichConstraint`2.Which
+P:FluentAssertions.AssertionConfiguration.Current
 P:FluentAssertions.Collections.WhoseValueConstraint`4.WhoseValue
+P:FluentAssertions.Configuration.GlobalConfiguration.Equivalency
 P:FluentAssertions.Primitives.ReferenceTypeAssertions`2.Subject
 P:FluentAssertions.Specialized.ExceptionAssertions`1.Which

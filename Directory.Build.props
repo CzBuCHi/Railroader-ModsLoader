@@ -1,5 +1,5 @@
 ﻿<Project>
-    <Import Project="Paths.user" Condition="Exists('Paths.user')"/>
+    <Import Project="Paths.user" Condition="Exists('Paths.user')"/>    
     <PropertyGroup>
         <TargetFramework>net48</TargetFramework>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
