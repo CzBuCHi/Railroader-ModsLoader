@@ -18,7 +18,7 @@ public sealed class TestsModExtractorService
         // Arrange
         var zipFile = new MemoryZip();
         zipFile.Add("File.txt", "Content");
-        zipFile.Add("definition.json", @"{""id"": ""MyMod"", ""name"": ""My Mod"", ""version"": ""1.0.0""}");
+        zipFile.Add("Definition.json", @"{""id"": ""MyMod"", ""name"": ""My Mod"", ""version"": ""1.0.0""}");
 
         var fileSystem = new MemoryFs();
         fileSystem.Add( @"C:\Mods\Mod1.zip",  zipFile);
@@ -37,7 +37,7 @@ public sealed class TestsModExtractorService
             new MemoryEntry(@"C:\Mods"),
             new MemoryEntry(@"C:\Mods\Mod1.bak", zipFile.GetBytes()),
             new MemoryEntry(@"C:\Mods\MyMod"),
-            new MemoryEntry(@"C:\Mods\MyMod\definition.json", Encoding.UTF8.GetBytes("""{"id": "MyMod", "name": "My Mod", "version": "1.0.0"}""")),
+            new MemoryEntry(@"C:\Mods\MyMod\Definition.json", Encoding.UTF8.GetBytes("""{"id": "MyMod", "name": "My Mod", "version": "1.0.0"}""")),
             new MemoryEntry(@"C:\Mods\MyMod\File.txt", Encoding.UTF8.GetBytes("Content"))
         ]);
         logger.Received().Information("Processing mod archive '{ZipPath}' for extraction.", @"C:\Mods\Mod1.zip");
@@ -70,7 +70,7 @@ public sealed class TestsModExtractorService
             new MemoryEntry(@"C:\Mods\Mod1.zip", zipFile.GetBytes())
         ]);
         logger.Received().Information("Processing mod archive '{ZipPath}' for extraction.", @"C:\Mods\Mod1.zip");
-        logger.Received().Error("Skipping archive '{ZipPath}': Invalid or missing 'definition.json'.", @"C:\Mods\Mod1.zip");
+        logger.Received().Error("Skipping archive '{ZipPath}': Invalid or missing 'Definition.json'.", @"C:\Mods\Mod1.zip");
         logger.ReceivedCalls().Should().HaveCount(2);
     }
 
@@ -79,7 +79,7 @@ public sealed class TestsModExtractorService
     public void ExtractMods_InvalidDefinitionJson_SkipsZipAndLogsError() {
         // Arrange
         var zipFile = new MemoryZip();
-        zipFile.Add("definition.json", "Invalid JSON");
+        zipFile.Add("Definition.json", "Invalid JSON");
 
         var fileSystem = new MemoryFs();
         fileSystem.Add( @"C:\Mods\Mod1.zip",  zipFile);
@@ -98,7 +98,7 @@ public sealed class TestsModExtractorService
             new MemoryEntry(@"C:\Mods"),
             new MemoryEntry(@"C:\Mods\Mod1.zip", zipFile.GetBytes())
         ]);
-        logger.Received(1).Error(Arg.Any<Exception>(), "Failed to parse definition.json in {ZipPath}.", @"C:\Mods\Mod1.zip");
+        logger.Received(1).Error(Arg.Any<Exception>(), "Failed to parse Definition.json in {ZipPath}.", @"C:\Mods\Mod1.zip");
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public sealed class TestsModExtractorService
     public void ExtractMods_MissingRequiredFields_SkipsZipAndLogsError() {
         // Arrange
         var zipFile = new MemoryZip();
-        zipFile.Add("definition.json", """{"version": "1.0.0"}"""); // Missing id and name
+        zipFile.Add("Definition.json", """{"version": "1.0.0"}"""); // Missing id and name
 
         var fileSystem = new MemoryFs();
         fileSystem.Add( @"C:\Mods\Mod1.zip",  zipFile);
@@ -126,7 +126,7 @@ public sealed class TestsModExtractorService
             new MemoryEntry(@"C:\Mods\Mod1.zip", zipFile.GetBytes())
         ]);
         logger.Received().Information("Processing mod archive '{ZipPath}' for extraction.", @"C:\Mods\Mod1.zip");
-        logger.Received().Error("Skipping archive '{ZipPath}': Invalid or missing 'definition.json'.", @"C:\Mods\Mod1.zip");
+        logger.Received().Error("Skipping archive '{ZipPath}': Invalid or missing 'Definition.json'.", @"C:\Mods\Mod1.zip");
         logger.ReceivedCalls().Should().HaveCount(2);
     }
 
@@ -162,7 +162,7 @@ public sealed class TestsModExtractorService
         zipFile2.Add( @"Path\In\Zip\File.txt",  zipFile);
 
         var zipFile3 = new MemoryZip();
-        zipFile3.Add( "definition.json",  @"{""id"": ""MyMod"", ""name"": ""My Mod"", ""version"": ""1.0.0""}");
+        zipFile3.Add( "Definition.json",  @"{""id"": ""MyMod"", ""name"": ""My Mod"", ""version"": ""1.0.0""}");
         zipFile3.Add( @"Path\In\Zip\File.txt",  zipFile2);
 
         var fileSystem = new MemoryFs();
@@ -183,7 +183,7 @@ public sealed class TestsModExtractorService
             new MemoryEntry(@"C:\Mods"),
             new MemoryEntry(@"C:\Mods\Mod1.bak", zipFile3.GetBytes()),
             new MemoryEntry(@"C:\Mods\MyMod"),
-            new MemoryEntry(@"C:\Mods\MyMod\definition.json", Encoding.UTF8.GetBytes("""{"id": "MyMod", "name": "My Mod", "version": "1.0.0"}""")),
+            new MemoryEntry(@"C:\Mods\MyMod\Definition.json", Encoding.UTF8.GetBytes("""{"id": "MyMod", "name": "My Mod", "version": "1.0.0"}""")),
             new MemoryEntry(@"C:\Mods\MyMod\Path"),
             new MemoryEntry(@"C:\Mods\MyMod\Path\In"),
             new MemoryEntry(@"C:\Mods\MyMod\Path\In\Zip"),

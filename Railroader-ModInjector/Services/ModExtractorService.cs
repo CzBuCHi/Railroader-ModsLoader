@@ -26,10 +26,10 @@ public sealed class ModExtractorService : IModExtractorService
             var zipPath = zipFile.FullName;
             Logger.Information("Processing mod archive '{ZipPath}' for extraction.", zipPath);
 
-            // Read definition.json from the zip
+            // Read Definition.json from the zip
             var modDefinition = GetModDefinitionFromZip(zipPath);
             if (modDefinition is not { IsValid: true }) {
-                Logger.Error("Skipping archive '{ZipPath}': Invalid or missing 'definition.json'.", zipPath);
+                Logger.Error("Skipping archive '{ZipPath}': Invalid or missing 'Definition.json'.", zipPath);
                 continue;
             }
 
@@ -43,9 +43,8 @@ public sealed class ModExtractorService : IModExtractorService
 
     private ModDefinition? GetModDefinitionFromZip(string zipPath) {
         try {
-
             using var archive         = FileSystem.ZipFile.OpenRead(zipPath);
-            var       definitionEntry = archive?.GetEntry("definition.json");
+            var       definitionEntry = archive?.GetEntry("Definition.json");
             if (definitionEntry == null) {
                 return null;
             }
@@ -56,7 +55,7 @@ public sealed class ModExtractorService : IModExtractorService
 
             return JsonConvert.DeserializeObject<ModDefinition>(json);
         } catch (JsonException ex) {
-            Logger.Error(ex, "Failed to parse definition.json in {ZipPath}.", zipPath);
+            Logger.Error(ex, "Failed to parse Definition.json in {ZipPath}.", zipPath);
             return null;
         }
     }

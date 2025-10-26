@@ -17,7 +17,7 @@ NOTE: Not compatible with **Railloader** as Railloader is canceling call to `Log
 
     -   currently code has limited set of references, i have 2 choices how to deal with them:
         -   reference everything from `Railroader_Data\\Managed\\*.dll` and `Mods\\*\\*.dll` (not good)
-        -   add references to `definition.json` where plugin author would need to list all needed references (better)
+        -   add references to `Definition.json` where plugin author would need to list all needed references (better)
 
 -   concept of 'marker' interfaces (see bellow)
 
