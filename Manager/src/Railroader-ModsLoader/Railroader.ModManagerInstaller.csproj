@@ -2,8 +2,6 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <AssemblyName>Railroader-ModsLoader</AssemblyName>
-        <RootNamespace>Railroader.ModsLoader</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>

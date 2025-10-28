@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
-namespace Railroader.ModsLoader;
+namespace Railroader.ModManagerInstaller;
 
 public static class Program
 {

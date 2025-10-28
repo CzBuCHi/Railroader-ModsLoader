@@ -1,7 +1,7 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-namespace Railroader.ModsLoader;
+namespace Railroader.ModManagerInstaller;
 
 internal static class Patcher
 {
