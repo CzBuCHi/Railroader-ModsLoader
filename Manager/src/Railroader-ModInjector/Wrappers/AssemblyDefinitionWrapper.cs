@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Mono.Cecil;
 
-namespace Railroader.ModInjector.Wrappers;
+namespace Railroader.ModManager.Wrappers;
 
 /// <summary> Wrapper for <see cref="AssemblyDefinition"/>. </summary>
 internal interface IAssemblyDefinitionWrapper

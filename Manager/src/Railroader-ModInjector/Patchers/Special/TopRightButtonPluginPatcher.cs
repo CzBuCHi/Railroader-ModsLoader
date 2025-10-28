@@ -11,7 +11,7 @@ using UnityEngine.UI;
 using ILogger = Serilog.ILogger;
 using Object = UnityEngine.Object;
 
-namespace Railroader.ModInjector.Patchers.Special;
+namespace Railroader.ModManager.Patchers.Special;
 
 /// <summary>
 /// Patches types implementing <see cref="ITopRightButtonPlugin"/> to add UI button in the top-right area.

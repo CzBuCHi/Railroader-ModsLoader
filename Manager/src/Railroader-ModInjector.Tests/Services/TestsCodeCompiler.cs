@@ -9,15 +9,15 @@ using MemoryFileSystem;
 using MemoryFileSystem.Internal;
 using Mono.Cecil;
 using NSubstitute;
-using Railroader.ModInjector.Patchers;
-using Railroader.ModInjector.Services;
-using Railroader.ModInjector.Wrappers;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Patchers;
+using Railroader.ModManager.Services;
+using Railroader.ModManager.Wrappers;
 using Serilog;
 using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
 using TypeDefinition = Mono.Cecil.TypeDefinition;
 
-namespace Railroader.ModInjector.Tests.Services;
+namespace Railroader.ModManager.Tests.Services;
 
 public sealed class TestsCodeCompiler
 {

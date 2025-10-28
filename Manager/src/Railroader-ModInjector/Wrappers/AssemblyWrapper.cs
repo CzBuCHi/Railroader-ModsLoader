@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace Railroader.ModInjector.Wrappers;
+namespace Railroader.ModManager.Wrappers;
 
 /// <summary> Wrapper for <see cref="Assembly"/>. </summary>
 internal interface IAssemblyWrapper

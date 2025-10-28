@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using FluentAssertions;
-using Railroader.ModInjector.Extensions;
+using Railroader.ModManager.Extensions;
 
-namespace Railroader.ModInjector.Tests.Extensions;
+namespace Railroader.ModManager.Tests.Extensions;
 
 public sealed class KeyValuePairExtensionsTests
 {

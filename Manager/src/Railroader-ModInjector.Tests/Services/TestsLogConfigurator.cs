@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Reflection;
 using FluentAssertions;
 using Logging;
-using Railroader.ModInjector.Services;
+using Railroader.ModManager.Services;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 
-namespace Railroader.ModInjector.Tests.Services;
+namespace Railroader.ModManager.Tests.Services;
 
 public sealed class TestsLogConfigurator
 {

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using Newtonsoft.Json;
-using Railroader.ModInjector.JsonConverters;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.JsonConverters;
 
-namespace Railroader.ModInjector.Tests.JsonConverters;
+namespace Railroader.ModManager.Tests.JsonConverters;
 
 public sealed class TestsModReferenceJsonConverter
 {

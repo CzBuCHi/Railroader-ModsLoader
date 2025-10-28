@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using MemoryFileSystem.Internal;
 using MemoryFileSystem.Types;
-using Railroader.ModInjector.Wrappers.FileSystem;
+using Railroader.ModManager.Wrappers.FileSystem;
 
 namespace MemoryFileSystem;
 

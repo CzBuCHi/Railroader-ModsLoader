@@ -1,12 +1,12 @@
 ﻿using System.Reflection;
 using FluentAssertions;
 using NSubstitute;
-using Railroader.ModInjector.Patchers;
-using Railroader.ModInjector.Patchers.Special;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Patchers;
+using Railroader.ModManager.Patchers.Special;
 using ILogger = Serilog.ILogger;
 
-namespace Railroader.ModInjector.Tests.Patchers.Special;
+namespace Railroader.ModManager.Tests.Patchers.Special;
 
 public sealed class TestsTopRightButtonPluginPatcher
 {

@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Railroader.ModManager.Interfaces;
 
-namespace Railroader.ModInjector.JsonConverters;
+namespace Railroader.ModManager.JsonConverters;
 
 /// <summary> JsonConverter for <see cref="Dictionary{String,FluentVersion}"/>. </summary>
 public sealed class ModReferenceJsonConverter : JsonConverter<Dictionary<string, FluentVersion?>>

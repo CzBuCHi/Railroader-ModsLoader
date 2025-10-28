@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
-using Railroader.ModInjector.Wrappers;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Wrappers;
 using Serilog;
 
-namespace Railroader.ModInjector.Services;
+namespace Railroader.ModManager.Services;
 
 /// <summary> Manages plugin instantiation for mods. </summary>
 internal interface IPluginManager

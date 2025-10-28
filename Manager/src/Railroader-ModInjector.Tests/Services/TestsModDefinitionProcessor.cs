@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using NSubstitute;
-using Railroader.ModInjector.JsonConverters;
-using Railroader.ModInjector.Services;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.JsonConverters;
+using Railroader.ModManager.Services;
 using Serilog;
 
-namespace Railroader.ModInjector.Tests.Services;
+namespace Railroader.ModManager.Tests.Services;
 
 public sealed class TestsModDefinitionProcessor
 {

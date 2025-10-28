@@ -2,7 +2,7 @@
 using System.Reflection;
 using HarmonyLib;
 
-namespace Railroader.ModInjector.Wrappers;
+namespace Railroader.ModManager.Wrappers;
 
 /// <summary> Wrapper for <see cref="Harmony"/>. </summary>
 internal interface IHarmonyWrapper

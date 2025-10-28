@@ -2,12 +2,12 @@
 using System.Linq;
 using FluentAssertions;
 using NSubstitute;
-using Railroader.ModInjector.Services;
-using Railroader.ModInjector.Wrappers;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Services;
+using Railroader.ModManager.Wrappers;
 using Serilog;
 
-namespace Railroader.ModInjector.Tests.Services;
+namespace Railroader.ModManager.Tests.Services;
 
 public sealed class TestsPluginManager
 {

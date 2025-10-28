@@ -3,7 +3,7 @@ using FluentAssertions;
 using NSubstitute;
 using Railroader.ModManager.Interfaces;
 
-namespace Railroader.ModInjector.Tests;
+namespace Railroader.ModManager.Tests;
 
 public sealed class TestsModdingContext
 {

@@ -2,7 +2,7 @@
 using System.IO;
 using Mono.CSharp;
 
-namespace Railroader.ModInjector.Wrappers;
+namespace Railroader.ModManager.Wrappers;
 
 /// <summary> Wrapper for <see cref="CompilerCallableEntryPoint"/>. </summary>
 internal interface ICompilerCallableEntryPoint

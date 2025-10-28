@@ -1,9 +1,9 @@
 ﻿using FluentAssertions;
 using Newtonsoft.Json;
-using Railroader.ModInjector.JsonConverters;
+using Railroader.ModManager.JsonConverters;
 using Serilog.Events;
 
-namespace Railroader.ModInjector.Tests.JsonConverters;
+namespace Railroader.ModManager.Tests.JsonConverters;
 
 public sealed class TestsLogEventLevelJsonConverter
 {

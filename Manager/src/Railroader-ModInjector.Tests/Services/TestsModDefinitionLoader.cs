@@ -3,12 +3,12 @@ using FluentAssertions;
 using MemoryFileSystem;
 using Newtonsoft.Json;
 using NSubstitute;
-using Railroader.ModInjector.Services;
-using Railroader.ModInjector.Wrappers.FileSystem;
+using Railroader.ModManager.Services;
+using Railroader.ModManager.Wrappers.FileSystem;
 using Serilog;
 using Serilog.Events;
 
-namespace Railroader.ModInjector.Tests.Services;
+namespace Railroader.ModManager.Tests.Services;
 
 public sealed class TestsModDefinitionLoader
 {

@@ -1,9 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Newtonsoft.Json;
-using Serilog;
 
-namespace Railroader.ModInjector.Services;
+namespace Railroader.ModManager.Services;
 
 /// <summary> Manages the lifecycle of all loaded mods. </summary>
 internal interface IModManager

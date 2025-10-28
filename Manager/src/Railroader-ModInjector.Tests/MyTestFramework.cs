@@ -10,7 +10,7 @@ using Xunit.Sdk;
 
 [assembly: TestFramework("Railroader.ModInjector.Tests.MyTestFramework", "Railroader-ModInjector.Tests")]
 
-namespace Railroader.ModInjector.Tests;
+namespace Railroader.ModManager.Tests;
 
 [UsedImplicitly]
 [ExcludeFromCodeCoverage]

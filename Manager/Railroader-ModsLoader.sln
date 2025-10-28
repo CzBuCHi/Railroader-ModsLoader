@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-ModInjector", "src\Railroader-ModInjector\Railroader-ModInjector.csproj", "{797B6FF5-1096-47BB-B251-215DBA5DF273}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager", "src\Railroader-ModInjector\Railroader.ModManager.csproj", "{797B6FF5-1096-47BB-B251-215DBA5DF273}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-ModInjector.Tests", "src\Railroader-ModInjector.Tests\Railroader-ModInjector.Tests.csproj", "{79DCAB4F-E19A-4BAB-B652-8A3F6E622382}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager.Tests", "src\Railroader-ModInjector.Tests\Railroader.ModManager.Tests.csproj", "{79DCAB4F-E19A-4BAB-B652-8A3F6E622382}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager.Interfaces", "src\Railroader.ModManager.Interfaces\Railroader.ModManager.Interfaces.csproj", "{C0EBBA8B-207E-49E7-A2A7-5CDB0B8EE9C5}"
 EndProject

@@ -1,10 +1,10 @@
 ﻿using System.Linq;
 using JetBrains.Annotations;
-using Railroader.ModInjector.Services;
+using Railroader.ModManager.Services;
 using Serilog;
 using Serilog.Core;
 
-namespace Railroader.ModInjector;
+namespace Railroader.ModManager;
 
 /// <summary> Entry point for mod injection and initialization. </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.Members)]

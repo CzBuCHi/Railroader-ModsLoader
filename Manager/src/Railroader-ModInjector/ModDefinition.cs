@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Newtonsoft.Json;
-using Railroader.ModInjector.JsonConverters;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.JsonConverters;
 using Serilog.Events;
 
-namespace Railroader.ModInjector;
+namespace Railroader.ModManager;
 
 /// <summary> Implementation of <see cref="IModDefinition"/> for mod metadata. </summary>
 [DebuggerDisplay("{Identifier,nq} [{Version}] ")]

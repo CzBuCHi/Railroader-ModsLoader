@@ -2,7 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 
-namespace Railroader.ModInjector.Wrappers.FileSystem;
+namespace Railroader.ModManager.Wrappers.FileSystem;
 
 /// <summary> Wrapper for <see cref="ZipArchiveEntry"/>. </summary>
 public interface IZipArchiveEntry

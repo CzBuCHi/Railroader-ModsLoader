@@ -2,7 +2,7 @@
 using System.Linq;
 using FluentAssertions;
 using NSubstitute;
-using Railroader.ModInjector.Wrappers.FileSystem;
+using Railroader.ModManager.Wrappers.FileSystem;
 using Xunit;
 
 namespace MemoryFileSystem.Tests;

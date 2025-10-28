@@ -1,10 +1,9 @@
 ﻿using System.IO;
-using System.Linq;
 using Newtonsoft.Json;
-using Railroader.ModInjector.Wrappers.FileSystem;
+using Railroader.ModManager.Wrappers.FileSystem;
 using Serilog;
 
-namespace Railroader.ModInjector.Services;
+namespace Railroader.ModManager.Services;
 
 public interface IModExtractorService
 {

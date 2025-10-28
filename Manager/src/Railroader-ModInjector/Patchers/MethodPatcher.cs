@@ -6,7 +6,7 @@ using Mono.Cecil.Cil;
 using Serilog;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 
-namespace Railroader.ModInjector.Patchers;
+namespace Railroader.ModManager.Patchers;
 
 public interface IMethodPatcher
 {

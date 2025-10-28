@@ -2,11 +2,11 @@
 using System.Reflection;
 using FluentAssertions;
 using NSubstitute;
-using Railroader.ModInjector.Services;
+using Railroader.ModManager.Services;
 using Serilog;
 using Serilog.Events;
 
-namespace Railroader.ModInjector.Tests;
+namespace Railroader.ModManager.Tests;
 
 public sealed class TestsInjector
 {

@@ -2,7 +2,6 @@
 using System.IO;
 using JetBrains.Annotations;
 using NSubstitute;
-using Railroader.ModInjector.Wrappers.FileSystem;
 
 namespace MemoryFileSystem;
 

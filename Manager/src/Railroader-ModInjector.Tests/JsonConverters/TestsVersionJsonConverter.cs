@@ -2,9 +2,9 @@
 using FluentAssertions;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using Railroader.ModInjector.JsonConverters;
+using Railroader.ModManager.JsonConverters;
 
-namespace Railroader.ModInjector.Tests.JsonConverters;
+namespace Railroader.ModManager.Tests.JsonConverters;
 
 public sealed class TestsVersionJsonConverter
 {

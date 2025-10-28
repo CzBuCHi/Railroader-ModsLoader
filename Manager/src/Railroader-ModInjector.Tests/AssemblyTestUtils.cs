@@ -10,11 +10,11 @@ using System.Text;
 using HarmonyLib;
 using Mono.CSharp;
 using NSubstitute;
-using Railroader.ModInjector.Services;
-using Railroader.ModInjector.Wrappers;
+using Railroader.ModManager.Services;
+using Railroader.ModManager.Wrappers;
 using Serilog;
 
-namespace Railroader.ModInjector.Tests;
+namespace Railroader.ModManager.Tests;
 
 [ExcludeFromCodeCoverage]
 public static class AssemblyTestUtils

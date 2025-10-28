@@ -3,16 +3,16 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Mono.Cecil;
-using Railroader.ModInjector.Patchers;
-using Railroader.ModInjector.Patchers.Special;
-using Railroader.ModInjector.Wrappers;
-using Railroader.ModInjector.Wrappers.FileSystem;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Patchers;
+using Railroader.ModManager.Patchers.Special;
+using Railroader.ModManager.Wrappers;
+using Railroader.ModManager.Wrappers.FileSystem;
 using ILogger = Serilog.ILogger;
 using Path = System.IO.Path;
 using SearchOption = System.IO.SearchOption;
 
-namespace Railroader.ModInjector.Services;
+namespace Railroader.ModManager.Services;
 
 /// <summary>
 /// Defines a contract for compiling mod source code and applying patches to the resulting assembly.

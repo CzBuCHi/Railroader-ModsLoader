@@ -5,10 +5,10 @@ using FluentAssertions;
 using MemoryFileSystem;
 using MemoryFileSystem.Internal;
 using NSubstitute;
-using Railroader.ModInjector.Services;
+using Railroader.ModManager.Services;
 using Serilog;
 
-namespace Railroader.ModInjector.Tests.Services;
+namespace Railroader.ModManager.Tests.Services;
 
 public sealed class TestsModExtractorService
 {

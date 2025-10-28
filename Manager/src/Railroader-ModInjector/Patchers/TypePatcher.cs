@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Mono.Cecil;
 
-namespace Railroader.ModInjector.Patchers;
+namespace Railroader.ModManager.Patchers;
 
 internal interface ITypePatcher
 {

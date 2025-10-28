@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Railroader.ModInjector.Extensions;
+using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
 
-namespace Railroader.ModInjector.Services;
+namespace Railroader.ModManager.Services;
 
 internal interface IModDefinitionProcessor
 {

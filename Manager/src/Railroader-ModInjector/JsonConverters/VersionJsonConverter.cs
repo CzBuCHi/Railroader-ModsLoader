@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Railroader.ModInjector.JsonConverters;
+namespace Railroader.ModManager.JsonConverters;
 
 /// <summary> JsonConverter for <see cref="Version"/>. </summary>
 internal sealed class VersionJsonConverter : JsonConverter<Version>

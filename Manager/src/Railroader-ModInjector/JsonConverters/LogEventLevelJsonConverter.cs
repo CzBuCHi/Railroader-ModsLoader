@@ -3,7 +3,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Serilog.Events;
 
-namespace Railroader.ModInjector.JsonConverters;
+namespace Railroader.ModManager.JsonConverters;
 
 /// <summary> JsonConverter for <see cref="LogEventLevel"/>. </summary>
 internal sealed class LogEventLevelJsonConverter : JsonConverter<LogEventLevel?>

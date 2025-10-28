@@ -10,13 +10,13 @@
     
     <ItemGroup>
         
-        <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs"  />
-        <Compile Include="..\SharedCode\JetBrains.Annotations.cs"  />
+        <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs" />
+        <Compile Include="..\SharedCode\JetBrains.Annotations.cs" />
         
     </ItemGroup>
     
     <ItemGroup>
-      <ProjectReference Include="..\Railroader-ModInjector\Railroader-ModInjector.csproj" />
+      <ProjectReference Include="..\Railroader-ModInjector\Railroader.ModManager.csproj" />
     </ItemGroup>
 
     <ItemGroup>

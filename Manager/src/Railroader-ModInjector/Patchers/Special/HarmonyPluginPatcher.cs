@@ -1,10 +1,10 @@
 ﻿using System.Collections.Concurrent;
 using JetBrains.Annotations;
-using Railroader.ModInjector.Wrappers;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Wrappers;
 using Serilog;
 
-namespace Railroader.ModInjector.Patchers.Special;
+namespace Railroader.ModManager.Patchers.Special;
 
 /// <summary> Patches types implementing <see cref="IHarmonyPlugin"/> to apply or remove Harmony patches when <c>OnIsEnabledChanged</c> is called. </summary>
 public sealed class HarmonyPluginPatcher(ILogger logger) : TypePatcher(

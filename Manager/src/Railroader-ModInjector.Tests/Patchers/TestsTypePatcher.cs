@@ -2,9 +2,9 @@
 using FluentAssertions;
 using Mono.Cecil;
 using NSubstitute;
-using Railroader.ModInjector.Patchers;
+using Railroader.ModManager.Patchers;
 
-namespace Railroader.ModInjector.Tests.Patchers;
+namespace Railroader.ModManager.Tests.Patchers;
 
 public sealed class TestsTypePatcher
 {

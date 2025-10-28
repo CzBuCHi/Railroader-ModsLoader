@@ -5,7 +5,7 @@ using Logging;
 using Serilog;
 using Serilog.Events;
 
-namespace Railroader.ModInjector.Services;
+namespace Railroader.ModManager.Services;
 
 /// <summary> Configures Serilog for modding with per-mod log levels and custom sinks. </summary>
 internal interface ILogConfigurator

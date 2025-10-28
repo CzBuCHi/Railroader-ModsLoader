@@ -7,11 +7,11 @@ using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using NSubstitute;
-using Railroader.ModInjector.Patchers;
+using Railroader.ModManager.Patchers;
 using Serilog;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 
-namespace Railroader.ModInjector.Tests.Patchers;
+namespace Railroader.ModManager.Tests.Patchers;
 
 public sealed class TestsMethodPatcher
 {

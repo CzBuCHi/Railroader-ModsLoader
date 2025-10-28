@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Railroader.ModManager.Interfaces;
 using Serilog;
 
-namespace Railroader.ModInjector;
+namespace Railroader.ModManager;
 
 /// <summary> Implementation of <see cref="IMod"/> for a loaded mod instance. </summary>
 internal sealed class Mod(IModDefinition modDefinition, string? assemblyPath) : IMod

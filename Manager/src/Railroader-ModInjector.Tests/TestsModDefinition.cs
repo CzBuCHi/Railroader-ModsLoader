@@ -3,7 +3,7 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using Serilog.Events;
 
-namespace Railroader.ModInjector.Tests;
+namespace Railroader.ModManager.Tests;
 
 public sealed class TestsModDefinition
 {

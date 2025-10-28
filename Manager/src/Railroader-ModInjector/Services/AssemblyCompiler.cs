@@ -3,10 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Railroader.ModInjector.Wrappers;
+using Railroader.ModManager.Wrappers;
 using Serilog;
 
-namespace Railroader.ModInjector.Services;
+namespace Railroader.ModManager.Services;
 
 internal interface IAssemblyCompiler
 {

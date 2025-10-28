@@ -2,7 +2,7 @@
 using System.Linq;
 using Newtonsoft.Json;
 using NSubstitute;
-using Railroader.ModInjector.Wrappers.FileSystem;
+using Railroader.ModManager.Wrappers.FileSystem;
 
 namespace MemoryFileSystem.Internal;
 

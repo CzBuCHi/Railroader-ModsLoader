@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Railroader.ModInjector.Wrappers.FileSystem;
+using Railroader.ModManager.Wrappers.FileSystem;
 using Serilog;
 using Path = System.IO.Path;
 
-namespace Railroader.ModInjector.Services;
+namespace Railroader.ModManager.Services;
 
 /// <summary> Loads mod definitions from JSON files and handles early logging. </summary>
 internal interface IModDefinitionLoader

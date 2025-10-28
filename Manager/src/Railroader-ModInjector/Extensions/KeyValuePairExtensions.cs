@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Railroader.ModInjector.Extensions;
+namespace Railroader.ModManager.Extensions;
 
 internal static class KeyValuePairExtensions
 {

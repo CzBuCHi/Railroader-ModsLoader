@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using MemoryFileSystem.Types;
 using NSubstitute;
-using Railroader.ModInjector.Wrappers.FileSystem;
+using Railroader.ModManager.Wrappers.FileSystem;
 
 namespace MemoryFileSystem.Internal;
 

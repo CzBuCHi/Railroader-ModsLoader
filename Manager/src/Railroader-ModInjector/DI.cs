@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
-using Railroader.ModInjector.Services;
-using Railroader.ModInjector.Wrappers;
-using Railroader.ModInjector.Wrappers.FileSystem;
+using Railroader.ModManager.Services;
+using Railroader.ModManager.Wrappers;
+using Railroader.ModManager.Wrappers.FileSystem;
 using Serilog;
 
-namespace Railroader.ModInjector;
+namespace Railroader.ModManager;
 
 /// <summary> Factory method for all manager services. </summary>
 /// <remarks> Whole purpose of this is ability to replace any service with mock in test</remarks>

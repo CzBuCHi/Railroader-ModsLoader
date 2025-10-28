@@ -5,7 +5,7 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 
-namespace Railroader.ModInjector.Services;
+namespace Railroader.ModManager.Services;
 
 internal interface IInitLogger : ILogger
 {

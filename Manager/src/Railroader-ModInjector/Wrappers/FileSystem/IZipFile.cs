@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 
-namespace Railroader.ModInjector.Wrappers.FileSystem;
+namespace Railroader.ModManager.Wrappers.FileSystem;
 
 /// <summary> Wrapper for <see cref="ZipFile"/>. </summary>
 public interface IZipFile

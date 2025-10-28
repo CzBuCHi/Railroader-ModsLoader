@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <RootNamespace>Railroader.ModInjector.Tests</RootNamespace>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
     </PropertyGroup>
@@ -50,7 +49,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\MemoryFileSystem\MemoryFileSystem.csproj" />
-        <ProjectReference Include="..\Railroader-ModInjector\Railroader-ModInjector.csproj" />
+        <ProjectReference Include="..\Railroader-ModInjector\Railroader.ModManager.csproj" />
     </ItemGroup>
 
     <ItemGroup>
