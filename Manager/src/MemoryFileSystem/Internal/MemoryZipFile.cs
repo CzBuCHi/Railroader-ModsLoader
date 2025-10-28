@@ -12,7 +12,7 @@ public sealed class MemoryZipFile(IMemoryFileSystem fileSystem) : IZipFile
         var normalizedSource = fileSystem.NormalizePath(sourceArchiveFileName);
         var normalizedDest   = fileSystem.NormalizePath(destinationDirectoryName);
 
-        if (!fileSystem.Items.TryGetValue(normalizedSource, out var zipEntry) || zipEntry!.IsDirectory) {
+        if (!fileSystem.Items.TryGetValue(normalizedSource, out var zipEntry) || zipEntry.IsDirectory) {
             throw new FileNotFoundException($"Zip file '{normalizedSource}' not found.");
         }
 
@@ -29,7 +29,7 @@ public sealed class MemoryZipFile(IMemoryFileSystem fileSystem) : IZipFile
 
     public IZipArchive OpenRead(string archiveFileName) {
         var normalizedPath = fileSystem.NormalizePath(archiveFileName);
-        if (!fileSystem.Items.TryGetValue(normalizedPath, out var zipEntry) || zipEntry!.IsDirectory) {
+        if (!fileSystem.Items.TryGetValue(normalizedPath, out var zipEntry) || zipEntry.IsDirectory) {
             throw new FileNotFoundException($"Zip file '{normalizedPath}' not found.");
         }
 

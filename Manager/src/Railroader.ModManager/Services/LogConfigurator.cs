@@ -22,17 +22,17 @@ internal sealed class LogConfigurator : ILogConfigurator
     /// <inheritdoc />
     public void ConfigureLogger(LoggerConfiguration configuration, ModDefinition[] definitions) {
         // Configure log levels 
-        configuration.MinimumLevel!.Override("Railroader.ModInjector", LogEventLevel.Debug);
+        configuration.MinimumLevel.Override("Railroader.ModInjector", LogEventLevel.Debug);
 
         foreach (var modDefinition in definitions.Where(o => o.LogLevel != null && o.LogLevel != LogEventLevel.Information)) {
-            configuration.MinimumLevel!.Override(modDefinition.Identifier, modDefinition.LogLevel!.Value);
+            configuration.MinimumLevel.Override(modDefinition.Identifier, modDefinition.LogLevel!.Value);
         }
 
         RemoveUnitySinks(configuration);
 
         // Configure modded sinks
-        configuration.WriteTo!.Conditional(o => o.Properties!.ContainsKey("SourceContext"), o => o.UnityConsole("[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"));
-        configuration.WriteTo.Conditional(o => !o.Properties!.ContainsKey("SourceContext"), o => o.UnityConsole("[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"));
+        configuration.WriteTo.Conditional(o => o.Properties.ContainsKey("SourceContext"), o => o.UnityConsole("[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"));
+        configuration.WriteTo.Conditional(o => !o.Properties.ContainsKey("SourceContext"), o => o.UnityConsole("[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"));
     }
 
     /// <summary> Removes vanilla Unity console sinks from the configuration. </summary>

@@ -150,9 +150,9 @@ internal sealed class CodeCompiler : ICodeCompiler
 
             var hasPatch = false;
             var hasError = false;
-            foreach (var type in assemblyDefinition.MainModule?.Types ?? Enumerable.Empty<TypeDefinition>()) {
+            foreach (var type in assemblyDefinition.MainModule.Types) {
                 try {
-                    var interfaces = type.Interfaces?.Select(i => i.InterfaceType?.FullName).ToList()!;
+                    var interfaces = type.Interfaces.Select(i => i.InterfaceType?.FullName).ToList();
                     var patchers = PluginPatchers.Where(pair => interfaces.Contains(pair.InterfaceType!.FullName))
                                                  .Select(pair => _PluginPatchers.GetOrAdd(pair.InterfaceType,
                                                      _ => (ITypePatcher)Activator.CreateInstance(pair.PluginPatcherType!, Logger)!

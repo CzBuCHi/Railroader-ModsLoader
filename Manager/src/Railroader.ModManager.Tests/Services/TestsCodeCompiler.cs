@@ -296,7 +296,7 @@ public sealed class TestsCodeCompiler
             var       fileName     = o.Arg<string>();
             using var stream       = memory.FileSystem.File.Create(fileName);
             using var streamWriter = new StreamWriter(stream, Encoding.UTF8, 1024, true);
-            streamWriter.Write(definition.Name!.Name!);
+            streamWriter.Write(definition.Name.Name);
         });
 
         var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
@@ -337,7 +337,7 @@ public sealed class TestsCodeCompiler
 
         // verify assemblyDefinition.Dispose as called ...
         var imageField  = typeof(ModuleDefinition).GetField("Image", BindingFlags.Instance | BindingFlags.NonPublic)!;
-        var image       = imageField.GetValue(assemblyDefinition.MainModule!)!; // Mono.Cecil.PE.Image
+        var image       = imageField.GetValue(assemblyDefinition.MainModule)!; // Mono.Cecil.PE.Image
         var streamField = image.GetType().GetField("Stream", BindingFlags.Instance | BindingFlags.Public)!;
         var disposable  = streamField.GetValue(image)!; // Mono.Disposable<System.IO.Stream>
         var valueField  = disposable.GetType().GetField("value", BindingFlags.Instance | BindingFlags.NonPublic)!;

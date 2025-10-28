@@ -75,8 +75,8 @@ public static class AssemblyTestUtils
             Platform = Platform.AnyCPU,
             ShowFullPaths = true
         };
-        settings.ReferencesLookupPaths!.Add(Directory.GetCurrentDirectory());
-        settings.AssemblyReferences!.AddRange([
+        settings.ReferencesLookupPaths.Add(Directory.GetCurrentDirectory());
+        settings.AssemblyReferences.AddRange([
             "Assembly-CSharp",
             "0Harmony",
             "Railroader-ModInterfaces",
@@ -89,7 +89,7 @@ public static class AssemblyTestUtils
         var eval    = new Evaluator(context);
 
         eval.Compile(source + " interface __AssemblyMarker { } ");
-        if (context.Report!.Errors > 0) {
+        if (context.Report.Errors > 0) {
             throw new Exception($"Compilation error: {printer.Messages}");
         }
 
@@ -116,7 +116,7 @@ public static class AssemblyTestUtils
 
     public static void Write(Mono.Cecil.AssemblyDefinition assemblyDefinition, string outputPath, string name) {
         if (Debugger.IsAttached) {
-            assemblyDefinition.Name!.Name = name;
+            assemblyDefinition.Name.Name = name;
             assemblyDefinition.Write(Path.Combine(outputPath, name + ".dll"));
         }
     }

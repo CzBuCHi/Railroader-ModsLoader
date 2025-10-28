@@ -14,7 +14,7 @@ public sealed class ModReferenceJsonConverter : JsonConverter<Dictionary<string,
     public override void WriteJson(JsonWriter writer, Dictionary<string, FluentVersion?>? value, JsonSerializer serializer) {
         writer.WriteStartObject();
         foreach (var pair in value!.OrderBy(o => o.Key)) {
-            writer.WritePropertyName(pair.Key!);
+            writer.WritePropertyName(pair.Key);
             if (pair.Value == null) {
                 writer.WriteNull();
             } else {

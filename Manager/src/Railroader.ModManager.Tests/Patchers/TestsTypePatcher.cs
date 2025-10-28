@@ -16,7 +16,7 @@ public sealed class TestsTypePatcher
         methodPatcher2.Patch(Arg.Any<AssemblyDefinition>(), Arg.Any<TypeDefinition>()).Returns(true);
         var sut = new TestTypePatcher([methodPatcher1, methodPatcher2]);
 
-        var assemblyDefinition = AssemblyDefinition.CreateAssembly(new AssemblyNameDefinition("Name", new Version(1, 0)), "ModuleName", ModuleKind.Dll)!;
+        var assemblyDefinition = AssemblyDefinition.CreateAssembly(new AssemblyNameDefinition("Name", new Version(1, 0)), "ModuleName", ModuleKind.Dll);
         var typeDefinition     = new TypeDefinition("Namespace", "Name", TypeAttributes.Class);
 
         // Act

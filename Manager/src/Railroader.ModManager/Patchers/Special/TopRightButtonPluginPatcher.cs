@@ -26,13 +26,13 @@ public sealed class TopRightButtonPluginPatcher(ILogger logger) : TypePatcher(
 
     private sealed record PatcherState(bool IsEnabled, GameObject? GameObject);
 
-    private static readonly ConcurrentDictionary<IPluginBase, PatcherState> _States = new();
+    private static readonly ConcurrentDictionary<IPlugin, PatcherState> _States = new();
 
     /// <summary> Handles the <c>OnIsEnabledChanged</c> event for the plugin, performing patcher-specific logic when the plugin is enabled or disabled. </summary>
     /// <param name="plugin">The plugin instance. Must not be null.</param>
     [UsedImplicitly]
   
-    public static void OnIsEnabledChanged(IPluginBase plugin) {
+    public static void OnIsEnabledChanged(IPlugin plugin) {
         var topRightArea = Object.FindObjectOfType<TopRightArea>();
         if (topRightArea == null) {
             return;
@@ -59,7 +59,7 @@ public sealed class TopRightButtonPluginPatcher(ILogger logger) : TypePatcher(
         }
     }
 
-    private static Texture2D? LoadButtonTexture(IPluginBase plugin) {
+    private static Texture2D? LoadButtonTexture(IPlugin plugin) {
         var topRightButton = (ITopRightButtonPlugin)plugin;
 
         var pluginType = plugin.GetType();
@@ -83,7 +83,7 @@ public sealed class TopRightButtonPluginPatcher(ILogger logger) : TypePatcher(
         }
     }
 
-    private static GameObject? AddButton(IPluginBase plugin, TopRightArea topRightArea) {
+    private static GameObject? AddButton(IPlugin plugin, TopRightArea topRightArea) {
         var texture = LoadButtonTexture(plugin);
         if (texture == null) {
             return null;
@@ -95,13 +95,13 @@ public sealed class TopRightButtonPluginPatcher(ILogger logger) : TypePatcher(
         var gameObject          = Object.Instantiate(componentInChildren.gameObject, componentInChildren.transform.parent!)!;
         gameObject.transform.SetSiblingIndex(topRightButton.Index);
 
-        gameObject.GetComponent<UITooltipProvider>()!.TooltipInfo = new TooltipInfo(topRightButton.Tooltip, string.Empty);
+        gameObject.GetComponent<UITooltipProvider>().TooltipInfo = new TooltipInfo(topRightButton.Tooltip, string.Empty);
 
-        var button = gameObject.GetComponent<Button>()!;
+        var button = gameObject.GetComponent<Button>();
         button.onClick = new Button.ButtonClickedEvent();
         button.onClick.AddListener(() => topRightButton.OnClick());
 
-        var image = gameObject.GetComponent<Image>()!;
+        var image = gameObject.GetComponent<Image>();
         image.sprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, 128, 128), new Vector2(0.5f, 0.5f))!;
 
         return gameObject;

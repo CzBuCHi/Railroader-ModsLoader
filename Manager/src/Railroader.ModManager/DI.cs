@@ -22,7 +22,7 @@ internal static class DI
 
     public static Action<LoggerConfiguration> CreateLogger { get; set; } = configuration => Logger = configuration.CreateLogger()!;
 
-    public static GetLoggerDelegate GetLogger { get; set; } = scope => Logger.ForContext("SourceContext", scope ?? "Railroader.ModInjector")!;
+    public static GetLoggerDelegate GetLogger { get; set; } = scope => Logger.ForContext("SourceContext", scope ?? "Railroader.ModInjector");
 
     public static Func<ICompilerCallableEntryPoint> CompilerCallableEntryPoint { get; set; } =
         () => new CompilerCallableEntryPointWrapper();

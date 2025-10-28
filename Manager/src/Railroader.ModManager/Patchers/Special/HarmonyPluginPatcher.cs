@@ -13,13 +13,13 @@ public sealed class HarmonyPluginPatcher(ILogger logger) : TypePatcher(
 {
     private sealed record PatcherState(bool IsEnabled, IHarmonyWrapper Harmony);
 
-    private static readonly ConcurrentDictionary<IPluginBase, PatcherState> _States = new();
+    private static readonly ConcurrentDictionary<IPlugin, PatcherState> _States = new();
 
     /// <summary> Handles the <c>OnIsEnabledChanged</c> event for the plugin, performing patcher-specific logic when the plugin is enabled or disabled. </summary>
     /// <param name="plugin">The plugin instance. Must not be null.</param>
     [UsedImplicitly]
-    public static void OnIsEnabledChanged(IPluginBase plugin) {
-        var state = _States.GetOrAdd(plugin, o => new PatcherState(!plugin.IsEnabled, DI.HarmonyWrapper(o.Mod.Definition.Identifier)))!;
+    public static void OnIsEnabledChanged(IPlugin plugin) {
+        var state = _States.GetOrAdd(plugin, o => new PatcherState(!plugin.IsEnabled, DI.HarmonyWrapper(o.Mod.Definition.Identifier)!))!;
         if (state.IsEnabled == plugin.IsEnabled) {
             return;
         }

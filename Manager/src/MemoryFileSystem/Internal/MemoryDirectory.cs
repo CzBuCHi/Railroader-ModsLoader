@@ -21,7 +21,7 @@ public sealed class MemoryDirectory(IMemoryFileSystem fileSystem) : IDirectory
     public IDirectory Mock() {
         var mock = Substitute.For<IDirectory>();
         mock.EnumerateDirectories(Arg.Any<string>()).Returns(o => EnumerateDirectories(o.Arg<string>()));
-        mock.GetCurrentDirectory().Returns(o => GetCurrentDirectory());
+        mock.GetCurrentDirectory().Returns(_ => GetCurrentDirectory());
         return mock;
     }
 }

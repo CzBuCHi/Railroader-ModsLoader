@@ -3,23 +3,10 @@ using JetBrains.Annotations;
 
 namespace Railroader.ModManager.Interfaces;
 
-[PublicAPI]
-public interface IPluginBase
-{
-    /// <summary> Gets the modding context for this plugin. </summary>
-    IModdingContext ModdingContext { get; }
-
-    /// <summary> Gets the mod for this plugin. </summary>
-    IMod Mod { get; }
-
-    /// <summary> Gets or sets a value indicating whether this plugin is enabled. </summary>
-    bool IsEnabled { get; set; }
-}
-
 /// <summary> Base class for all plugins, providing common functionality and modding context access. </summary>
 /// <remarks> This class is intended to be inherited by concrete plugin implementations. </remarks>
 [PublicAPI]
-public abstract class PluginBase<T> : IPluginBase where T : PluginBase<T>
+public abstract class PluginBase<T> : IPlugin where T : PluginBase<T>
 {
     private static T? _Instance;
 

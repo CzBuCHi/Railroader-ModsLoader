@@ -41,7 +41,7 @@ public sealed class MemoryFile(IMemoryFileSystem fileSystem) : IFile
             return;
         }
 
-        if (entry!.IsDirectory) {
+        if (entry.IsDirectory) {
             throw new InvalidOperationException($"Entry at {path} is directory.");
         }
 

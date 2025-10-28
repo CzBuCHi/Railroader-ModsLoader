@@ -39,7 +39,7 @@ internal sealed class ModDefinitionLoader : IModDefinitionLoader
                 var modDefinition = jObject.ToObject<ModDefinition>()!;
 
                 if (modDefinitions.TryGetValue(modDefinition.Identifier, out var conflict)) {
-                    Logger.Error("Another mod with the same Identifier has been found in '{directory}'", conflict!.BasePath);
+                    Logger.Error("Another mod with the same Identifier has been found in '{directory}'", conflict.BasePath);
                 } else {
                     modDefinition.BasePath = directory;
                     modDefinitions.Add(modDefinition.Identifier, modDefinition);

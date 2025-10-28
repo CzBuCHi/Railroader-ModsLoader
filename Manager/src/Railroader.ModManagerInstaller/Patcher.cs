@@ -25,7 +25,7 @@ internal static class Patcher
 
         var assemblyCsharpModule = ModuleDefinition.ReadModule(assemblyCsharp, readerParameters)!;
 
-        if (assemblyCsharpModule.AssemblyReferences!.Any(o => o.Name == ModInjector)) {
+        if (assemblyCsharpModule.AssemblyReferences.Any(o => o.Name == ModInjector)) {
             Program.WriteWarning("Railroader is already patched.");
             return false;
         }
@@ -48,8 +48,8 @@ internal static class Patcher
             return null!;
         }
 
-        var modInterfacesReference = new AssemblyNameReference(name, modInterfacesModule.Assembly!.Name!.Version!);
-        assemblyCsharpModule.AssemblyReferences!.Add(modInterfacesReference);
+        var modInterfacesReference = new AssemblyNameReference(name, modInterfacesModule.Assembly.Name.Version);
+        assemblyCsharpModule.AssemblyReferences.Add(modInterfacesReference);
         return modInterfacesModule;
     }
 
@@ -96,13 +96,13 @@ internal static class Patcher
             return;
         }
 
-        var awake = logManager.Methods!.FirstOrDefault(o => o.Name == "Awake");
+        var awake = logManager.Methods.FirstOrDefault(o => o.Name == "Awake");
         if (awake == null) {
             Program.WriteFatal("Could not find Awake method in Logging.LogManager.");
             return;
         }
 
-        var createLogger = awake.Body!.Instructions!.FirstOrDefault(o =>
+        var createLogger = awake.Body.Instructions.FirstOrDefault(o =>
             o.OpCode == OpCodes.Callvirt &&
             o.Operand is MethodReference { Name: "CreateLogger" } method &&
             method.DeclaringType!.FullName == "Serilog.LoggerConfiguration");
@@ -114,17 +114,17 @@ internal static class Patcher
 
         var injectorType           = modInjector.GetType("Railroader.ModInjector.Injector")!;
 
-        var modInjectorMain         = injectorType.Methods!.FirstOrDefault(o => o.Name == "ModInjectorMain")!;
-        var importedModInjectorMain = assemblyCsharp.ImportReference(modInjectorMain)!;
+        var modInjectorMain         = injectorType.Methods.FirstOrDefault(o => o.Name == "ModInjectorMain")!;
+        var importedModInjectorMain = assemblyCsharp.ImportReference(modInjectorMain);
 
-        var createLoggerEx          = injectorType.Methods!.FirstOrDefault(o => o.Name == "CreateLogger")!;
-        var importedCreateLoggerEx  = assemblyCsharp.ImportReference(createLoggerEx)!;
+        var createLoggerEx         = injectorType.Methods.FirstOrDefault(o => o.Name == "CreateLogger")!;
+        var importedCreateLoggerEx = assemblyCsharp.ImportReference(createLoggerEx);
 
-        var ilProcessor = awake.Body.GetILProcessor()!;
-        var returnInstruction = awake.Body.Instructions!.Last(i => i.OpCode == OpCodes.Ret);
+        var ilProcessor       = awake.Body.GetILProcessor();
+        var returnInstruction = awake.Body.Instructions.Last(i => i.OpCode == OpCodes.Ret);
 
-        ilProcessor.InsertBefore(returnInstruction, ilProcessor.Create(OpCodes.Call, importedModInjectorMain)!);
-        ilProcessor.Replace(createLogger, ilProcessor.Create(OpCodes.Call, importedCreateLoggerEx)!);
+        ilProcessor.InsertBefore(returnInstruction, ilProcessor.Create(OpCodes.Call, importedModInjectorMain));
+        ilProcessor.Replace(createLogger, ilProcessor.Create(OpCodes.Call, importedCreateLoggerEx));
     }
 
     private static string GetFile(string path, string name) {

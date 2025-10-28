@@ -53,8 +53,8 @@ internal sealed class ModDefinitionProcessor : IModDefinitionProcessor
             if (mod.ConflictsWith != null) {
                 foreach (var (conflictId, fluentVersion) in mod.ConflictsWith) {
                     if (modMap.TryGetValue(conflictId, out var conflictingMod)) {
-                        if (fluentVersion == null || IsVersionSatisfied(conflictingMod!.Version, fluentVersion)) {
-                            Errors.Add($"Mod '{mod.Identifier}' conflicts with mod '{conflictId}' (version: '{conflictingMod!.Version}'{(fluentVersion != null ? $", constraint: '{fluentVersion}'" : "")}).");
+                        if (fluentVersion == null || IsVersionSatisfied(conflictingMod.Version, fluentVersion)) {
+                            Errors.Add($"Mod '{mod.Identifier}' conflicts with mod '{conflictId}' (version: '{conflictingMod.Version}'{(fluentVersion != null ? $", constraint: '{fluentVersion}'" : "")}).");
                         }
                     }
                 }

@@ -15,7 +15,7 @@ internal sealed class ModdingContext(IReadOnlyCollection<IMod> mods) : IModdingC
 
     /// <inheritdoc />
     [ExcludeFromCodeCoverage]
-    public T? LoadSettings<T>(string identifier) where T : class => throw new NotImplementedException();
+    public T LoadSettings<T>(string identifier) where T : class => throw new NotImplementedException();
 
     /// <inheritdoc />
     [ExcludeFromCodeCoverage]

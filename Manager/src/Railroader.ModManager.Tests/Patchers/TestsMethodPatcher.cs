@@ -68,7 +68,7 @@ public sealed class TestsMethodPatcher
     public void SkipNotMarkedTypes(string suffix, string source) {
         // Arrange
         var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source, suffix);
-        var typeDefinition = assemblyDefinition.MainModule!.Types!.First(o => o.FullName == "Foo.Bar.TargetType");
+        var typeDefinition = assemblyDefinition.MainModule.Types.First(o => o.FullName == "Foo.Bar.TargetType");
 
         var logger = Substitute.For<ILogger>();
 
@@ -96,7 +96,7 @@ public sealed class TestsMethodPatcher
                               """;
 
         var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source);
-        var typeDefinition = assemblyDefinition.MainModule!.Types!.First(o => o.FullName == "Foo.Bar.TargetType");
+        var typeDefinition = assemblyDefinition.MainModule.Types.First(o => o.FullName == "Foo.Bar.TargetType");
 
         var logger = Substitute.For<ILogger>();
 
@@ -132,7 +132,7 @@ public sealed class TestsMethodPatcher
         var targetMethod = "TargetMethod" + suffix;
        
         var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source, suffix);
-        var typeDefinition = assemblyDefinition.MainModule!.Types!.First(o => o.FullName == "Foo.Bar.TargetType");
+        var typeDefinition = assemblyDefinition.MainModule.Types.First(o => o.FullName == "Foo.Bar.TargetType");
 
         var logger = Substitute.For<ILogger>();
 
@@ -150,7 +150,7 @@ public sealed class TestsMethodPatcher
         logger.Received().Information("Successfully patched {TypeName} for {PluginInterface}", typeDefinition.FullName, typeof(IMarker).FullName);
         logger.ReceivedCalls().Should().HaveCount(3);
 
-        var baseMethodDef = typeDefinition.BaseType!.Resolve()!.Methods!.FirstOrDefault(m => m.Name == targetMethod && m.IsVirtual)!;
+        var baseMethodDef = typeDefinition.BaseType!.Resolve()!.Methods.FirstOrDefault(m => m.Name == targetMethod && m.IsVirtual)!;
 
         var methodAttributes = (baseMethodDef.Attributes & ~(MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.NewSlot)) |
                                MethodAttributes.Virtual | MethodAttributes.ReuseSlot | MethodAttributes.HideBySig;
@@ -158,27 +158,27 @@ public sealed class TestsMethodPatcher
         var targetMethodDefinition = typeDefinition.Methods.Should().Contain(o => o.Name == targetMethod).Which;
         targetMethodDefinition.Attributes.Should().Be(methodAttributes);
 
-        var instructions           = targetMethodDefinition.Body!.Instructions!.ToArray()!;
+        var instructions           = targetMethodDefinition.Body.Instructions.ToArray()!;
         
         instructions.Last().OpCode.Should().Be(OpCodes.Ret);
 
-        var injectedMethodRef = (instructions[1].Operand as MethodReference)!;
+        var injectedMethodRef = (instructions[1]!.Operand as MethodReference)!;
 
 
-        instructions[0].OpCode.Should().Be(OpCodes.Ldarg_0);
-        instructions[1].OpCode.Should().Be(OpCodes.Call);
+        instructions[0]!.OpCode.Should().Be(OpCodes.Ldarg_0);
+        instructions[1]!.OpCode.Should().Be(OpCodes.Call);
         injectedMethodRef.FullName.Should().Contain("Patcher::InjectedMethod");
         injectedMethodRef.Parameters.Should().HaveCount(1);
 
         var baseCalls = instructions
                         .Skip(2)
                         .Where(i => i.OpCode == OpCodes.Call && 
-                                    (i.Operand as MethodReference)?.FullName.Contains($"BaseType::{targetMethod}") == true)
+                                    (i.Operand as MethodReference)?.FullName!.Contains($"BaseType::{targetMethod}") == true)
                         .ToArray();
     
         baseCalls.Should().HaveCount(1);
     
-        var baseCallIndex = Array.IndexOf(instructions, baseCalls[0]);
+        var baseCallIndex = Array.IndexOf(instructions, baseCalls[0]!);
 
         var targetMethodInfo       = typeof(BaseType).GetMethod(targetMethod, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
         var targetMethodParameters = targetMethodInfo.GetParameters();
@@ -199,13 +199,13 @@ public sealed class TestsMethodPatcher
                 3 => OpCodes.Ldarg_3, // param 2
                 _ => OpCodes.Ldarg_S  // param 3+
             };
-            argLoadInstructions[i].OpCode.Should().Be(expectedOpcode);
+            argLoadInstructions[i]!.OpCode.Should().Be(expectedOpcode);
     
-            // Verify Ldarg_S operands match parameter names
+            // Verify operands match parameter names
             if (i >= 3) {
                 var paramIndex = i - 1; // 0-based param index
                 var paramName  = targetMethodParameters[paramIndex].Name;
-                (argLoadInstructions[i].Operand as ParameterReference)?.Name.Should().Be(paramName);
+                (argLoadInstructions[i]!.Operand as ParameterReference)?.Name.Should().Be(paramName);
             }
         }
     }
@@ -221,7 +221,7 @@ public sealed class TestsMethodPatcher
                               """;
 
         var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source);
-        var typeDefinition = assemblyDefinition.MainModule!.Types!.First(o => o.FullName == "Foo.Bar.TargetType");
+        var typeDefinition = assemblyDefinition.MainModule.Types.First(o => o.FullName == "Foo.Bar.TargetType");
 
         var logger = Substitute.For<ILogger>();
 
@@ -255,7 +255,7 @@ public sealed class TestsMethodPatcher
                               """;
 
         var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source);
-        var typeDefinition = assemblyDefinition.MainModule!.Types!.First(o => o.FullName == "Foo.Bar.TargetType");
+        var typeDefinition = assemblyDefinition.MainModule.Types.First(o => o.FullName == "Foo.Bar.TargetType");
 
         var logger = Substitute.For<ILogger>();
 

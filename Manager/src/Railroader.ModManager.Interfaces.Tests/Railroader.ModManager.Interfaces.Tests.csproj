@@ -6,20 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="System.Core" />
         <GameAssembly Include="Assembly-CSharp" />
-        <GameAssembly Include="KeyValue.Runtime" />
-        <GameAssembly Include="Core" />
-        <GameAssembly Include="Definition" />
-        <GameAssembly Include="UnityEngine.CoreModule" />
-        <GameAssembly Include="UnityEngine.PhysicsModule" />
-        <GameAssembly Include="UnityEngine.ImageConversionModule" />
-        <GameAssembly Include="UnityEngine.InputLegacyModule" />
-        <GameAssembly Include="UnityEngine.UI" />
-        <GameAssembly Include="Unity.TextMeshPro" />
         <GameAssembly Include="Serilog" />
-        <GameAssembly Include="Newtonsoft.Json" />
-        <GameAssembly Include="SimpleGraph.Runtime" />
     </ItemGroup>
     
     <ItemGroup>

@@ -9,7 +9,7 @@ namespace Railroader.ModManager.Services;
 /// <summary> Manages plugin instantiation for mods. </summary>
 internal interface IPluginManager
 {
-    IEnumerable<IPluginBase> CreatePlugins(Mod mod);
+    IEnumerable<IPlugin> CreatePlugins(Mod mod);
 }
 
 /// <inheritdoc />
@@ -20,7 +20,7 @@ internal sealed class PluginManager : IPluginManager
     public required ILogger          Logger          { get; init; }
 
     /// <inheritdoc />
-    public IEnumerable<IPluginBase> CreatePlugins(Mod mod) {
+    public IEnumerable<IPlugin> CreatePlugins(Mod mod) {
         var assembly = AssemblyWrapper.LoadFrom(mod.AssemblyPath!);
         if (assembly == null) {
             yield break;
@@ -32,8 +32,8 @@ internal sealed class PluginManager : IPluginManager
             }
 
             if (type.BaseType is not { IsGenericType: true } || type.BaseType?.GetGenericTypeDefinition() != typeof(PluginBase<>)) {
-                if (typeof(IPluginBase).IsAssignableFrom(type)) {
-                    Logger.Warning("Type {type} inherits IPluginBase but not PluginBase<> in mod {ModId}", type, mod.Definition.Identifier);
+                if (typeof(IPlugin).IsAssignableFrom(type)) {
+                    Logger.Warning("Type {type} inherits IPlugin but not PluginBase<> in mod {ModId}", type, mod.Definition.Identifier);
                 }
 
                 continue;
@@ -45,7 +45,7 @@ internal sealed class PluginManager : IPluginManager
                 continue;
             }
 
-            yield return (IPluginBase)constructor.Invoke([ModdingContext, mod])!;
+            yield return (IPlugin)constructor.Invoke([ModdingContext, mod])!;
         }
     }
 }

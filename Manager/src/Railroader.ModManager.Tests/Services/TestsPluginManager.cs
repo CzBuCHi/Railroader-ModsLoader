@@ -111,7 +111,7 @@ public sealed class TestsPluginManager
             """
             using Railroader.ModInterfaces;
             
-            public class Foo : IPluginBase {
+            public class Foo : IPlugin {
                 public IModdingContext ModdingContext { get; }
                 public IMod Mod { get; }
                 public bool IsEnabled { get; set; }
@@ -132,7 +132,7 @@ public sealed class TestsPluginManager
         // Assert
         plugins.Should().BeEmpty();
 
-        logger.Received().Warning("Type {type} inherits IPluginBase but not PluginBase<> in mod {ModId}", Arg.Is<Type>(o => o.Name == "Foo"), mod.Definition.Identifier);
+        logger.Received().Warning("Type {type} inherits IPlugin but not PluginBase<> in mod {ModId}", Arg.Is<Type>(o => o.Name == "Foo"), mod.Definition.Identifier);
     }
 
     [Theory]

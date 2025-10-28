@@ -41,7 +41,7 @@ internal sealed class Mod(IModDefinition modDefinition, string? assemblyPath) : 
 
     /// <inheritdoc />
     [JsonIgnore]
-    public IPluginBase[]? Plugins { get; internal set; }
+    public IPlugin[]? Plugins { get; internal set; }
 
     [JsonProperty("Plugins")]
     internal string[]? PluginNames => Plugins?.Select(o => o.GetType().FullName).ToArray();

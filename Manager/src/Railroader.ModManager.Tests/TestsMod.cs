@@ -31,7 +31,7 @@ public sealed class TestsMod
         // Arrange
         var modDefinition = Substitute.For<IModDefinition>();
         var sut           = new Mod(modDefinition, "assemblyPath");
-        var plugin        = Substitute.For<IPluginBase>();
+        var plugin        = Substitute.For<IPlugin>();
         
         sut.Plugins = [plugin];
 

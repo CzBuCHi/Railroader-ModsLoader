@@ -111,7 +111,7 @@ public static class Program
         var steamIdRegex = new Regex("^\\s*\"1683150\"\\s*\"\\d+\"\\s*$", RegexOptions.Compiled);
         var pathRegex    = new Regex("^\\s*\"path\"\\s*\"(.+?)\"\\s*$", RegexOptions.Compiled);
 
-        using var registryKey = Registry.CurrentUser!.OpenSubKey(@"SOFTWARE\Valve\Steam");
+        using var registryKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Valve\Steam");
         if (registryKey == null) {
             throw new ArgumentException("Cannot find Steam registry");
         }

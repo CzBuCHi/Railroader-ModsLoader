@@ -148,7 +148,7 @@ public sealed class TestsMemoryFileSystemBase
         ]);
     }
 
-    private static MemoryEntry[] Enumerate_SpecificWildcardPatterns_MatchesCorrectlyEntries = [
+    private static readonly MemoryEntry[] _EnumerateSpecificWildcardPatternsMatchesCorrectlyEntries = [
         // @formatter:off
         new(@"c:\test\__.__",  [0 ] ),
         new(@"c:\test\-.__",   [1 ] ),
@@ -180,7 +180,7 @@ public sealed class TestsMemoryFileSystemBase
     public static IEnumerable<object?[]> Enumerate_SpecificWildcardPatterns_MatchesCorrectlyData() {
         return Enumerate().Select(o => new object?[] {
             o.searchPattern,
-            o.entries!.Select(p => Enumerate_SpecificWildcardPatterns_MatchesCorrectlyEntries[p]).ToArray()
+            o.entries!.Select(p => _EnumerateSpecificWildcardPatternsMatchesCorrectlyEntries[p]).ToArray()
         });
 
         IEnumerable<(string searchPattern, int[] entries)> Enumerate() {
@@ -217,7 +217,7 @@ public sealed class TestsMemoryFileSystemBase
     {
         // Arrange
         var sut = new MemoryFileSystemBaseImpl();
-        sut.AddRange(Enumerate_SpecificWildcardPatterns_MatchesCorrectlyEntries);
+        sut.AddRange(_EnumerateSpecificWildcardPatternsMatchesCorrectlyEntries);
         
         // Act
         var result = sut.Enumerate(@"C:\Test", searchPattern).ToList();

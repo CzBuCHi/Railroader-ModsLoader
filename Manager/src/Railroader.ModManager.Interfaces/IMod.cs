@@ -17,7 +17,7 @@ public interface IMod
     bool IsLoaded { get; }
 
     /// <summary> Gets the plugins provided by this mod, or <see langword="null"/> if no plugins are available. </summary>
-    IPluginBase[]? Plugins { get; }
+    IPlugin[]? Plugins { get; }
 
     /// <summary> Creates a scoped logger for this mod. </summary>
     /// <param name="scope">

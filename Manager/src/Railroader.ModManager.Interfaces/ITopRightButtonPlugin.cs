@@ -5,7 +5,7 @@ namespace Railroader.ModManager.Interfaces;
 
 /// <summary> Defines a plugin that adds a custom button to the top-right UI area. </summary>
 [PublicAPI]
-public interface ITopRightButtonPlugin
+public interface ITopRightButtonPlugin : IPlugin
 {
     /// <summary> Gets the name of the icon to display for this button. </summary>
     string IconName { get; }

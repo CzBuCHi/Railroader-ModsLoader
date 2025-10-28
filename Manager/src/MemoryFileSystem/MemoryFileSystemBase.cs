@@ -72,19 +72,19 @@ public abstract partial class MemoryFileSystemBase : IMemoryFileSystem, IEnumera
         // path = @"C:\Test"
 
         // filter out all where Key do not start with path
-        var query = Items.Where(o => o.Key!.StartsWith(path, StringComparison.OrdinalIgnoreCase));
+        var query = Items.Where(o => o.Key.StartsWith(path, StringComparison.OrdinalIgnoreCase));
 
         // _Items.Keys = [@"C:\Test", @"C:\Test\Dir1", @"C:\Test\Dir2", @"C:\Test\File1.txt", @"C:\Test\Dir3", @"C:\Test\Dir3\SubDir", @"C:\Test\Dir3\File2.txt" ]
 
         // filter out 'self'
-        query = query.Where(o => o.Key!.Length > path.Length);
+        query = query.Where(o => o.Key.Length > path.Length);
 
         // _Items.Keys = [ @"C:\Test\Dir1", @"C:\Test\Dir2", @"C:\Test\File1.txt", @"C:\Test\Dir3", @"C:\Test\Dir3\SubDir", @"C:\Test\Dir3\File2.txt" ]
         if (searchOption == SearchOption.TopDirectoryOnly) {
             // filter out nested entries
             query = query.Where(o => {
                 // o.Key one of = [ @"C:\Test\Dir1", @"C:\Test\Dir2", @"C:\Test\File1.txt", @"C:\Test\Dir3", @"C:\Test\Dir3\SubDir", @"C:\Test\Dir3\File2.txt" ]
-                var index = o.Key!.IndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar], path.Length + 1);
+                var index = o.Key.IndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar], path.Length + 1);
                 if (index == -1) {
                     // o.Key one of [ @"C:\Test\Dir1", @"C:\Test\Dir2", @"C:\Test\File1.txt", @"C:\Test\Dir3" ]
                     return true;
@@ -98,7 +98,7 @@ public abstract partial class MemoryFileSystemBase : IMemoryFileSystem, IEnumera
         var regex = ToRegex(searchPattern);
 
         // filter out files that do not match pattern
-        query = query.Where(o => regex.IsMatch(Path.GetFileName(o.Key!)));
+        query = query.Where(o => regex.IsMatch(Path.GetFileName(o.Key)));
 
         return query.Select(o => o.Value).OrderBy(o => o!.Path);
     }
