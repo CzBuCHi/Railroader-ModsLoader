@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<assembly name="Mono.Cecil">
+  <member name="M:Mono.Cecil.AssemblyDefinition.CreateAssembly(Mono.Cecil.AssemblyNameDefinition,System.String,Mono.Cecil.ModuleKind)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:Mono.Cecil.Cil.ILProcessor.Create(Mono.Cecil.Cil.OpCode,Mono.Cecil.MethodReference)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:Mono.Cecil.Cil.ILProcessor.Create(Mono.Cecil.Cil.OpCode,Mono.Cecil.ParameterDefinition)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:Mono.Cecil.Cil.ILProcessor.Create(Mono.Cecil.Cil.OpCode)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:Mono.Cecil.Cil.MethodBody.GetILProcessor">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:Mono.Cecil.ModuleDefinition.ImportReference(Mono.Cecil.MethodReference)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:Mono.Cecil.ModuleDefinition.ImportReference(Mono.Cecil.TypeReference)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:Mono.Cecil.ModuleDefinition.ImportReference(System.Reflection.MethodBase)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.AssemblyDefinition.MainModule">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.AssemblyDefinition.Name">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.AssemblyNameReference.Name">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.AssemblyNameReference.Version">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.Cil.MethodBody.Instructions">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+    <attribute ctor="M:JetBrains.Annotations.ItemNotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.MethodDefinition.Body">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.MethodReference.Parameters">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.MethodReference.ReturnType">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.ModuleDefinition.Assembly">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.ModuleDefinition.AssemblyReferences">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.ModuleDefinition.Types">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.ModuleDefinition.TypeSystem">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.ParameterReference.Name">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.ParameterReference.ParameterType">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.TypeDefinition.Interfaces">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.TypeDefinition.Methods">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:Mono.Cecil.TypeSystem.Void">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+</assembly>

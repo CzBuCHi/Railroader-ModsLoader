@@ -1,0 +1,3 @@
+F:Mono.CSharp.CompilerSettings.AssemblyReferences
+F:Mono.CSharp.CompilerSettings.ReferencesLookupPaths
+P:Mono.CSharp.CompilerContext.Report

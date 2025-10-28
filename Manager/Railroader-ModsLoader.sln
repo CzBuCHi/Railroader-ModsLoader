@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryFileSystem.Tests", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stryker", "src\Stryker\Stryker.csproj", "{5376BC7F-5AA5-C127-BF09-7A32E0E3BFBF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExternalAnnotationsBuilder", "src\ExternalAnnotationsBuilder\ExternalAnnotationsBuilder.csproj", "{C48E9155-AFEE-993C-9631-DFF425D58EE6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +80,10 @@ Global
 		{5376BC7F-5AA5-C127-BF09-7A32E0E3BFBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5376BC7F-5AA5-C127-BF09-7A32E0E3BFBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5376BC7F-5AA5-C127-BF09-7A32E0E3BFBF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C48E9155-AFEE-993C-9631-DFF425D58EE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C48E9155-AFEE-993C-9631-DFF425D58EE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C48E9155-AFEE-993C-9631-DFF425D58EE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C48E9155-AFEE-993C-9631-DFF425D58EE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,6 +98,7 @@ Global
 		{17964381-469C-4E46-BD84-D4FC40612C2B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{EA3B34B7-E88A-4A01-92FA-BC6D488A8FAE} = {951B46DF-AC6C-4BBD-82BF-DCA8CE1BAED6}
 		{5376BC7F-5AA5-C127-BF09-7A32E0E3BFBF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{C48E9155-AFEE-993C-9631-DFF425D58EE6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3E9DAAED-6A69-4753-8BB3-37E7B3841F09}

@@ -1,0 +1,7 @@
+M:HarmonyLib.Harmony.CreateClassProcessor(System.Type)
+M:HarmonyLib.Harmony.CreateProcessor(System.Reflection.MethodBase)
+M:HarmonyLib.Harmony.CreateReversePatcher(System.Reflection.MethodBase,HarmonyLib.HarmonyMethod)
+M:HarmonyLib.Harmony.GetPatchedMethods
+M:HarmonyLib.Harmony.Patch(System.Reflection.MethodBase,HarmonyLib.HarmonyMethod,HarmonyLib.HarmonyMethod,HarmonyLib.HarmonyMethod,HarmonyLib.HarmonyMethod) original prefix postfix transpiler finalizer
+M:HarmonyLib.Harmony.UnpatchAll(System.String) harmonyID
+P:HarmonyLib.Harmony.Id

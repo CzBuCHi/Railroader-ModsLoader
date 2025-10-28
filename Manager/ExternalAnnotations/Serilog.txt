@@ -1,4 +1,8 @@
+M:Serilog.Configuration.LoggerMinimumLevelConfiguration.Override(System.String,Serilog.Events.LogEventLevel)
+M:Serilog.ILogger.ForContext(System.String,System.Object,System.Boolean)
 M:Serilog.Log.ForContext(System.String,System.Object,System.Boolean)
 M:Serilog.Log.ForContext(System.Type)
 M:Serilog.Log.ForContext``1
+P:Serilog.Events.LogEvent.Properties
+P:Serilog.LoggerConfiguration.MinimumLevel
 P:Serilog.LoggerConfiguration.WriteTo

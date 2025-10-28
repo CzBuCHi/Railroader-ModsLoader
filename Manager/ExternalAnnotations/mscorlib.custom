@@ -1,0 +1,23 @@
+﻿<assembly name="mscorlib">
+    <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.TryGetValue(`0,`1@)">
+        <attribute ctor="M:JetBrains.Annotations.ContractAnnotationAttribute.#ctor(System.String)">
+            <argument>=>true,value:NotNull; =>false,value:null</argument>
+        </attribute>
+        <parameter name="value">         
+            <attribute ctor="M:System.Diagnostics.NotNullWhenAttribute.#ctor(System.Boolean)">
+                <argument>true</argument>
+            </attribute>
+        </parameter>
+    </member>
+    <member name="M:System.Collections.Generic.Dictionary`2.TryGetValue(`0,`1@)">
+        <attribute ctor="M:JetBrains.Annotations.ContractAnnotationAttribute.#ctor(System.String)">
+            <argument>=>true,value:NotNull; =>false,value:null</argument>
+        </attribute>
+        <parameter name="value">         
+            <attribute ctor="M:System.Diagnostics.NotNullWhenAttribute.#ctor(System.Boolean)">
+                <argument>true</argument>
+            </attribute>
+        </parameter>
+    </member>
+</assembly>
+

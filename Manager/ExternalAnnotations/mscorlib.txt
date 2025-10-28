@@ -1,0 +1,9 @@
+F:Microsoft.Win32.Registry.CurrentUser
+P:System.Collections.Generic.KeyValuePair`2.Key
+P:System.Reflection.AssemblyName.Name
+P:System.Reflection.AssemblyName.Version
+P:System.Reflection.MemberInfo.DeclaringType
+P:System.Reflection.ParameterInfo.Name
+P:System.Type.FullName
+P:System.Type.Namespace
+T:System.Version version

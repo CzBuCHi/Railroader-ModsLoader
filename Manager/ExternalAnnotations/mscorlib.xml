@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<assembly name="mscorlib">
+  <member name="F:Microsoft.Win32.Registry.CurrentUser">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:System.Collections.Concurrent.ConcurrentDictionary`2.TryGetValue(`0,`1@)">
+    <attribute ctor="M:JetBrains.Annotations.ContractAnnotationAttribute.#ctor(System.String)">
+      <argument>=&gt;true,value:NotNull; =&gt;false,value:null</argument>
+    </attribute>
+    <parameter name="value">
+      <attribute ctor="M:System.Diagnostics.NotNullWhenAttribute.#ctor(System.Boolean)">
+        <argument>true</argument>
+      </attribute>
+    </parameter>
+  </member>
+  <member name="M:System.Collections.Generic.Dictionary`2.TryGetValue(`0,`1@)">
+    <attribute ctor="M:JetBrains.Annotations.ContractAnnotationAttribute.#ctor(System.String)">
+      <argument>=&gt;true,value:NotNull; =&gt;false,value:null</argument>
+    </attribute>
+    <parameter name="value">
+      <attribute ctor="M:System.Diagnostics.NotNullWhenAttribute.#ctor(System.Boolean)">
+        <argument>true</argument>
+      </attribute>
+    </parameter>
+  </member>
+  <member name="P:System.Collections.Generic.KeyValuePair`2.Key">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:System.Reflection.AssemblyName.Name">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:System.Reflection.AssemblyName.Version">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:System.Reflection.MemberInfo.DeclaringType">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:System.Reflection.ParameterInfo.Name">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:System.Type.FullName">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="P:System.Type.Namespace">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="T:System.Version">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+    <parameter name="version">
+      <attribute ctor="M:JetBrains.Annotations.CanBeNullAttribute.#ctor" />
+    </parameter>
+  </member>
+</assembly>

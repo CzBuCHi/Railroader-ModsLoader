@@ -1,0 +1,2 @@
+M:UnityEngine.GameObject.AddComponent``1
+M:UnityEngine.GameObject.GetComponent``1

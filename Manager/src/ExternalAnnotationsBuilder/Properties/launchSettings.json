@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ExternalAnnotationsBuilder": {
+      "commandName": "Project",
+      "workingDirectory": "c:\\projects\\Railroader\\Railroader.ModManager\\Manager\\ExternalAnnotations\\"
+    }
+  }
+}
