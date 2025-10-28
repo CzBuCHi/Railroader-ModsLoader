@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>BUTR.Harmony.Analyzer</id>
+    <version>1.0.1.50</version>
+    <authors>BUTR</authors>
+    <developmentDependency>true</developmentDependency>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <projectUrl>https://github.com/BUTR/BUTR.Harmony.Analyzer</projectUrl>
+    <description>BUTR.Harmony.Analyzer</description>
+    <copyright>Copyright</copyright>
+    <tags>harmony, analyzers</tags>
+    <repository url="https://github.com/BUTR/BUTR.Harmony.Analyzer" />
+  </metadata>
+</package>

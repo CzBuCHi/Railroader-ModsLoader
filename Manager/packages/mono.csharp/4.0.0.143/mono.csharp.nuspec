@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>Mono.CSharp</id>
+    <version>4.0.0.143</version>
+    <authors>Mono Development Team</authors>
+    <owners>Dale Ragan</owners>
+    <licenseUrl>https://github.com/mono/mono/blob/0b501c1c7dab6626ea6b781890cd3050926cadc8/mcs/LICENSE</licenseUrl>
+    <projectUrl>http://www.mono-project.com/docs/about-mono/languages/csharp/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Mono C# Compiler</description>
+    <releaseNotes>http://www.mono-project.com/docs/about-mono/releases/4.0.0/#c</releaseNotes>
+    <copyright>Copyright 2015 Mono Project</copyright>
+    <tags>mono csharp c# compiler</tags>
+  </metadata>
+</package>
