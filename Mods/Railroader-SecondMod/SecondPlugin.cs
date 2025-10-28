@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 using Railroader.FirstMod;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using Serilog;
 
 namespace Railroader.SecondMod

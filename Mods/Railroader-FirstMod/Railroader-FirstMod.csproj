@@ -16,8 +16,6 @@
       <GameAssembly Include="Serilog" />
       <GameAssembly Include="0Harmony" />
       <GameAssembly Include="UnityEngine.CoreModule" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Railroader-ModInterfaces\Railroader-ModInterfaces.csproj" />
+      <GameAssembly Include="Railroader.ModManager.Interfaces" />
   </ItemGroup>
 </Project>

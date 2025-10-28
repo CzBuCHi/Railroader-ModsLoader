@@ -1,5 +1,5 @@
 ﻿using JetBrains.Annotations;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using Serilog;
 
 namespace Railroader.FirstMod

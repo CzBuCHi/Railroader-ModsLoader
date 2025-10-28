@@ -1,0 +1,78 @@
+﻿<Project>
+    <PropertyGroup>
+        <!-- Try to find the directory on our own -->
+        <GameManagedDir Condition="'$(GameManagedDir)' == ''">$([System.IO.Directory]::GetDirectories(`$(GameDir)`, `*_Data`)[0])\Managed</GameManagedDir>
+        <GameModsDir Condition="'$(GameModsDir)' == ''">$(GameDir)/Mods</GameModsDir>        
+        <GameModDir Condition="'$(GameModDir)' == ''">$(GameModsDir)/$(AssemblyName)</GameModDir>        
+    </PropertyGroup>
+    
+    <PropertyGroup>
+        <IsMod Condition="'$(IsMod)' == ''">false</IsMod>
+        <PackageMod Condition="'$(PackageMod)' == '' Or '$(IsMod)' == 'false'">disable</PackageMod>
+        <PublishMod Condition="'$(PublishMod)' == '' Or '$(PackageMod)' == 'false'">disable</PublishMod>
+    </PropertyGroup>
+    
+    <!-- Replace the default version if something was set for it -->
+    <PropertyGroup Condition="'$(AssemblyVersion)' == '' OR '$(MajorVersion)' != '' OR '$(MinorVersion)' != ''">
+        <MajorVersion Condition="'$(MajorVersion)' == ''">1</MajorVersion>
+        <MinorVersion Condition="'$(MinorVersion)' == ''">0</MinorVersion>
+        <AssemblyVersion>$(MajorVersion).$(MinorVersion).$([System.DateTime]::UtcNow.ToString(yy))$([System.DateTime]::UtcNow.DayOfYear.ToString("000")).$([System.DateTime]::UtcNow.ToString("Hmm").TrimStart('0'))</AssemblyVersion>
+        <FileVersion>$(AssemblyVersion)</FileVersion>
+        <ProductVersion>$(AssemblyVersion)</ProductVersion>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <!-- Reference the .dll/.exes specified with GameAssembly elements-->
+        <Reference Include="@(GameAssembly)">
+            <HintPath Condition="Exists('$(GameManagedDir)\%(Identity).dll')">$(GameManagedDir)\%(Identity).dll</HintPath>
+            <HintPath Condition="Exists('$(GameManagedDir)\%(Identity).exe')">$(GameManagedDir)\%(Identity).exe</HintPath>
+            <HintPath Condition="Exists('$(GameDir)/Mods/%(Identity)/%(Identity).dll')">$(GameDir)/Mods/%(Identity)/%(Identity).dll</HintPath>
+            <Private>$(IsTestProject)</Private>
+        </Reference>
+        <!-- Allow referencing things like OtherMod/Mod.dll -->
+        <ModReference Include="@(ModAssembly)">
+            <AssemblyName>$([System.IO.Path]::GetFileNameWithoutExtension("%(Identity)"))</AssemblyName>
+            <FullModPath>$(GameDir)\Mods\%(Identity)</FullModPath>
+        </ModReference>
+        <Reference Include="@(ModReference->'%(AssemblyName)')">
+            <HintPath Condition="Exists('%(FullModPath)')">%(FullModPath)</HintPath>
+            <Private>$(IsTestProject)</Private>
+        </Reference>
+    </ItemGroup>
+    
+    <!-- package mod -->
+    <Target Name="PackageMod" AfterTargets="AfterBuild" Condition="'$(PackageMod)' == 'enable'">
+        <Message Text="Packaging $(AssemblyName) v$(AssemblyVersion)" Importance="high"/>
+        <!-- Replace $(AssemblyVersion) with the actual version in Definition.json -->
+        <Exec Command="powershell -Command &quot;(Get-Content '$(MSBuildProjectDirectory)/Definition.json') -replace '\$\(AssemblyVersion\)', '$(AssemblyVersion)' | Set-Content '$(MSBuildProjectDirectory)/Definition.json'&quot;"/>
+        <PropertyGroup>
+            <ModsDirectory>$(OutputPath)/Mods</ModsDirectory>
+            <ModDirectory>$(ModsDirectory)/$(AssemblyName)</ModDirectory>
+            <!-- Folder we'll put the published zips into -->
+            <PublishPath>../bin</PublishPath>
+            <ZipName>$(PublishPath)/$(AssemblyName)_$(AssemblyVersion).zip</ZipName>
+            <ZipName Condition="'$(Configuration)' == 'Debug'">$(PublishPath)/$(AssemblyName).DEBUG_$(AssemblyVersion).zip</ZipName>
+        </PropertyGroup>
+        <!-- Ensure the output path exists -->
+        <MakeDir Directories="$(PublishPath)"/>
+        <!-- Remove old Mods directory and existing zip files -->
+        <ItemGroup>
+            <OldZips Include="$(PublishPath)/$(AssemblyName)_*.zip"/>
+        </ItemGroup>
+        <RemoveDir Directories="$(ModsDirectory)" ContinueOnError="true"/>
+        <Delete Files="@(OldZips)"/>
+        <!-- Create the Mods directory again -->
+        <MakeDir Directories="$(ModDirectory)"/>
+        <!-- Collect source files -->
+        <ItemGroup>
+            <SourceFiles Include="$(MSBuildProjectDirectory)/Definition.json"/>
+            <SourceFiles Include="$(MSBuildProjectDirectory)/**/*.cs" Exclude="$(MSBuildProjectDirectory)/bin/**/*.*;$(MSBuildProjectDirectory)/obj/**/*.*"/>
+        </ItemGroup>
+        <!-- Copy source files to the Mods directory -->
+        <Copy SourceFiles="@(SourceFiles)" DestinationFiles="@(SourceFiles->'$(ModDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
+        <!-- Zip the source files -->
+        <Exec Command="powershell -Command &quot;Compress-Archive -Path '$(ModDirectory)/*' -Destination '$(ZipName)'&quot;"/>
+        <!-- Copy them to the game directory -->
+        <Copy SourceFiles="$(ZipName)" DestinationFolder="$(GameModsDir)"/>
+    </Target>
+</Project>
