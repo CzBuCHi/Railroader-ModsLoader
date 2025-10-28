@@ -8,32 +8,34 @@ namespace Railroader.ModManagerInstaller;
 public static class Program
 {
     private static readonly Assembly _Assembly     = Assembly.GetExecutingAssembly();
-    private static readonly string?  _AssemblyName = _Assembly.GetName().Name;
-
-    private const string Railroader = "Railroader.exe";
+    private static readonly string   _AssemblyName = _Assembly.GetName().Name;
 
     public static void Main() {
         try {
-            var text = $"{_AssemblyName} {_Assembly.GetName().Version}";
-            Console.WriteLine(text);
-            Console.Title = text;
+            Console.Write(_AssemblyName);
+            Console.Write(" ");
+            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine(_Assembly.GetName().Version);
+            Console.ResetColor();
+            Console.Title = $"{_AssemblyName} {_Assembly.GetName().Version}";
         } catch (PlatformNotSupportedException) {
         }
 
         AppDomain.CurrentDomain.AssemblyResolve += ResolveInternalAssemblies;
 
         if (!SetCurrentDirectory()) {
-            WriteError("Could not determine Railroader directory automatically.");
+            ConsoleEx.WriteError("Could not determine Railroader directory automatically.");
             Console.WriteLine($"Move this {_AssemblyName} into your game's directory, then run again.");
             Environment.Exit(1);
         }
 
-        if (Patcher.PatchGame()) {
+        try {
             ExtractFiles();
-        }
-
-        if (!Directory.Exists("Mods")) {
+            Patcher.PatchGame();
             Directory.CreateDirectory("Mods");
+        } catch (Exception exc) {
+            ConsoleEx.WriteError("Failed to patch game.");
+            Console.Error.WriteLine(exc);
         }
 
         Console.ForegroundColor = ConsoleColor.White;
@@ -42,40 +44,32 @@ public static class Program
     }
 
     private static void ExtractFiles() {
-        const string injector = "Railroader.ModsLoader.Injector.";
+        var prefix = typeof(Program).FullName!.Replace(nameof(Program), "Assemblies");
+
+        string[] assemblies = [
+            "0Harmony.dll",
+            "Mono.Cecil.dll",
+            "Mono.CSharp.dll",
+            "Railroader.ModManager.dll",
+            "Railroader.ModManager.Interfaces.dll"
+        ];
 
         Console.WriteLine("Extracting files ...");
-        foreach (var item in _Assembly.GetManifestResourceNames().Where(n => n.StartsWith(injector))) {
-            var path = item.Replace(injector, "Railroader_Data/Managed/");
+        foreach (var assembly in assemblies) {
+            var path = Path.Combine("Railroader_Data", "Managed", assembly);
 
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.Error.WriteLine(path);
             Console.ResetColor();
 
-            using var stream     = _Assembly.GetManifestResourceStream(item)!;
+            using var stream     = _Assembly.GetManifestResourceStream($"{prefix}.{assembly}")!;
             using var fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
             fileStream.SetLength(0L);
             stream.CopyTo(fileStream);
         }
     }
 
-    private static Assembly? ResolveInternalAssemblies(object sender, ResolveEventArgs args) {
-        var name         = args.Name!;
-        var assemblyName = new AssemblyName(name);
-        if (name.StartsWith("Mono.Cecil") || name.StartsWith("Newtonsoft.Json")) {
-            var manifestResourceStream = typeof(Program).Assembly.GetManifestResourceStream($"Assemblies/{assemblyName.Name}.dll")!;
-            if (manifestResourceStream != null!) {
-                var array = new byte[manifestResourceStream.Length];
-                var size  = manifestResourceStream.Read(array, 0, array.Length);
-                if (size == array.Length) {
-                    return Assembly.Load(array);
-                }
-            }
-        }
-
-        WriteFatal($"Could not load missing assembly {assemblyName}");
-        return null;
-    }
+    private const string Railroader = "Railroader.exe";
 
     private static bool SetCurrentDirectory() {
         if (File.Exists(Path.Combine(Environment.CurrentDirectory, Railroader))) {
@@ -92,7 +86,7 @@ public static class Program
 
         path = FindRailroaderFromRegistry();
         if (path == null) {
-            WriteError($"Could not find {Railroader} using Steam's Library.");
+            ConsoleEx.WriteError($"Could not find {Railroader} using Steam's Library.");
             return false;
         }
 
@@ -102,7 +96,7 @@ public static class Program
             return true;
         }
 
-        WriteError($"Could not find {Railroader} (Steam's Library path is invalid).");
+        ConsoleEx.WriteError($"Could not find {Railroader} (Steam's Library path is invalid).");
         return false;
     }
 
@@ -150,18 +144,21 @@ public static class Program
         return null;
     }
 
-    private static void WriteError(string message) => WriteLine(message, ConsoleColor.Red);
+    private static Assembly? ResolveInternalAssemblies(object sender, ResolveEventArgs args) {
+        var name         = args.Name!;
+        var assemblyName = new AssemblyName(name);
+        if (name.StartsWith("Mono.Cecil") || name.StartsWith("Newtonsoft.Json")) {
+            var manifestResourceStream = typeof(Program).Assembly.GetManifestResourceStream($"Assemblies/{assemblyName.Name}.dll");
+            if (manifestResourceStream != null) {
+                var array = new byte[manifestResourceStream.Length];
+                var size  = manifestResourceStream.Read(array, 0, array.Length);
+                if (size == array.Length) {
+                    return Assembly.Load(array);
+                }
+            }
+        }
 
-    public static void WriteWarning(string message) => WriteLine(message, ConsoleColor.DarkYellow);
-
-    private static void WriteLine(string message, ConsoleColor color) {
-        Console.ForegroundColor = color;
-        Console.Error.WriteLine(message);
-        Console.ResetColor();
-    }
-
-    public static void WriteFatal(string message) {
-        WriteError(message);
-        Environment.Exit(1);
+        ConsoleEx.WriteFatal($"Could not load missing assembly {assemblyName}");
+        return null;
     }
 }
