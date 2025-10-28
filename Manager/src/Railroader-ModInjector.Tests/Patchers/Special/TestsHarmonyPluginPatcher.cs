@@ -4,7 +4,7 @@ using NSubstitute;
 using Railroader.ModInjector.Patchers;
 using Railroader.ModInjector.Patchers.Special;
 using Railroader.ModInjector.Wrappers;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using Serilog;
 
 namespace Railroader.ModInjector.Tests.Patchers.Special;

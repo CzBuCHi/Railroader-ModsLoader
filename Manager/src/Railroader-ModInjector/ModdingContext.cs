@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using UI.Builder;
 using UI.Common;
 

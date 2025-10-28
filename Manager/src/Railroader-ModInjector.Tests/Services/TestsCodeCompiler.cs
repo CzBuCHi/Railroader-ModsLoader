@@ -12,7 +12,7 @@ using NSubstitute;
 using Railroader.ModInjector.Patchers;
 using Railroader.ModInjector.Services;
 using Railroader.ModInjector.Wrappers;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using Serilog;
 using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
 using TypeDefinition = Mono.Cecil.TypeDefinition;

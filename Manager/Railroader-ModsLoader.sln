@@ -7,9 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-ModInjector", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-ModInjector.Tests", "src\Railroader-ModInjector.Tests\Railroader-ModInjector.Tests.csproj", "{79DCAB4F-E19A-4BAB-B652-8A3F6E622382}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-ModInterfaces", "src\Railroader-ModInterfaces\Railroader-ModInterfaces.csproj", "{C0EBBA8B-207E-49E7-A2A7-5CDB0B8EE9C5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager.Interfaces", "src\Railroader-ModInterfaces\Railroader.ModManager.Interfaces.csproj", "{C0EBBA8B-207E-49E7-A2A7-5CDB0B8EE9C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-ModInterfaces.Tests", "src\Railroader-ModInterfaces.Tests\Railroader-ModInterfaces.Tests.csproj", "{4209A3D4-AC21-4B19-A753-16215E7D4A39}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager.Interfaces.Tests", "src\Railroader-ModInterfaces.Tests\Railroader.ModManager.Interfaces.Tests.csproj", "{4209A3D4-AC21-4B19-A753-16215E7D4A39}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader-ModsLoader", "src\Railroader-ModsLoader\Railroader-ModsLoader.csproj", "{E7542518-EFAB-4EAB-9ACC-D83B49B85E52}"
 EndProject

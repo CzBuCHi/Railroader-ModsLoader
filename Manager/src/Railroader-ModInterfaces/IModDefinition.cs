@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Serilog.Events;
 
-namespace Railroader.ModInterfaces;
+namespace Railroader.ModManager.Interfaces;
 
 /// <summary> Defines the metadata for a mod. Loaded from Definition.json </summary>
 [PublicAPI]

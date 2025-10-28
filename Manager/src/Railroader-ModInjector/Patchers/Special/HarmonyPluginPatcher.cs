@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using JetBrains.Annotations;
 using Railroader.ModInjector.Wrappers;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using Serilog;
 
 namespace Railroader.ModInjector.Patchers.Special;

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using Railroader.ModInjector.Wrappers;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using Serilog;
 
 namespace Railroader.ModInjector.Services;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Railroader.ModInjector.Extensions;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 
 namespace Railroader.ModInjector.Services;
 

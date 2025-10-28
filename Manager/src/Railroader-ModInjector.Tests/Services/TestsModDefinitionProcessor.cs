@@ -5,7 +5,7 @@ using FluentAssertions;
 using NSubstitute;
 using Railroader.ModInjector.JsonConverters;
 using Railroader.ModInjector.Services;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using Serilog;
 
 namespace Railroader.ModInjector.Tests.Services;

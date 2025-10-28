@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Serilog;
 
-namespace Railroader.ModInterfaces;
+namespace Railroader.ModManager.Interfaces;
 
 /// <summary> Represents a loaded mod instance. </summary>
 [PublicAPI]

@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using JetBrains.Annotations;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using UI;
 using UI.Tooltips;
 using UnityEngine;

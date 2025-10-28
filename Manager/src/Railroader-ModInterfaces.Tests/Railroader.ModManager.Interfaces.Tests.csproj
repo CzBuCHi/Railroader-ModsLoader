@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <RootNamespace>Railroader.ModInterfaces.Tests</RootNamespace>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
     </PropertyGroup>
@@ -44,7 +43,7 @@
 
 
     <ItemGroup>
-        <ProjectReference Include="..\Railroader-ModInterfaces\Railroader-ModInterfaces.csproj" />
+        <ProjectReference Include="..\Railroader-ModInterfaces\Railroader.ModManager.Interfaces.csproj" />
     </ItemGroup>
 
     <ItemGroup>

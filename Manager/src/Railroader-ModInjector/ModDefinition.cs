@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using Railroader.ModInjector.JsonConverters;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using Serilog.Events;
 
 namespace Railroader.ModInjector;

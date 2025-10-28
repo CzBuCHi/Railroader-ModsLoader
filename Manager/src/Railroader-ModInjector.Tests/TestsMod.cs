@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using NSubstitute;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 
 namespace Railroader.ModInjector.Tests;
 

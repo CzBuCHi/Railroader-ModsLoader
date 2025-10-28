@@ -7,7 +7,7 @@ using Railroader.ModInjector.Patchers;
 using Railroader.ModInjector.Patchers.Special;
 using Railroader.ModInjector.Wrappers;
 using Railroader.ModInjector.Wrappers.FileSystem;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using ILogger = Serilog.ILogger;
 using Path = System.IO.Path;
 using SearchOption = System.IO.SearchOption;

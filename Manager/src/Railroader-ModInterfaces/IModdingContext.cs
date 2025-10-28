@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UI.Builder;
 using UI.Common;
 
-namespace Railroader.ModInterfaces;
+namespace Railroader.ModManager.Interfaces;
 
 /// <summary> An injectable interface that allows access to other mods and some quality-of-life functionality. </summary>
 public interface IModdingContext

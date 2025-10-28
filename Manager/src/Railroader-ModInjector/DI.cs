@@ -79,7 +79,7 @@ internal static class DI
     
 
     public static Func<IModManager> ModManager { get; set; } =
-        () => new ModManager {
+        () => new Services.ModManager {
             CodeCompiler = CodeCompiler()!,
             PluginManagerFactory = o => PluginManager(o)!,
             ModDefinitionProcessor = ModDefinitionProcessor()!,

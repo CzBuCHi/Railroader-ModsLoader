@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace Railroader.ModInterfaces;
+namespace Railroader.ModManager.Interfaces;
 
 [PublicAPI]
 public interface IPluginBase

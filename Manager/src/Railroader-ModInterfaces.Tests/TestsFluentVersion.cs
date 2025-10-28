@@ -1,7 +1,7 @@
 ﻿using System;
 using FluentAssertions;
 
-namespace Railroader.ModInterfaces.Tests;
+namespace Railroader.ModManager.Interfaces.Tests;
 
 public sealed class TestsFluentVersion
 {

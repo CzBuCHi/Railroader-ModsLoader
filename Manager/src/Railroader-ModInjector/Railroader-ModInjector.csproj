@@ -33,10 +33,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Railroader-ModInterfaces\Railroader-ModInterfaces.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
             <_Parameter1>$(MSBuildProjectName).Tests</_Parameter1>
         </AssemblyAttribute>
@@ -46,12 +42,17 @@
     </ItemGroup>
 
   <ItemGroup>
-      <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs"  />
+      <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs" />
     </ItemGroup>
     
 
     <ItemGroup>
       <PackageReference Include="Mono.CSharp" Version="4.0.0.143" />
+    </ItemGroup>
+    
+
+    <ItemGroup>
+      <ProjectReference Include="..\Railroader-ModInterfaces\Railroader.ModManager.Interfaces.csproj" />
     </ItemGroup>
     
     <Target Name="CopyGeneratedFile" AfterTargets="Build">

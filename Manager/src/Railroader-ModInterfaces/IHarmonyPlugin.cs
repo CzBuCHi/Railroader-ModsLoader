@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace Railroader.ModInterfaces;
+namespace Railroader.ModManager.Interfaces;
 
 /// <summary> Marker interface for plugins that want to use harmony to patch game code. </summary>
 [PublicAPI]

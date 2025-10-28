@@ -3,7 +3,7 @@ using FluentAssertions;
 using NSubstitute;
 using Railroader.ModInjector.Patchers;
 using Railroader.ModInjector.Patchers.Special;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using ILogger = Serilog.ILogger;
 
 namespace Railroader.ModInjector.Tests.Patchers.Special;

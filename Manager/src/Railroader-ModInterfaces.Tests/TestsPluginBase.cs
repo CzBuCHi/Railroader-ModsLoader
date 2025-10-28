@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 
-namespace Railroader.ModInterfaces.Tests;
+namespace Railroader.ModManager.Interfaces.Tests;
 
 public sealed class TestsPluginBase : IAsyncLifetime
 {

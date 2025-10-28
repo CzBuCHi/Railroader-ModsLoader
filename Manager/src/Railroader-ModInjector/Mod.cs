@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using Newtonsoft.Json;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 using Serilog;
 
 namespace Railroader.ModInjector;

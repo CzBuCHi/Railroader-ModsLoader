@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Railroader.ModInterfaces;
+using Railroader.ModManager.Interfaces;
 
 namespace Railroader.ModInjector.JsonConverters;
 
