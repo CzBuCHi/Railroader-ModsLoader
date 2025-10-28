@@ -1,6 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
         <Reference Include="System.Core" />
+        <GameAssembly Include="0Harmony" />
+        <GameAssembly Include="Mono.Cecil" />
+        <GameAssembly Include="Mono.CSharp" />
         <GameAssembly Include="Assembly-CSharp" />
         <GameAssembly Include="KeyValue.Runtime" />
         <GameAssembly Include="Core" />
@@ -18,14 +21,6 @@
         <GameAssembly Include="System.IO.Compression" />
         <GameAssembly Include="System.IO.Compression.FileSystem" />
     </ItemGroup>
-    <ItemGroup>
-        <Reference Include="Mono.Cecil">
-            <HintPath>..\Railroader-ModsLoader\Assemblies\Mono.Cecil.dll</HintPath>
-        </Reference>
-        <Reference Include="0Harmony">
-            <HintPath>..\Railroader-ModsLoader\Injector\0Harmony.dll</HintPath>
-        </Reference>
-    </ItemGroup>
 
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
@@ -39,12 +34,6 @@
   <ItemGroup>
       <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs" />
     </ItemGroup>
-    
-
-    <ItemGroup>
-      <PackageReference Include="Mono.CSharp" Version="4.0.0.143" />
-    </ItemGroup>
-    
 
     <ItemGroup>
       <ProjectReference Include="..\Railroader.ModManager.Interfaces\Railroader.ModManager.Interfaces.csproj" />

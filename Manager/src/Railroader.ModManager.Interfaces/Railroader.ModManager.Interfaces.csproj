@@ -5,6 +5,7 @@
 
     <ItemGroup>
         <Reference Include="System.Core" />
+        <GameAssembly Include="0Harmony" />
         <GameAssembly Include="Assembly-CSharp" />
         <GameAssembly Include="KeyValue.Runtime" />
         <GameAssembly Include="Core" />
@@ -18,12 +19,6 @@
         <GameAssembly Include="Serilog" />
         <GameAssembly Include="Newtonsoft.Json" />
         <GameAssembly Include="SimpleGraph.Runtime" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="0Harmony">
-            <HintPath>..\Railroader-ModsLoader\Injector\0Harmony.dll</HintPath>
-        </Reference>
     </ItemGroup>
 
     <ItemGroup>

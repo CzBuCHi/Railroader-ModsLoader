@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager.Inter
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager.Interfaces.Tests", "src\Railroader.ModManager.Interfaces.Tests\Railroader.ModManager.Interfaces.Tests.csproj", "{4209A3D4-AC21-4B19-A753-16215E7D4A39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManagerInstaller", "src\Railroader-ModsLoader\Railroader.ModManagerInstaller.csproj", "{E7542518-EFAB-4EAB-9ACC-D83B49B85E52}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManagerInstaller", "src\Railroader.ModManagerInstaller\Railroader.ModManagerInstaller.csproj", "{E7542518-EFAB-4EAB-9ACC-D83B49B85E52}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7EA7E276-EC85-429E-A358-46FC99B5F769}"
 EndProject

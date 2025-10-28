@@ -8,6 +8,9 @@
 
     <ItemGroup>
         <Reference Include="System.Core" />
+        <GameAssembly Include="0Harmony" />
+        <GameAssembly Include="Mono.Cecil" />
+        <GameAssembly Include="Mono.CSharp" />
         <GameAssembly Include="Assembly-CSharp" />
         <GameAssembly Include="KeyValue.Runtime" />
         <GameAssembly Include="Core" />
@@ -22,16 +25,6 @@
         <GameAssembly Include="Newtonsoft.Json" />
         <GameAssembly Include="SimpleGraph.Runtime" />
     </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="0Harmony">
-            <HintPath>..\Railroader-ModsLoader\Injector\0Harmony.dll</HintPath>
-        </Reference>
-        <Reference Include="Mono.Cecil">
-            <HintPath>..\Railroader-ModsLoader\Assemblies\Mono.Cecil.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
 
 
     <ItemGroup>
