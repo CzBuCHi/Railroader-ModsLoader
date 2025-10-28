@@ -16,7 +16,7 @@
     </ItemGroup>
     
     <ItemGroup>
-      <ProjectReference Include="..\Railroader-ModInjector\Railroader.ModManager.csproj" />
+      <ProjectReference Include="..\Railroader.ModManager\Railroader.ModManager.csproj" />
     </ItemGroup>
 
     <ItemGroup>
