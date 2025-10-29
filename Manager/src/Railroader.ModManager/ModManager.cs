@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 using JetBrains.Annotations;
-using Mono.CSharp;
 using Newtonsoft.Json;
-using Railroader.ModManager.Delegates;
 using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
 using Railroader.ModManager.Services;
 using Railroader.ModManager.Services.Factories;
-using Railroader.ModManager.Services.Wrappers.FileSystem;
 using Serilog;
 using UnityEngine;
-using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
 using ILogger = Serilog.ILogger;
 
 namespace Railroader.ModManager;
@@ -76,24 +71,17 @@ public class ModManager : MonoBehaviour
         // data
         serviceManager.AddSingleton<LoggerSettings, LoggerSettings>(_ => new LoggerSettings());
 
-        // wrappers
-        serviceManager.AddSingleton<IFileSystem, FileSystemWrapper>();
-        serviceManager.AddDelegate<LoadAssemblyFromDelegate>(Assembly.LoadFrom);
-        serviceManager.AddDelegate<InvokeCompilerDelegate>(CompilerCallableEntryPoint.InvokeCompiler);
-        serviceManager.AddDelegate<ReadAssemblyDefinitionDelegate>(AssemblyDefinition.ReadAssembly);
-        serviceManager.AddDelegate<WriteAssemblyDefinitionDelegate>((assemblyDefinition, fileName) => assemblyDefinition.Write(fileName));
-
         // factories
         serviceManager.AddSingleton<IHarmonyFactory, HarmonyFactory>();
-        serviceManager.AddTransient<IPluginManagerFactory, PluginManagerFactory>(o => new PluginManagerFactory(o.GetService<LoadAssemblyFromDelegate>(), o.GetService<ILoggerFactory>().GetLogger()));
+        serviceManager.AddTransient<IPluginManagerFactory, PluginManagerFactory>(o => new PluginManagerFactory(o.GetService<ILoggerFactory>().GetLogger()));
 
         // services
-        serviceManager.AddTransient<IModExtractor, ModExtractor>(o => new ModExtractor(o.GetService<IFileSystem>(), o.GetService<IMemoryLogger>()));
-        serviceManager.AddSingleton<IModDefinitionLoader, ModDefinitionLoader>(o => new ModDefinitionLoader(o.GetService<IFileSystem>(), o.GetService<IMemoryLogger>()));
+        serviceManager.AddTransient<IModExtractor, ModExtractor>(o => new ModExtractor(o.GetService<IMemoryLogger>()));
+        serviceManager.AddSingleton<IModDefinitionLoader, ModDefinitionLoader>(o => new ModDefinitionLoader(o.GetService<IMemoryLogger>()));
         serviceManager.AddTransient<IModDefinitionProcessor, ModDefinitionProcessor>(o => new ModDefinitionProcessor(o.GetService<ILoggerFactory>().GetLogger()));
-        serviceManager.AddSingleton<CompileAssemblyDelegate, CompileAssemblyDelegate>(o => CompileAssemblyCore.CompileAssembly(o.GetService<InvokeCompilerDelegate>(), o.GetService<ILoggerFactory>().GetLogger()));
-        serviceManager.AddTransient<ICodeCompiler, CodeCompiler>(o => new CodeCompiler(o.GetService<IFileSystem>(), o.GetService<CompileAssemblyDelegate>(), o.GetService<ILoggerFactory>().GetLogger()));
-        serviceManager.AddTransient<ICodePatcher, CodePatcher>(o => new CodePatcher(o.GetService<IFileSystem>(), o.GetService<ReadAssemblyDefinitionDelegate>(), o.GetService<WriteAssemblyDefinitionDelegate>(), o.GetService<ILoggerFactory>().GetLogger()));
+        serviceManager.AddSingleton<CompileAssemblyDelegate, CompileAssemblyDelegate>(o => CompileAssemblyCore.CompileAssembly(o.GetService<ILoggerFactory>().GetLogger()));
+        serviceManager.AddTransient<ICodeCompiler, CodeCompiler>(o => new CodeCompiler(o.GetService<ILoggerFactory>().GetLogger()            ));
+        serviceManager.AddTransient<ICodePatcher, CodePatcher>(o => new CodePatcher(o.GetService<ILoggerFactory>().GetLogger()));
 
         return serviceManager;
     }

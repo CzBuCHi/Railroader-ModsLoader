@@ -1,51 +1,51 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using JetBrains.Annotations;
-using MemoryFileSystem.Internal;
-using Newtonsoft.Json;
+﻿//using System;
+//using System.Diagnostics;
+//using System.Linq;
+//using System.Text;
+//using JetBrains.Annotations;
+//using MemoryFileSystem.Internal;
+//using Newtonsoft.Json;
 
-namespace MemoryFileSystem;
+//namespace MemoryFileSystem;
 
-[PublicAPI]
-[DebuggerStepThrough]
-public sealed class MemoryZip : MemoryFileSystemBase
-{
-    public MemoryZip() {
-    }
+//[PublicAPI]
+//[DebuggerStepThrough]
+//public sealed class MemoryZip : MemoryFileSystemBase
+//{
+//    public MemoryZip() {
+//    }
 
-    public MemoryZip(byte[] bytes) {
-        var entries = GetEntries(bytes);
+//    public MemoryZip(byte[] bytes) {
+//        var entries = GetEntries(bytes);
 
-        foreach (var entry in entries) {
-            Items.TryAdd(entry.Path, entry);
-        }
-    }
+//        foreach (var entry in entries) {
+//            Items.TryAdd(entry.Path, entry);
+//        }
+//    }
 
-    public override string NormalizePath(string path) {
-        if (string.IsNullOrEmpty(path)) {
-            throw new ArgumentException("Path cannot be null or empty.");
-        }
+//    public override string NormalizePath(string path) {
+//        if (string.IsNullOrEmpty(path)) {
+//            throw new ArgumentException("Path cannot be null or empty.");
+//        }
 
-        if (path.Contains(':')) {
-            throw new ArgumentException("Zip file do not support absolute paths.");
-        }
+//        if (path.Contains(':')) {
+//            throw new ArgumentException("Zip file do not support absolute paths.");
+//        }
 
-        path = path.Replace('\\', '/');
-        if (path.StartsWith("/")) {
-            path = path.Substring(1); // Remove leading "/"
-        }
+//        path = path.Replace('\\', '/');
+//        if (path.StartsWith("/")) {
+//            path = path.Substring(1); // Remove leading "/"
+//        }
 
-        return path;
-    }
+//        return path;
+//    }
 
-    protected override string? GetParentPath(string path) {
-        var index = path.LastIndexOf('/');
-        return index == -1 ? null : path.Substring(0, index);
-    }
+//    protected override string? GetParentPath(string path) {
+//        var index = path.LastIndexOf('/');
+//        return index == -1 ? null : path.Substring(0, index);
+//    }
 
-    public byte[] GetBytes() => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(Items.Values.ToArray()));
+//    public byte[] GetBytes() => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(Items.Values.ToArray()));
 
-    private MemoryEntry[] GetEntries(byte[] bytes) => JsonConvert.DeserializeObject<MemoryEntry[]>(Encoding.UTF8.GetString(bytes))!;
-}
+//    private MemoryEntry[] GetEntries(byte[] bytes) => JsonConvert.DeserializeObject<MemoryEntry[]>(Encoding.UTF8.GetString(bytes))!;
+//}

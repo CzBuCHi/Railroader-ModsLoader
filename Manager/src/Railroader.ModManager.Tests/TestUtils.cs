@@ -29,7 +29,7 @@ public static class TestUtils
 
         var logger = Substitute.For<ILogger>();
 
-        var compiler = CompileAssemblyCore.CompileAssembly(CompilerCallableEntryPoint.InvokeCompiler, logger);
+        var compiler = CompileAssemblyCore.CompileAssembly(logger);
         
 
         if (Directory.Exists(outputPath)) {

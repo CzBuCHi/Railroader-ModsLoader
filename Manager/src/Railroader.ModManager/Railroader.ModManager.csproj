@@ -28,7 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs"  />
+        <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs" />
     </ItemGroup>
 
     <Target Name="CopyGeneratedFile" AfterTargets="Build">

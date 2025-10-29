@@ -3,7 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Railroader.ModManager.Delegates;
+using Mono.CSharp;
+using Railroader.ModManager.Delegates.Mono.CSharp.CompilerCallableEntryPoint;
 using Serilog;
 
 namespace Railroader.ModManager.Services;
@@ -12,11 +13,11 @@ internal delegate bool CompileAssemblyDelegate(string outputPath, ICollection<st
 
 internal static class CompileAssemblyCore
 {
-    public static CompileAssemblyDelegate CompileAssembly(InvokeCompilerDelegate invokeCompiler, ILogger logger) =>
+    public static CompileAssemblyDelegate CompileAssembly(ILogger logger) =>
         (string outputPath, ICollection<string> sources, ICollection<string> references, out string messages) =>
-            CompileAssembly(invokeCompiler, logger, outputPath, sources, references, out messages);
+            CompileAssembly(CompilerCallableEntryPoint.InvokeCompiler, logger, outputPath, sources, references, out messages);
 
-    private static bool CompileAssembly(InvokeCompilerDelegate invokeCompiler, ILogger logger, string outputPath, ICollection<string> sources, ICollection<string> references, out string messages) {
+    private static bool CompileAssembly(InvokeCompiler invokeCompiler, ILogger logger, string outputPath, ICollection<string> sources, ICollection<string> references, out string messages) {
         var args = CompilerArguments(outputPath, sources, references).ToArray();
 
         logger.Information("Compiling assembly {outputPath} ...", outputPath);

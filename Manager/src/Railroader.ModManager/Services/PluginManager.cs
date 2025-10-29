@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Railroader.ModManager.Delegates;
+using Railroader.ModManager.Delegates.System.Reflection.Assembly;
 using Railroader.ModManager.Interfaces;
 using Serilog;
 
@@ -14,14 +14,18 @@ internal interface IPluginManager
 }
 
 /// <inheritdoc />
-internal sealed class PluginManager(LoadAssemblyFromDelegate loadAssemblyFrom, IModdingContext moddingContext, ILogger logger)
+internal sealed class PluginManager(IModdingContext moddingContext, ILogger logger, LoadFrom loadFrom)
     : IPluginManager
 {
+    public PluginManager(IModdingContext moddingContext, ILogger logger) : this(moddingContext, logger, Assembly.LoadFrom) {
+        
+    }
+
     /// <inheritdoc />
     public IPlugin[] CreatePlugins(Mod mod) => PluginFactory(mod).ToArray();
 
     private IEnumerable<IPlugin> PluginFactory(Mod mod) {
-        var assembly = loadAssemblyFrom(mod.AssemblyPath!);
+        var assembly = loadFrom(mod.AssemblyPath!);
         if (assembly == null) {
             yield break;
         }

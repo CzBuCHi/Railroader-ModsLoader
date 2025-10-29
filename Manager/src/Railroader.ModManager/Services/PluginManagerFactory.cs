@@ -1,5 +1,4 @@
-﻿using Railroader.ModManager.Delegates;
-using Railroader.ModManager.Interfaces;
+﻿using Railroader.ModManager.Interfaces;
 using Serilog;
 
 namespace Railroader.ModManager.Services;
@@ -14,8 +13,8 @@ internal interface IPluginManagerFactory
 }
 
 /// <inheritdoc />
-internal sealed class PluginManagerFactory(LoadAssemblyFromDelegate loadAssemblyFrom, ILogger logger) : IPluginManagerFactory
+internal sealed class PluginManagerFactory(ILogger logger) : IPluginManagerFactory
 {
     /// <inheritdoc />
-    public IPluginManager CreatePluginManager(IModdingContext moddingContext) => new PluginManager(loadAssemblyFrom, moddingContext, logger);
+    public IPluginManager CreatePluginManager(IModdingContext moddingContext) => new PluginManager(moddingContext, logger);
 }

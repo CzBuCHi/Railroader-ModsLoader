@@ -9,8 +9,6 @@ internal sealed class ServiceManager : IServiceProvider
 
     internal Dictionary<Type, ServiceContext> Services { get; } = new();
 
-    public void AddDelegate<TDelegate>(TDelegate instance) where TDelegate : Delegate => Add<TDelegate>(_ => instance, true);
-
     public void AddSingleton<TInterface, TService>() where TService : class, TInterface, new() => Add<TInterface>(_ => new TService(), true);
     public void AddTransient<TInterface, TService>() where TService : class, TInterface, new() => Add<TInterface>(_ => new TService(), false);
 

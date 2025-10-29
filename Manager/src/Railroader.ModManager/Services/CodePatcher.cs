@@ -6,9 +6,10 @@ using System.Linq;
 using Mono.Cecil;
 using Railroader.ModManager.CodePatchers;
 using Railroader.ModManager.CodePatchers.Special;
-using Railroader.ModManager.Delegates;
+using Railroader.ModManager.Delegates.Mono.Cecil;
+using Railroader.ModManager.Delegates.System.IO.Directory;
+using Railroader.ModManager.Delegates.System.IO.File;
 using Railroader.ModManager.Interfaces;
-using Railroader.ModManager.Services.Wrappers.FileSystem;
 using Serilog;
 
 namespace Railroader.ModManager.Services;
@@ -23,9 +24,22 @@ internal interface ICodePatcher
 }
 
 /// <summary> Compiles mod source code into a DLL and applies registered patches to the assembly. </summary>
-internal sealed class CodePatcher(IFileSystem fileSystem, ReadAssemblyDefinitionDelegate readAssemblyDefinition, WriteAssemblyDefinitionDelegate writeAssemblyDefinition, ILogger logger)
+internal sealed class CodePatcher(
+    ILogger logger,
+    ReadAssemblyDefinition readAssemblyDefinition,
+    WriteAssemblyDefinition writeAssemblyDefinition,
+    GetCurrentDirectory getCurrentDirectory,
+    EnumerateDirectories enumerateDirectories,
+    Delete delete,
+    Move move)
     : ICodePatcher
 {
+    public CodePatcher(ILogger logger) : this(logger, AssemblyDefinition.ReadAssembly, (definition, name) => definition.Write(name),
+        Directory.GetCurrentDirectory, Directory.EnumerateDirectories, File.Delete, File.Move) {
+
+    }
+
+
     private readonly ConcurrentDictionary<Type, ITypePatcher> _PluginPatchers = new();
 
     /// <inheritdoc />
@@ -62,11 +76,11 @@ internal sealed class CodePatcher(IFileSystem fileSystem, ReadAssemblyDefinition
             var resolver = new DefaultAssemblyResolver();
 
             // game DLLs
-            resolver.AddSearchDirectory(Path.Combine(fileSystem.Directory.GetCurrentDirectory(), "Railroader_Data", "Managed"));
+            resolver.AddSearchDirectory(Path.Combine(getCurrentDirectory(), "Railroader_Data", "Managed"));
 
             // other mods DLLs
             var thisModDir = Path.GetDirectoryName(assemblyPath);
-            var modDirs = fileSystem.Directory.EnumerateDirectories(Path.Combine(fileSystem.Directory.GetCurrentDirectory(), "Mods"))
+            var modDirs = enumerateDirectories(Path.Combine(getCurrentDirectory(), "Mods"))
                                     .Where(o => o != thisModDir);
             foreach (var modDir in modDirs) {
                 resolver.AddSearchDirectory(modDir);
@@ -111,8 +125,8 @@ internal sealed class CodePatcher(IFileSystem fileSystem, ReadAssemblyDefinition
         } finally {
             assemblyDefinition?.Dispose();
             if (success) {
-                fileSystem.File.Delete(assemblyPath);
-                fileSystem.File.Move(tempFilePath, assemblyPath);
+                delete(assemblyPath);
+                move(tempFilePath, assemblyPath);
             }
         }
     }

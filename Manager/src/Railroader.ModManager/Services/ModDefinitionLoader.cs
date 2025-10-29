@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Railroader.ModManager.Services.Wrappers.FileSystem;
+using Railroader.ModManager.Delegates.System.IO.Directory;
+using Railroader.ModManager.Delegates.System.IO.File;
 using Path = System.IO.Path;
 
 namespace Railroader.ModManager.Services;
@@ -19,8 +21,19 @@ internal interface IModDefinitionLoader
 }
 
 /// <inheritdoc />
-internal sealed class ModDefinitionLoader(IFileSystem fileSystem, IMemoryLogger logger) : IModDefinitionLoader
+internal sealed class ModDefinitionLoader(
+    IMemoryLogger logger,
+    GetCurrentDirectory getCurrentDirectory,
+    EnumerateDirectories enumerateDirectories,
+    Exists exists,
+    ReadAllText readAllText
+) : IModDefinitionLoader
 {
+    public ModDefinitionLoader(IMemoryLogger logger)
+        : this(logger, Directory.GetCurrentDirectory, Directory.EnumerateDirectories, File.Exists, File.ReadAllText) {
+    }
+
+
     /// <inheritdoc />
     public ModDefinition[] ModDefinitions { get; private set; } = [];
 
@@ -28,17 +41,17 @@ internal sealed class ModDefinitionLoader(IFileSystem fileSystem, IMemoryLogger 
     public void LoadDefinitions() {
         var modDefinitions = new Dictionary<string, ModDefinition>(StringComparer.OrdinalIgnoreCase);
 
-        var baseDirectory = Path.Combine(fileSystem.Directory.GetCurrentDirectory(), "Mods");
-        foreach (var directory in fileSystem.Directory.EnumerateDirectories(baseDirectory)) {
+        var baseDirectory = Path.Combine(getCurrentDirectory(), "Mods");
+        foreach (var directory in enumerateDirectories(baseDirectory)) {
             var path = Path.Combine(directory, "Definition.json");
-            if (!fileSystem.File.Exists(path)) {
+            if (!exists(path)) {
                 logger.Warning("Not loading directory {directory}: Missing Definition.json.", directory);
                 continue;
             }
 
             logger.Information("Loading definition from {directory} ...", directory);
             try {
-                var jObject       = JObject.Parse(fileSystem.File.ReadAllText(path));
+                var jObject       = JObject.Parse(readAllText(path));
                 var modDefinition = jObject.ToObject<ModDefinition>()!;
 
                 if (modDefinitions.TryGetValue(modDefinition.Identifier, out var conflict)) {

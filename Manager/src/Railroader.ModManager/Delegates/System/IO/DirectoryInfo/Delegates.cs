@@ -2,21 +2,26 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using Railroader.ModManager.Services.Wrappers.FileSystem;
+using _DirectoryInfo = System.IO.DirectoryInfo;
 
-namespace Railroader.ModManager.Services.Wrappers.FileSystem;
+namespace Railroader.ModManager.Delegates.System.IO.DirectoryInfo;
 
-/// <summary> Wrapper for <see cref="DirectoryInfo"/>. </summary>
+/// <inheritdoc cref="_DirectoryInfo(string)"/>
+/// <remarks> Wraps <see cref="_DirectoryInfo(string)"/> for testability. </remarks>
+internal delegate IDirectoryInfo DirectoryInfoFactory(string path);
+
 public interface IDirectoryInfo
 {
     /// <inheritdoc cref="DirectoryInfo.EnumerateFiles(string, SearchOption)"/>
     IEnumerable<IFileInfo> EnumerateFiles(string searchPattern, SearchOption searchOption = SearchOption.TopDirectoryOnly);
 }
 
-/// <inheritdoc />
 [ExcludeFromCodeCoverage]
-internal sealed class DirectoryInfoWrapper(DirectoryInfo directoryInfo) : IDirectoryInfo
+internal sealed class DirectoryInfoWrapper(_DirectoryInfo directoryInfo) : IDirectoryInfo
 {
-    /// <inheritdoc />
+    public static DirectoryInfoFactory Create => o => new DirectoryInfoWrapper(new _DirectoryInfo(o));
+
     public IEnumerable<IFileInfo> EnumerateFiles(string searchPattern, SearchOption searchOption)
         => directoryInfo.EnumerateFiles(searchPattern, searchOption).Select(o => new FileInfoWrapper(o));
 }
