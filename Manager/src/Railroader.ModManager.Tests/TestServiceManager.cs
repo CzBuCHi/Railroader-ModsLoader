@@ -63,7 +63,7 @@
 //    public ILogger                         ContextLogger           { get; } = Substitute.For<ILogger>();
 //    public ILoggerFactory                  LoggerFactory           { get; }
 //    public LoadFrom                LoadAssemblyFrom        { get; }
-//    public IHarmonyWrapper                 HarmonyWrapper          { get; } = Substitute.For<IHarmonyWrapper>();
+//    public IHarmony                 Harmony          { get; } = Substitute.For<IHarmony>();
 //    public ReadAssemblyDefinition  ReadAssemblyDefinition  { get; } = Substitute.For<ReadAssemblyDefinition>();
 //    public WriteAssemblyDefinition WriteAssemblyDefinition { get; } = Substitute.For<WriteAssemblyDefinition>();
 //    public IModdingContext                 ModdingContext          { get; } = Substitute.For<IModdingContext>();
@@ -85,7 +85,7 @@
 
 //    private IHarmonyFactory MockHarmonyFactory() {
 //        var harmonyFactory = Substitute.For<IHarmonyFactory>();
-//        harmonyFactory.CreateHarmony(Arg.Any<string>()).Returns(_ => HarmonyWrapper);
+//        harmonyFactory.CreateHarmony(Arg.Any<string>()).Returns(_ => Harmony);
 //        return harmonyFactory;
 //    }
 

@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO.Compression;
 using System.Linq;
+using Railroader.ModManager.Delegates.System.IO.Compression.ZipArchiveEntry;
+using _ZipArchive = System.IO.Compression.ZipArchive;
+namespace Railroader.ModManager.Delegates.System.IO.Compression.ZipArchive;
 
-namespace Railroader.ModManager.Services.Wrappers.FileSystem;
 
-/// <summary> Wrapper for <see cref="ZipArchive"/>. </summary>
+/// <summary> Wrapper for <see cref="_ZipArchive"/>. </summary>
 public interface IZipArchive : IDisposable
 {
-    /// <inheritdoc cref="ZipArchive.Entries" />
+    /// <inheritdoc cref="_ZipArchive.Entries" />
     IReadOnlyCollection<IZipArchiveEntry> Entries { get; }
 
-    /// <inheritdoc cref="ZipArchive.GetEntry(string)" />
+    /// <inheritdoc cref="_ZipArchive.GetEntry(string)" />
     IZipArchiveEntry? GetEntry(string entryName);
 }
 
 [ExcludeFromCodeCoverage]
-public sealed class ZipArchiveWrapper(ZipArchive archive) : IZipArchive
+public sealed class ZipArchiveWrapper(_ZipArchive archive) : IZipArchive
 {
     /// <inheritdoc />
     public IReadOnlyCollection<IZipArchiveEntry> Entries => archive.Entries.Select(e => new ZipArchiveEntryWrapper(e)).ToList().AsReadOnly();

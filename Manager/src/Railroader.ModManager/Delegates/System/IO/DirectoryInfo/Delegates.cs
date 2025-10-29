@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using Railroader.ModManager.Services.Wrappers.FileSystem;
+using Railroader.ModManager.Delegates.System.IO.FileInfo;
 using _DirectoryInfo = System.IO.DirectoryInfo;
 
 namespace Railroader.ModManager.Delegates.System.IO.DirectoryInfo;

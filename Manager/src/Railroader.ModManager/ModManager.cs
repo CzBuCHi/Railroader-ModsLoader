@@ -3,10 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Railroader.ModManager.Delegates.HarmonyLib.Harmony;
 using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
 using Railroader.ModManager.Services;
-using Railroader.ModManager.Services.Factories;
 using Serilog;
 using UnityEngine;
 using ILogger = Serilog.ILogger;
@@ -41,8 +41,9 @@ public class ModManager : MonoBehaviour
                     settings.ModsLogLevels[definition.Identifier] = definition.LogLevel.Value;
                 }
             }
-
-            ServiceProvider.GetService<IHarmonyFactory>().CreateHarmony("Railroader.ModManager").PatchCategory(typeof(ModManager).Assembly, "LogManager");
+            
+            // todo: not mocked
+            Harmony.Create("Railroader.ModManager").PatchCategory(typeof(ModManager).Assembly, "LogManager");
 
             _GameObject = new GameObject("ModManager");
             _GameObject.SetActive(false);
@@ -72,7 +73,6 @@ public class ModManager : MonoBehaviour
         serviceManager.AddSingleton<LoggerSettings, LoggerSettings>(_ => new LoggerSettings());
 
         // factories
-        serviceManager.AddSingleton<IHarmonyFactory, HarmonyFactory>();
         serviceManager.AddTransient<IPluginManagerFactory, PluginManagerFactory>(o => new PluginManagerFactory(o.GetService<ILoggerFactory>().GetLogger()));
 
         // services
@@ -159,7 +159,9 @@ public class ModManager : MonoBehaviour
         }
 
         logger.Information("Applying harmony patches ...");
-        ServiceProvider.GetService<IHarmonyFactory>().CreateHarmony("Railroader.ModManager").PatchAllUncategorized(typeof(ModManager).Assembly);
+
+        // todo: not mocked
+        Harmony.Create("Railroader.ModManager").PatchAllUncategorized(typeof(ModManager).Assembly);
 
         logger.Information("Mod loader loaded ...");
     }

@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Railroader.ModManager.Delegates.System.IO.Compression.ZipFile;
 using Railroader.ModManager.Delegates.System.IO.Directory;
 using Railroader.ModManager.Delegates.System.IO.DirectoryInfo;
-using Railroader.ModManager.Services.Wrappers.FileSystem;
+using Railroader.ModManager.Delegates.System.IO.FileInfo;
 using ZipFile = System.IO.Compression.ZipFile;
 
 namespace Railroader.ModManager.Services;

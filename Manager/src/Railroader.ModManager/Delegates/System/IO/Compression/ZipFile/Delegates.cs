@@ -1,4 +1,5 @@
-﻿using Railroader.ModManager.Services.Wrappers.FileSystem;
+﻿using System.Diagnostics.CodeAnalysis;
+using Railroader.ModManager.Delegates.System.IO.Compression.ZipArchive;
 using _ZipFile = System.IO.Compression.ZipFile;
 
 namespace Railroader.ModManager.Delegates.System.IO.Compression.ZipFile;
@@ -11,6 +12,7 @@ internal delegate void ExtractToDirectory(string sourceArchiveFileName, string d
 /// <remarks> Wraps <see cref="_ZipFile.OpenRead(string)"/> for testability. </remarks>
 internal delegate IZipArchive? OpenRead(string archiveFileName);
 
+[ExcludeFromCodeCoverage]
 internal static class ZipFileDefaults
 {
     public static OpenRead OpenRead => o => new ZipArchiveWrapper(_ZipFile.OpenRead(o)!);

@@ -51,8 +51,8 @@
 //        HarmonyPluginPatcher.OnIsEnabledChanged(plugin);
 
 //        // Assert
-//        serviceManager.HarmonyWrapper.Received(1).PatchAll(plugin.GetType().Assembly);
-//        serviceManager.HarmonyWrapper.ReceivedCalls().Should().HaveCount(1);
+//        serviceManager.Harmony.Received(1).PatchAll(plugin.GetType().Assembly);
+//        serviceManager.Harmony.ReceivedCalls().Should().HaveCount(1);
 
 //        serviceManager.ContextLogger.Received().Information("Applying Harmony patch for mod {ModId}", "Identifier");
 //    }
@@ -70,8 +70,8 @@
 //        HarmonyPluginPatcher.OnIsEnabledChanged(plugin);
 
 //        // Assert
-//        serviceManager.HarmonyWrapper.Received(1).UnpatchAll("Identifier");
-//        serviceManager.HarmonyWrapper.ReceivedCalls().Should().HaveCount(1);
+//        serviceManager.Harmony.Received(1).UnpatchAll("Identifier");
+//        serviceManager.Harmony.ReceivedCalls().Should().HaveCount(1);
 
 //        serviceManager.ContextLogger.Received().Information("Removing Harmony patch for mod {ModId}", "Identifier");
 //    }
@@ -91,8 +91,8 @@
 //        HarmonyPluginPatcher.OnIsEnabledChanged(plugin);
 
 //        // Assert
-//        serviceManager.HarmonyWrapper.Received(1).PatchAll(plugin.GetType().Assembly);
-//        serviceManager.HarmonyWrapper.ReceivedCalls().Should().HaveCount(1);
+//        serviceManager.Harmony.Received(1).PatchAll(plugin.GetType().Assembly);
+//        serviceManager.Harmony.ReceivedCalls().Should().HaveCount(1);
 
 //        serviceManager.ContextLogger.Received(1).Information("Applying Harmony patch for mod {ModId}", "Identifier");
 //    }

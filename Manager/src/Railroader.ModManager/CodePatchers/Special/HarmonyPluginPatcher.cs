@@ -1,10 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using JetBrains.Annotations;
+using Railroader.ModManager.Delegates.HarmonyLib.Harmony;
 using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
 using Railroader.ModManager.Services;
-using Railroader.ModManager.Services.Factories;
-using Railroader.ModManager.Services.Wrappers;
 
 namespace Railroader.ModManager.CodePatchers.Special;
 
@@ -15,11 +14,12 @@ public sealed class HarmonyPluginPatcher : TypePatcher
         : base([new MethodPatcher<IHarmonyPlugin, HarmonyPluginPatcher>(loggerFactory, typeof(PluginBase<>), "OnIsEnabledChanged")]) {
     }
 
-    private sealed record PatcherState(bool IsEnabled, IHarmonyWrapper Harmony);
+    private sealed record PatcherState(bool IsEnabled, IHarmony Harmony);
 
     private static readonly ConcurrentDictionary<IPlugin, PatcherState> _States = new();
 
-    private static IHarmonyWrapper CreateHarmonyWrapper(string id) => ModManager.ServiceProvider.GetService<IHarmonyFactory>().CreateHarmony(id);
+    // todo: not mocked
+    private static IHarmony CreateHarmonyWrapper(string id) => Harmony.Create(id);
 
     /// <summary> Handles the <c>OnIsEnabledChanged</c> event for the plugin, performing patcher-specific logic when the plugin is enabled or disabled. </summary>
     /// <param name="plugin">The plugin instance. Must not be null.</param>

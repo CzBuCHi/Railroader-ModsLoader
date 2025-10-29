@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using NSubstitute;
-using Railroader.ModManager.Services.Wrappers.FileSystem;
+using Railroader.ModManager.Delegates.System.IO.Compression.ZipArchiveEntry;
 
 namespace MemoryFileSystem.Internal;
 
