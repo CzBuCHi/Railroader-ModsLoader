@@ -10,7 +10,7 @@ internal sealed class LogEventLevelJsonConverter : JsonConverter<LogEventLevel?>
 {
     /// <inheritdoc />
     public override void WriteJson(JsonWriter writer, LogEventLevel? value, JsonSerializer serializer) {
-        writer.WriteValue(value!.ToString());
+        writer.WriteValue(value.ToString());
     }
 
     /// <inheritdoc />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
+using Serilog;
 
 namespace Railroader.ModManager.Services;
 
@@ -11,7 +12,7 @@ internal interface IModDefinitionProcessor
     bool PreprocessModDefinitions(ref ModDefinition[] modDefinitions);
 }
 
-internal sealed class ModDefinitionProcessor : IModDefinitionProcessor
+internal sealed class ModDefinitionProcessor(ILogger logger) : IModDefinitionProcessor
 {
     public List<string> Errors { get; } = new();
 
@@ -21,7 +22,7 @@ internal sealed class ModDefinitionProcessor : IModDefinitionProcessor
         }
 
         if (Errors.Count > 0) {
-            DI.GetLogger().Error("Mod preprocessing failed with error(s): {errors}", Errors.ToArray());
+            logger.Error("Mod preprocessing failed with error(s): {errors}", Errors.ToArray());
             modDefinitions = [];
             return false;
         }

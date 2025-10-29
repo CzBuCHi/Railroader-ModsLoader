@@ -23,7 +23,7 @@
     </ItemGroup>
     
     <Target Name="CopyGeneratedFile" AfterTargets="Build">
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\src\Railroader.ModManagerInstaller\Injector" SkipUnchangedFiles="false" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\src\Railroader.ModManagerInstaller\Assemblies" SkipUnchangedFiles="false" />
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GameDir)\Railroader_Data\Managed" SkipUnchangedFiles="false" />
     </Target>
 </Project>

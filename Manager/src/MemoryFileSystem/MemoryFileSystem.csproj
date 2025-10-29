@@ -7,20 +7,21 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
-    
+
+
     <ItemGroup>
-        
-        <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs" />
-        <Compile Include="..\SharedCode\JetBrains.Annotations.cs" />
-        
+        <GameAssembly Include="Newtonsoft.Json" />
     </ItemGroup>
-    
+
     <ItemGroup>
       <ProjectReference Include="..\Railroader.ModManager\Railroader.ModManager.csproj" />
     </ItemGroup>
 
+
     <ItemGroup>
-        <GameAssembly Include="Newtonsoft.Json" />
+        <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs" />
+        <Compile Include="..\SharedCode\JetBrains.Annotations.cs" />
+        <Compile Include="..\SharedCode\System.Diagnostics.CodeAnalysis.cs" />
     </ItemGroup>
     
 </Project>

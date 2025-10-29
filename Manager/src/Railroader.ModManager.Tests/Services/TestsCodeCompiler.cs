@@ -1,21 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using FluentAssertions;
-using MemoryFileSystem;
 using MemoryFileSystem.Internal;
-using Mono.Cecil;
 using NSubstitute;
 using Railroader.ModManager.Interfaces;
-using Railroader.ModManager.Patchers;
 using Railroader.ModManager.Services;
-using Railroader.ModManager.Wrappers;
-using Serilog;
-using AssemblyDefinition = Mono.Cecil.AssemblyDefinition;
-using TypeDefinition = Mono.Cecil.TypeDefinition;
 
 namespace Railroader.ModManager.Tests.Services;
 
@@ -35,21 +26,16 @@ public sealed class TestsCodeCompiler
     [Fact]
     public void CompileMod_WhenNoSources() {
         // Arrange
-        var memory                    = new MemoryFs();
-        var assemblyCompiler          = Substitute.For<IAssemblyCompiler>();
-        var logger                    = Substitute.For<ILogger>();
-        var assemblyDefinitionWrapper = Substitute.For<IAssemblyDefinitionWrapper>();
-        var sut = new CodeCompiler {
-            FileSystem = memory.FileSystem,
-            Logger = logger,
-            AssemblyCompiler = assemblyCompiler,
-            AssemblyDefinitionWrapper = assemblyDefinitionWrapper
-        };
+        var serviceManager =
+            new TestServiceManager()
+                .WithAssemblyCompiler();
+
+        var sut = serviceManager.CreateCodeCompiler();
 
         IEnumerable<string> defaultReferences = [
             "Assembly-CSharp",
             "0Harmony",
-            "Railroader-ModInterfaces",
+            "Railroader.ModManager.Interfaces",
             "Serilog",
             "UnityEngine.CoreModule"
         ];
@@ -62,7 +48,7 @@ public sealed class TestsCodeCompiler
 
         actual.Should().BeNull();
 
-        logger.ReceivedCalls().Should().BeEmpty();
+        serviceManager.MainLogger.ReceivedCalls().Should().BeEmpty();
     }
 
     [Theory]
@@ -70,22 +56,12 @@ public sealed class TestsCodeCompiler
     [InlineData(2)]
     public void CompileMod_AssemblyUpToDate(int day) {
         // Arrange
-        var memory = new MemoryFs(currentDirectory:@"\Current") {
-            { AssemblyPath, "DLL", new DateTime(2000, 1, 2)},
-            { @"C:\Current\Mods\DummyMod\source.cs", "", new DateTime(2000, 1, day)}
-        };
-
-        var logger = Substitute.For<ILogger>();
-
-        var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
-
-        var assemblyDefinitionWrapper = Substitute.For<IAssemblyDefinitionWrapper>();
-        var sut = new CodeCompiler {
-            FileSystem = memory.FileSystem,
-            Logger = logger,
-            AssemblyCompiler = assemblyCompiler,
-            AssemblyDefinitionWrapper = assemblyDefinitionWrapper
-        };
+        var serviceManager =
+            new TestServiceManager(@"\Current")
+                .WithFile(AssemblyPath, "DLL", new DateTime(2000, 1, 2))
+                .WithFile(@"C:\Current\Mods\DummyMod\source.cs", "", new DateTime(2000, 1, day))
+                .WithAssemblyCompiler();
+        var sut = serviceManager.CreateCodeCompiler();
 
         // Act
         var actual = sut.CompileMod(_ModDefinition);
@@ -93,37 +69,27 @@ public sealed class TestsCodeCompiler
         // Assert
         actual.Should().Be(AssemblyPath);
 
-        logger.Received().Information("Using existing mod {ModId} DLL at {Path}", _ModDefinition.Identifier, AssemblyPath);
-        logger.ReceivedCalls().Should().HaveCount(1);
+        serviceManager.MainLogger.Received().Information("Using existing mod {ModId} DLL at {Path}", _ModDefinition.Identifier, AssemblyPath);
+        serviceManager.MainLogger.ReceivedCalls().Should().HaveCount(1);
     }
 
     [Fact]
     public void CompileMod_Compilation_Failed() {
         // Arrange
-        var memory = new MemoryFs(currentDirectory: @"C:\Current") {
-            { AssemblyPath, "", _OldDate },
-            { @"C:\Current\Mods\DummyMod\source1.cs", "", _NewDate },
-            { @"C:\Current\Mods\DummyMod\source2.cs", "", _OldDate }
-        };
+        var serviceManager =
+            new TestServiceManager(@"\Current")
+                .WithFile(AssemblyPath, "", _OldDate)
+                .WithFile(@"C:\Current\Mods\DummyMod\source1.cs", "", _NewDate)
+                .WithFile(@"C:\Current\Mods\DummyMod\source2.cs", "", _OldDate)
+                .WithAssemblyCompiler(assemblyCompiler => { assemblyCompiler(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>(), out _).Returns(_ => false); });
 
-        var logger           = Substitute.For<ILogger>();
-        var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
-        assemblyCompiler.CompileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>()).Returns(_ => false);
-
-        var assemblyDefinitionWrapper = Substitute.For<IAssemblyDefinitionWrapper>();
-        var sut = new CodeCompiler {
-            FileSystem = memory.FileSystem,
-            Logger = logger,
-            AssemblyCompiler = assemblyCompiler,
-            AssemblyDefinitionWrapper = assemblyDefinitionWrapper,
-            PluginPatchers = []
-        };
+        var sut = serviceManager.CreateCodeCompiler();
 
         string[] sources = [@"C:\Current\Mods\DummyMod\source1.cs", @"C:\Current\Mods\DummyMod\source2.cs"];
         string[] references = [
             @"C:\Current\Railroader_Data\Managed\Assembly-CSharp.dll",
             @"C:\Current\Railroader_Data\Managed\0Harmony.dll",
-            @"C:\Current\Railroader_Data\Managed\Railroader-ModInterfaces.dll",
+            @"C:\Current\Railroader_Data\Managed\Railroader.ModManager.Interfaces.dll",
             @"C:\Current\Railroader_Data\Managed\Serilog.dll",
             @"C:\Current\Railroader_Data\Managed\UnityEngine.CoreModule.dll"
         ];
@@ -134,19 +100,19 @@ public sealed class TestsCodeCompiler
         // Assert
         actual.Should().BeNull();
 
-        logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
-        logger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
+        serviceManager.MainLogger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
+        serviceManager.MainLogger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
 
-        assemblyCompiler.Received().CompileAssembly(AssemblyPath,
+        serviceManager.GetService<CompileAssemblyDelegate>().Received().Invoke(AssemblyPath,
             Arg.Is<string[]>(o => o.SequenceEqual(sources)),
-            Arg.Is<string[]>(o => o.SequenceEqual(references))
+            Arg.Is<string[]>(o => o.SequenceEqual(references)),
+            out Arg.Any<string>()
         );
 
-        logger.Received().Error("Compilation failed for mod {ModId} ...", _ModDefinition.Identifier);
+        serviceManager.MainLogger.Received().Error("Compilation failed for mod {ModId} ...", _ModDefinition.Identifier);
+        serviceManager.MainLogger.ReceivedCalls().Should().HaveCount(3);
 
-        logger.ReceivedCalls().Should().HaveCount(3);
-
-        memory.FileSystem.File.Received().Delete(AssemblyPath);
+        serviceManager.MemoryFs.FileSystem.File.Received().Delete(AssemblyPath);
     }
 
     [Theory]
@@ -154,14 +120,17 @@ public sealed class TestsCodeCompiler
     [InlineData(false)]
     public void CompileMod_Compilation_Successful(bool hasEmptyRequires) {
         // Arrange
-        var memory = new MemoryFs(currentDirectory: @"C:\Current") {
-            { AssemblyPath, "", _OldDate },
-            { @"C:\Current\Mods\DummyMod\source1.cs", "", _NewDate },
-            { @"C:\Current\Mods\DummyMod\source2.cs", "", _OldDate }
-        };
+        var serviceManager =
+            new TestServiceManager(@"\Current")
+                .WithFile(AssemblyPath, "", _OldDate)
+                .WithFile(@"C:\Current\Mods\DummyMod\source1.cs", "", _NewDate)
+                .WithFile(@"C:\Current\Mods\DummyMod\source2.cs", "", _OldDate);
 
-        var logger           = Substitute.For<ILogger>();
-        var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
+        serviceManager.WithAssemblyCompiler(assemblyCompiler => {
+            assemblyCompiler(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>(), out _)
+                            .Returns(_ => true)
+                            .AndDoes(o => serviceManager.MemoryFs.Add(o.ArgAt<string>(0), "Compiled DLL"));
+        });
 
         var modDefinition = new ModDefinition {
             Identifier = "DummyMod",
@@ -174,23 +143,12 @@ public sealed class TestsCodeCompiler
         string[] references = [
             @"C:\Current\Railroader_Data\Managed\Assembly-CSharp.dll",
             @"C:\Current\Railroader_Data\Managed\0Harmony.dll",
-            @"C:\Current\Railroader_Data\Managed\Railroader-ModInterfaces.dll",
+            @"C:\Current\Railroader_Data\Managed\Railroader.ModManager.Interfaces.dll",
             @"C:\Current\Railroader_Data\Managed\Serilog.dll",
             @"C:\Current\Railroader_Data\Managed\UnityEngine.CoreModule.dll"
         ];
 
-        assemblyCompiler.CompileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>()).Returns(_ => true).AndDoes(_ => { 
-            memory.Add(AssemblyPath, "Compiled DLL"); 
-        });
-
-        var assemblyDefinitionWrapper = Substitute.For<IAssemblyDefinitionWrapper>();
-        var sut = new CodeCompiler {
-            FileSystem = memory.FileSystem,
-            Logger = logger,
-            AssemblyCompiler = assemblyCompiler,
-            AssemblyDefinitionWrapper = assemblyDefinitionWrapper,
-            PluginPatchers = []
-        };
+        var sut = serviceManager.CreateCodeCompiler();
 
         // Act
         var actual = sut.CompileMod(modDefinition);
@@ -198,423 +156,55 @@ public sealed class TestsCodeCompiler
         // Assert
         actual.Should().Be(AssemblyPath);
 
-        logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
-        logger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
+        serviceManager.MainLogger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
+        serviceManager.MainLogger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
 
-        assemblyCompiler.Received().CompileAssembly(AssemblyPath,
+        serviceManager.GetService<CompileAssemblyDelegate>().Received().Invoke(AssemblyPath,
             Arg.Is<string[]>(o => o.SequenceEqual(sources)),
-            Arg.Is<string[]>(o => o.SequenceEqual(references))
+            Arg.Is<string[]>(o => o.SequenceEqual(references)),
+            out Arg.Any<string>()
         );
 
-        logger.Received().Information("Compilation complete for mod {ModId}", _ModDefinition.Identifier);
+        serviceManager.MainLogger.Received().Information("Compilation complete for mod {ModId}", _ModDefinition.Identifier);
+        serviceManager.MainLogger.ReceivedCalls().Should().HaveCount(3);
 
-        logger.ReceivedCalls().Should().HaveCount(3);
-
-        memory.FileSystem.File.Received().Delete(AssemblyPath);
-
-        memory.Items.Should().ContainKey(AssemblyPath).WhoseValue
-              .Should().BeEquivalentTo(new MemoryEntry(AssemblyPath, Encoding.UTF8.GetBytes("Compiled DLL")));
-    }
-
-    [Fact]
-    public void CompileMod_Compilation_WithPatches_AssemblyLoadFail() {
-        // Arrange
-        var memory = new MemoryFs(currentDirectory: @"C:\Current") {
-            { AssemblyPath, "", _OldDate },
-            { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate }
-        };
-
-        var logger = Substitute.For<ILogger>();
-
-        var assemblyDefinitionWrapper = Substitute.For<IAssemblyDefinitionWrapper>();
-        assemblyDefinitionWrapper.ReadAssembly(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => null);
-
-        var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
-        assemblyCompiler.CompileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>()).Returns(true);
-
-        var sut = new CodeCompiler {
-            FileSystem = memory.FileSystem,
-            Logger = logger,
-            AssemblyCompiler = assemblyCompiler,
-            AssemblyDefinitionWrapper = assemblyDefinitionWrapper,
-            PluginPatchers = [(typeof(IHarmonyPlugin), typeof(TestPluginPatcher))]
-        };
-
-        // Act
-        var actual = sut.CompileMod(_ModDefinition);
-
-        // Assert
-        actual.Should().BeNull();
-        logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
-        logger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Information("Compilation complete for mod {ModId}", _ModDefinition.Identifier);
-        logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Error("Failed to load definition for assembly {AssemblyPath} for mod {ModId}", AssemblyPath, _ModDefinition.Identifier);
-        logger.Received().Error("Failed to apply patches to assembly {AssemblyPath} for mod {ModId}", AssemblyPath, _ModDefinition.Identifier);
-        logger.ReceivedCalls().Should().HaveCount(6);
-    }
-
-    [Fact]
-    public void CompileMod_Compilation_WithPatches_ReturnValidInstances() {
-        // Arrange
-        const string source = """
-                              using Railroader.ModInterfaces;
-                              using Serilog;
-
-                              namespace Foo.Bar
-                              {
-                                  public sealed class FirstPlugin : PluginBase<FirstPlugin>, IHarmonyPlugin
-                                  {
-                                      public FirstPlugin(IModdingContext moddingContext, IMod mod) 
-                                          : base(moddingContext, mod) {
-                                      }
-                                  }
-                              }
-                              """;
-
-        var (assemblyDefinition, _) = AssemblyTestUtils.BuildAssemblyDefinition(source);
-
-        string[] expectedDirectories = [
-            ".",
-            "bin",
-            @"C:\Current\Railroader_Data\Managed",
-            @"C:\Current\Mods\SecondMod"
-        ];
-
-        var memory = new MemoryFs(currentDirectory: @"C:\Current") {
-            { AssemblyPath, "", _OldDate },
-            { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate },
-            { @"C:\Current\Mods\SecondMod\SecondMod.dll", "", _OldDate }
-        };
-
-        var logger = Substitute.For<ILogger>();
-
-        var assemblyDefinitionWrapper = Substitute.For<IAssemblyDefinitionWrapper>();
-        assemblyDefinitionWrapper.ReadAssembly(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => assemblyDefinition);
-        assemblyDefinitionWrapper.When(o => o.Write(Arg.Any<AssemblyDefinition>(), Arg.Any<string>())).Do(o => {
-            var       definition   = o.Arg<AssemblyDefinition>();
-            var       fileName     = o.Arg<string>();
-            using var stream       = memory.FileSystem.File.Create(fileName);
-            using var streamWriter = new StreamWriter(stream, Encoding.UTF8, 1024, true);
-            streamWriter.Write(definition.Name.Name);
-        });
-
-        var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
-        assemblyCompiler.CompileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>()).Returns(true);
-
-        var sut = new CodeCompiler {
-            FileSystem = memory.FileSystem,
-            Logger = logger,
-            AssemblyCompiler = assemblyCompiler,
-            AssemblyDefinitionWrapper = assemblyDefinitionWrapper,
-            PluginPatchers = [(typeof(IHarmonyPlugin), typeof(TestPluginPatcher))]
-        };
-
-        // Act
-        var actual = sut.CompileMod(_ModDefinition);
-
-        // Assert
-        actual.Should().Be(AssemblyPath);
-        logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
-        logger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Information("Compilation complete for mod {ModId}", _ModDefinition.Identifier);
-        logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Debug("TestPluginPatcher::Patch | typeDefinition: {type}", "FirstPlugin");
-        logger.Received().Debug("Wrote patched assembly to temporary file {TempPath} for mod {ModId}", Arg.Any<string>(), _ModDefinition.Identifier);
-        logger.Received().Information("Patching complete for mod {ModId}", _ModDefinition.Identifier);
-        logger.ReceivedCalls().Should().HaveCount(7);
-
-        assemblyDefinitionWrapper.Received(1).ReadAssembly(AssemblyPath,
-            Arg.Is<ReaderParameters>(o =>
-                o.AssemblyResolver is DefaultAssemblyResolver &&
-                ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
-            )
-        );
-        assemblyDefinitionWrapper.Received(1).Write(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
-
-        memory.FileSystem.File.Received(2).Delete(AssemblyPath);
-        memory.FileSystem.File.Received().Move(@"C:\Current\Mods\DummyMod\DummyMod.patched.dll", AssemblyPath);
-
-        // verify assemblyDefinition.Dispose as called ...
-        var imageField  = typeof(ModuleDefinition).GetField("Image", BindingFlags.Instance | BindingFlags.NonPublic)!;
-        var image       = imageField.GetValue(assemblyDefinition.MainModule)!; // Mono.Cecil.PE.Image
-        var streamField = image.GetType().GetField("Stream", BindingFlags.Instance | BindingFlags.Public)!;
-        var disposable  = streamField.GetValue(image)!; // Mono.Disposable<System.IO.Stream>
-        var valueField  = disposable.GetType().GetField("value", BindingFlags.Instance | BindingFlags.NonPublic)!;
-        var stream      = (Stream)valueField.GetValue(disposable)!;
-        stream.CanRead.Should().BeFalse();
-        stream.CanWrite.Should().BeFalse();
-    }
-
-    [Fact]
-    public void CompileMod_Compilation_WithPatches_ExtraInterface() {
-        // Arrange
-        const string source = """
-                              using Railroader.ModInterfaces;
-                              using Serilog;
-
-                              namespace Foo.Bar
-                              {
-                                  public interface IExtra {}
-                                  
-                                  public sealed class FirstPlugin : PluginBase<FirstPlugin>, IExtra
-                                  {
-                                      public FirstPlugin(IModdingContext moddingContext, IMod mod) 
-                                          : base(moddingContext, mod) {
-                                      }
-                                  }
-                              }
-                              """;
-
-        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source);
-
-        string[] expectedDirectories = [
-            ".",
-            "bin",
-            @"C:\Current\Railroader_Data\Managed",
-            @"C:\Current\Mods\SecondMod"
-        ];
-
-        var memory = new MemoryFs(currentDirectory: @"C:\Current") {
-            { AssemblyPath, "", _OldDate },
-            { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate },
-            { @"C:\Current\Mods\SecondMod\SecondMod.dll", "", _OldDate }
-        };
-
-        var logger = Substitute.For<ILogger>();
-
-        var assemblyDefinitionWrapper = Substitute.For<IAssemblyDefinitionWrapper>();
-        assemblyDefinitionWrapper.ReadAssembly(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => assemblyDefinition);
-
-        var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
-        assemblyCompiler.CompileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>()).Returns(true);
-
-        var sut = new CodeCompiler {
-            FileSystem = memory.FileSystem,
-            Logger = logger,
-            AssemblyCompiler = assemblyCompiler,
-            AssemblyDefinitionWrapper = assemblyDefinitionWrapper,
-            PluginPatchers = [(typeof(IHarmonyPlugin), typeof(TestPluginPatcher))]
-        };
-
-        // Act
-        var actual = sut.CompileMod(_ModDefinition);
-        AssemblyTestUtils.Write(assemblyDefinition, outputPath, "patched");
-
-        // Assert
-        actual.Should().Be(AssemblyPath);
-        logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
-        logger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Information("Compilation complete for mod {ModId}", _ModDefinition.Identifier);
-        logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
-        logger.Received().Information("Patching complete for mod {ModId}", _ModDefinition.Identifier);
-        logger.ReceivedCalls().Should().HaveCount(6);
-
-        assemblyDefinitionWrapper.Received(1).ReadAssembly(AssemblyPath,
-            Arg.Is<ReaderParameters>(o =>
-                o.AssemblyResolver is DefaultAssemblyResolver &&
-                ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
-            )
-        );
-        assemblyDefinitionWrapper.Received(0).Write(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
-    }
-
-    [Fact]
-    public void CompileMod_Compilation_WithPatches_HandleThrowingPatcher1() {
-        // Arrange
-        const string source = """
-                              using Railroader.ModInterfaces;
-                              using Serilog;
-
-                              namespace Foo.Bar
-                              {
-                                  public sealed class FirstPlugin : PluginBase<FirstPlugin>, IHarmonyPlugin
-                                  {
-                                      public FirstPlugin(IModdingContext moddingContext, IMod mod) 
-                                          : base(moddingContext, mod) {
-                                      }
-                                  }
-                              }
-                              """;
-
-        var (assemblyDefinition, outputPath) = AssemblyTestUtils.BuildAssemblyDefinition(source);
-
-        string[] expectedDirectories = [
-            ".",
-            "bin",
-            @"C:\Current\Railroader_Data\Managed",
-            @"C:\Current\Mods\SecondMod"
-        ];
-
-        var memory = new MemoryFs(currentDirectory: @"C:\Current") {
-            { AssemblyPath, "", _OldDate },
-            { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate },
-            { @"C:\Current\Mods\SecondMod\SecondMod.dll", "", _OldDate }
-        };
-
-        var logger = Substitute.For<ILogger>();
-
-        var assemblyDefinitionWrapper = Substitute.For<IAssemblyDefinitionWrapper>();
-        assemblyDefinitionWrapper.ReadAssembly(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => assemblyDefinition);
-
-        var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
-        assemblyCompiler.CompileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>()).Returns(true);
-
-        var sut = new CodeCompiler {
-            FileSystem = memory.FileSystem,
-            Logger = logger,
-            AssemblyCompiler = assemblyCompiler,
-            AssemblyDefinitionWrapper = assemblyDefinitionWrapper,
-            PluginPatchers = [(typeof(IHarmonyPlugin), typeof(ThrowingPatcher))]
-        };
-
-        // Act
-        var actual = sut.CompileMod(_ModDefinition);
-        AssemblyTestUtils.Write(assemblyDefinition, outputPath, "patched");
-
-        // Assert
-        actual.Should().Be(AssemblyPath);
-        logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
-        logger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Information("Compilation complete for mod {ModId}", _ModDefinition.Identifier);
-        logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Error(Arg.Is<Exception>(o => o.Message == "ThrowingPatcher"), "Failed to patch type {TypeName} for mod {ModId}", "Foo.Bar.FirstPlugin", _ModDefinition.Identifier);
-        logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
-        logger.ReceivedCalls().Should().HaveCount(7);
-
-        assemblyDefinitionWrapper.Received(1).ReadAssembly(AssemblyPath,
-            Arg.Is<ReaderParameters>(o =>
-                o.AssemblyResolver is DefaultAssemblyResolver &&
-                ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
-            )
-        );
-        assemblyDefinitionWrapper.ReceivedCalls().Should().HaveCount(1);
-    }
-
-    [Fact]
-    public void CompileMod_Compilation_WithPatches_HandleThrowingPatcher2() {
-        // Arrange
-        const string source = """
-                              using System;
-                              using Railroader.ModInterfaces;
-                              using Railroader.ModInjector.Tests.Services;
-                              using Serilog;
-
-                              namespace Foo.Bar
-                              {
-                                  public sealed class FirstPlugin : PluginBase<FirstPlugin>, IHarmonyPlugin, ITopRightButtonPlugin
-                                  {
-                                      public FirstPlugin(IModdingContext moddingContext, IMod mod) 
-                                          : base(moddingContext, mod) {
-                                      }
-                                      
-                                      public string IconName => "";
-                                      public string Tooltip => "";
-                                      public int Index => 0;
-                                      public Action OnClick => () => {};
-                                  }
-                              }
-                              """;
-
-        var (assemblyDefinition, _) = AssemblyTestUtils.BuildAssemblyDefinition(source);
-
-        string[] expectedDirectories = [
-            ".",
-            "bin",
-            @"C:\Current\Railroader_Data\Managed",
-            @"C:\Current\Mods\SecondMod"
-        ];
-
-        var memory = new MemoryFs(currentDirectory: @"C:\Current") {
-            { AssemblyPath, "", _OldDate },
-            { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate },
-            { @"C:\Current\Mods\SecondMod\SecondMod.dll", "", _OldDate }
-        };
-
-        var logger = Substitute.For<ILogger>();
-
-        var assemblyDefinitionWrapper = Substitute.For<IAssemblyDefinitionWrapper>();
-        assemblyDefinitionWrapper.ReadAssembly(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => assemblyDefinition);
-
-        var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
-        assemblyCompiler.CompileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>()).Returns(true);
-
-        var sut = new CodeCompiler {
-            FileSystem = memory.FileSystem,
-            Logger = logger,
-            AssemblyCompiler = assemblyCompiler,
-            AssemblyDefinitionWrapper = assemblyDefinitionWrapper,
-            PluginPatchers = [
-                (typeof(IHarmonyPlugin), typeof(TestPluginPatcher)),
-                (typeof(ITopRightButtonPlugin), typeof(ThrowingPatcher))
-            ]
-        };
-
-        // Act
-        var actual = sut.CompileMod(_ModDefinition);
-
-        // Assert
-        actual.Should().Be(AssemblyPath);
-        logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
-        logger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Information("Compilation complete for mod {ModId}", _ModDefinition.Identifier);
-        logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Debug("TestPluginPatcher::Patch | typeDefinition: {type}", "FirstPlugin");
-        logger.Received().Error(Arg.Any<Exception>(), "Failed to patch type {TypeName} for mod {ModId}", "Foo.Bar.FirstPlugin", _ModDefinition.Identifier);
-        logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
-        logger.Received().Information("Patching complete for mod {ModId}", _ModDefinition.Identifier);
-        logger.ReceivedCalls().Should().HaveCount(8);
-
-        assemblyDefinitionWrapper.Received(1).ReadAssembly(AssemblyPath,
-            Arg.Is<ReaderParameters>(o =>
-                o.AssemblyResolver is DefaultAssemblyResolver &&
-                ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
-            )
-        );
-        assemblyDefinitionWrapper.ReceivedCalls().Should().HaveCount(1);
+        serviceManager.MemoryFs.FileSystem.File.Received().Delete(AssemblyPath);
+        serviceManager.MemoryFs.Items.Should().ContainKey(AssemblyPath).WhoseValue
+                      .Should().BeEquivalentTo(new MemoryEntry(AssemblyPath, Encoding.UTF8.GetBytes("Compiled DLL")));
     }
 
     [Fact]
     public void CompileMod_Compilation_WithValidModReferences() {
         // Arrange
-        var memory = new MemoryFs(currentDirectory: @"C:\Current") {
-            { AssemblyPath, "", _OldDate },
-            { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate },
-            { @"C:\Current\Mods\DepMod1\DepMod1.dll", "", _OldDate },
-            { @"C:\Current\Mods\DepMod2\DepMod2.dll", "", _OldDate }
-        };
+        var serviceManager =
+            new TestServiceManager(@"\Current")
+                .WithFile(AssemblyPath, "", _OldDate)
+                .WithFile(@"C:\Current\Mods\DummyMod\source.cs", "", _NewDate)
+                .WithFile(@"C:\Current\Mods\DepMod1\DepMod1.dll", "", _OldDate)
+                .WithFile(@"C:\Current\Mods\DepMod2\DepMod2.dll", "", _OldDate);
+
+        serviceManager.WithAssemblyCompiler(assemblyCompiler => {
+            assemblyCompiler(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>(), out _)
+                            .Returns(_ => true)
+                            .AndDoes(o => serviceManager.MemoryFs.Add(o.ArgAt<string>(0), "Compiled DLL"));
+        });
 
         var modDefinition = new ModDefinition {
             Identifier = "DummyMod",
             Name = "Dummy Mod Name",
             BasePath = @"C:\Current\Mods\DummyMod",
-            Requires = new Dictionary<string, FluentVersion?> {
-                { "DepMod1", null },
-                { "DepMod2", null }
-            }
+            Requires = new Dictionary<string, FluentVersion?>()
         };
+        modDefinition.Requires.Add("DepMod1", null);
+        modDefinition.Requires.Add("DepMod2", null);
 
-        var logger           = Substitute.For<ILogger>();
-        var assemblyCompiler = Substitute.For<IAssemblyCompiler>();
-        assemblyCompiler.CompileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>())
-                        .Returns(true)
-                        .AndDoes(_ => { memory.Add(AssemblyPath, "Compiled DLL"); });
-
-        var assemblyDefinitionWrapper = Substitute.For<IAssemblyDefinitionWrapper>();
-        var sut = new CodeCompiler {
-            FileSystem = memory.FileSystem,
-            Logger = logger,
-            AssemblyCompiler = assemblyCompiler,
-            AssemblyDefinitionWrapper = assemblyDefinitionWrapper,
-            PluginPatchers = []
-        };
+        var sut = serviceManager.CreateCodeCompiler();
 
         string[] sources = [@"C:\Current\Mods\DummyMod\source.cs"];
         string[] expectedReferences = [
             @"C:\Current\Railroader_Data\Managed\Assembly-CSharp.dll",
             @"C:\Current\Railroader_Data\Managed\0Harmony.dll",
-            @"C:\Current\Railroader_Data\Managed\Railroader-ModInterfaces.dll",
+            @"C:\Current\Railroader_Data\Managed\Railroader.ModManager.Interfaces.dll",
             @"C:\Current\Railroader_Data\Managed\Serilog.dll",
             @"C:\Current\Railroader_Data\Managed\UnityEngine.CoreModule.dll",
             @"C:\Current\Mods\DepMod1\DepMod1.dll",
@@ -629,35 +219,21 @@ public sealed class TestsCodeCompiler
         // Assert
         actual.Should().Be(AssemblyPath);
 
-        logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", modDefinition.Identifier, AssemblyPath);
-        logger.Received().Information("Compiling mod {ModId} ...", modDefinition.Identifier);
-        logger.Received().Information("Adding references to {Mods} ...", Arg.Is<ICollection<string>>(o => o.SequenceEqual(expectedRequiredMods)));
-        logger.Received().Information("Compilation complete for mod {ModId}", modDefinition.Identifier);
-        logger.ReceivedCalls().Should().HaveCount(4);
+        serviceManager.MainLogger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", modDefinition.Identifier, AssemblyPath);
+        serviceManager.MainLogger.Received().Information("Compiling mod {ModId} ...", modDefinition.Identifier);
+        serviceManager.MainLogger.Received().Information("Adding references to {Mods} ...", Arg.Is<ICollection<string>>(o => o.SequenceEqual(expectedRequiredMods)));
+        serviceManager.MainLogger.Received().Information("Compilation complete for mod {ModId}", modDefinition.Identifier);
+        serviceManager.MainLogger.ReceivedCalls().Should().HaveCount(4);
 
-        assemblyCompiler.Received().CompileAssembly(AssemblyPath,
+        serviceManager.GetService<CompileAssemblyDelegate>().Received().Invoke(AssemblyPath,
             Arg.Is<string[]>(o => o.SequenceEqual(sources)),
-            Arg.Is<string[]>(o => o.SequenceEqual(expectedReferences))
+            Arg.Is<string[]>(o => o.SequenceEqual(expectedReferences)),
+            out Arg.Any<string>()
         );
 
-        memory.FileSystem.File.Received().Delete(AssemblyPath);
+        serviceManager.MemoryFs.FileSystem.File.Received().Delete(AssemblyPath);
 
-        memory.Items.Should().ContainKey(AssemblyPath).WhoseValue
-              .Should().BeEquivalentTo(new MemoryEntry(AssemblyPath, Encoding.UTF8.GetBytes("Compiled DLL")));
-    }
-
-    private sealed class TestPluginPatcher(ILogger logger) : ITypePatcher
-    {
-        public bool Patch(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition) {
-            logger.Debug("TestPluginPatcher::Patch | typeDefinition: {type}", typeDefinition.Name);
-            return true;
-        }
-    }
-
-#pragma warning disable CS9113 // Parameter is unread.
-    private sealed class ThrowingPatcher(ILogger logger) : ITypePatcher
-#pragma warning restore CS9113 // Parameter is unread.
-    {
-        public bool Patch(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition) => throw new Exception("ThrowingPatcher");
+        serviceManager.MemoryFs.Items.Should().ContainKey(AssemblyPath).WhoseValue
+                      .Should().BeEquivalentTo(new MemoryEntry(AssemblyPath, Encoding.UTF8.GetBytes("Compiled DLL")));
     }
 }

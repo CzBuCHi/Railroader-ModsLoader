@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using Newtonsoft.Json;
+using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Services;
 using Serilog;
 
 namespace Railroader.ModManager;
@@ -48,5 +50,5 @@ internal sealed class Mod(IModDefinition modDefinition, string? assemblyPath) : 
 
     /// <inheritdoc />
     public ILogger CreateLogger(string? scope = null)
-        => DI.GetLogger(scope == null ? Definition.Identifier : $"{Definition.Identifier}.{scope}");
+        => ModManager.ServiceProvider.GetService<ILoggerFactory>().GetLogger(scope == null ? Definition.Identifier : $"{Definition.Identifier}.{scope}");
 }

@@ -1,4 +1,4 @@
-- extract zipped mod from Mods\*.zip to Mods\*
+- upgrade interfaces to delegates
 - ModdingContext implementation
 - ModManager tests
 - convert my mods to this manager

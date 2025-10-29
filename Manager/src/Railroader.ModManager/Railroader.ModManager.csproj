@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
     <ItemGroup>
         <Reference Include="System.Core" />
         <GameAssembly Include="0Harmony" />
@@ -23,24 +24,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-            <_Parameter1>$(MSBuildProjectName).Tests</_Parameter1>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-            <_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
-        </AssemblyAttribute>
-    </ItemGroup>
-
-  <ItemGroup>
-      <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs" />
+        <ProjectReference Include="..\Railroader.ModManager.Interfaces\Railroader.ModManager.Interfaces.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Railroader.ModManager.Interfaces\Railroader.ModManager.Interfaces.csproj" />
+        <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs"  />
     </ItemGroup>
-    
+
     <Target Name="CopyGeneratedFile" AfterTargets="Build">
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\src\Railroader.ModManagerInstaller\Injector" SkipUnchangedFiles="false" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)\src\Railroader.ModManagerInstaller\Assemblies" SkipUnchangedFiles="false" />
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GameDir)\Railroader_Data\Managed" SkipUnchangedFiles="false" />
     </Target>
 </Project>

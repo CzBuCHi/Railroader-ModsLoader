@@ -5,12 +5,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using MemoryFileSystem.Internal;
 using MemoryFileSystem.Types;
-using Railroader.ModManager.Wrappers.FileSystem;
+using Railroader.ModManager.Services.Wrappers.FileSystem;
 
 namespace MemoryFileSystem;
 
+[PublicAPI]
 public interface IMemoryFileSystem
 {
     void Add(string folderPath, DateTime? lastWriteTime = null);
@@ -27,8 +29,6 @@ public interface IMemoryFileSystem
     EntryDictionary Items { get; }
 }
 
-//[PublicAPI]
-//[DebuggerStepThrough]
 public abstract partial class MemoryFileSystemBase : IMemoryFileSystem, IEnumerable<MemoryEntry>
 {
     protected MemoryFileSystemBase() => FileSystem = new MemoryFileSystem(this).Mock();

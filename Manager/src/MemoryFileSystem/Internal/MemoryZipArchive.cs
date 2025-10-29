@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using NSubstitute;
-using Railroader.ModManager.Wrappers.FileSystem;
+using Railroader.ModManager.Services.Wrappers.FileSystem;
 
 namespace MemoryFileSystem.Internal;
 

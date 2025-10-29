@@ -49,23 +49,22 @@ public sealed class TestsMod
     }
 
     [Theory]
-    [InlineData(null!, "Identifier")]
-    [InlineData("Scope", "Identifier.Scope")]
-    public void CreateLogger(string? scope, string expected) {
+    [InlineData(null!)]
+    [InlineData("scope")]
+    public void CreateLogger(string? scope) {
         // Arrange
-        const string assemblyPath  = "assemblyPath";
-        var modDefinition = new ModDefinition{
-            Identifier = "Identifier"
-        };
-        var sut = new Mod(modDefinition, assemblyPath);
-
-        DI.GetLogger = Substitute.For<DI.GetLoggerDelegate>();
-
+        var serviceManager = new TestServiceManager();
+        
+        var modDefinition = Substitute.For<IModDefinition>();
+        modDefinition.Identifier.Returns("Identifier");
+        var sut = new Mod(modDefinition, "assemblyPath");
+      
         // Act
-        _ = sut.CreateLogger(scope);
+        var actual = sut.CreateLogger(scope);
 
         // Assert
-        DI.GetLogger.Received(1).Invoke(expected);
+        actual.Should().Be(serviceManager.ContextLogger);
 
+        serviceManager.LoggerFactory.Received().GetLogger(scope == null ? "Identifier" : $"Identifier.{scope}");
     }
 }

@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Railroader.ModManager.Wrappers.FileSystem;
-using Serilog;
+using Railroader.ModManager.Services.Wrappers.FileSystem;
 using Path = System.IO.Path;
 
 namespace Railroader.ModManager.Services;
@@ -12,45 +11,49 @@ namespace Railroader.ModManager.Services;
 /// <summary> Loads mod definitions from JSON files and handles early logging. </summary>
 internal interface IModDefinitionLoader
 {
+    /// <summary>An array of loaded mod definitions.</summary>
+    ModDefinition[] ModDefinitions { get; }
+
     /// <summary> Loads all mod definitions from the mod directory. </summary>
-    /// <returns>An array of loaded mod definitions.</returns>
-    ModDefinition[] LoadDefinitions();
+    void LoadDefinitions();
 }
 
-internal sealed class ModDefinitionLoader : IModDefinitionLoader
+/// <inheritdoc />
+internal sealed class ModDefinitionLoader(IFileSystem fileSystem, IMemoryLogger logger) : IModDefinitionLoader
 {
-    public required IFileSystem FileSystem { get; init; }
-    public required ILogger     Logger     { get; init; }
+    /// <inheritdoc />
+    public ModDefinition[] ModDefinitions { get; private set; } = [];
 
-    public ModDefinition[] LoadDefinitions() {
+    /// <inheritdoc />
+    public void LoadDefinitions() {
         var modDefinitions = new Dictionary<string, ModDefinition>(StringComparer.OrdinalIgnoreCase);
 
-        var baseDirectory = Path.Combine(FileSystem.Directory.GetCurrentDirectory(), "Mods");
-        foreach (var directory in FileSystem.Directory.EnumerateDirectories(baseDirectory)) {
+        var baseDirectory = Path.Combine(fileSystem.Directory.GetCurrentDirectory(), "Mods");
+        foreach (var directory in fileSystem.Directory.EnumerateDirectories(baseDirectory)) {
             var path = Path.Combine(directory, "Definition.json");
-            if (!FileSystem.File.Exists(path)) {
-                Logger.Warning("Not loading directory {directory}: Missing Definition.json.", directory);
+            if (!fileSystem.File.Exists(path)) {
+                logger.Warning("Not loading directory {directory}: Missing Definition.json.", directory);
                 continue;
             }
 
-            Logger.Information("Loading definition from {directory}...", directory);
+            logger.Information("Loading definition from {directory} ...", directory);
             try {
-                var jObject       = JObject.Parse(FileSystem.File.ReadAllText(path));
+                var jObject       = JObject.Parse(fileSystem.File.ReadAllText(path));
                 var modDefinition = jObject.ToObject<ModDefinition>()!;
 
                 if (modDefinitions.TryGetValue(modDefinition.Identifier, out var conflict)) {
-                    Logger.Error("Another mod with the same Identifier has been found in '{directory}'", conflict.BasePath);
+                    logger.Error("Another mod with the same Identifier has been found in '{directory}'", conflict.BasePath);
                 } else {
                     modDefinition.BasePath = directory;
                     modDefinitions.Add(modDefinition.Identifier, modDefinition);
                 }
             } catch (JsonException exc) {
-                Logger.Error("Failed to parse definition JSON, json error: {exception}", exc);
+                logger.Error("Failed to parse definition JSON, json error: {exception}", exc);
             } catch (Exception exc) {
-                Logger.Error("Failed to parse definition JSON, generic error: {exception}", exc);
+                logger.Error("Failed to parse definition JSON, generic error: {exception}", exc);
             }
         }
 
-        return modDefinitions.Values.ToArray();
+        ModDefinitions = modDefinitions.Values.ToArray();
     }
 }

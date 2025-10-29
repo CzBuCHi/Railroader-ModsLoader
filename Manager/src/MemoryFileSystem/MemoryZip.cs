@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using JetBrains.Annotations;
@@ -8,6 +9,7 @@ using Newtonsoft.Json;
 namespace MemoryFileSystem;
 
 [PublicAPI]
+[DebuggerStepThrough]
 public sealed class MemoryZip : MemoryFileSystemBase
 {
     public MemoryZip() {
@@ -16,7 +18,7 @@ public sealed class MemoryZip : MemoryFileSystemBase
     public MemoryZip(byte[] bytes) {
         var entries = GetEntries(bytes);
 
-        foreach (var entry in entries!) {
+        foreach (var entry in entries) {
             Items.TryAdd(entry.Path, entry);
         }
     }
@@ -45,5 +47,5 @@ public sealed class MemoryZip : MemoryFileSystemBase
 
     public byte[] GetBytes() => Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(Items.Values.ToArray()));
 
-    private MemoryEntry[]? GetEntries(byte[] bytes) => JsonConvert.DeserializeObject<MemoryEntry[]>(Encoding.UTF8.GetString(bytes));
+    private MemoryEntry[] GetEntries(byte[] bytes) => JsonConvert.DeserializeObject<MemoryEntry[]>(Encoding.UTF8.GetString(bytes))!;
 }

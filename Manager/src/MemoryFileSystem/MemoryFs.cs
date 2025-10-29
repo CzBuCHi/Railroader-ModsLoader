@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using JetBrains.Annotations;
 
 namespace MemoryFileSystem;
 
 [PublicAPI]
+[DebuggerStepThrough]
 public sealed class MemoryFs : MemoryFileSystemBase
 {
     public MemoryFs(string? currentDirectory = null) {

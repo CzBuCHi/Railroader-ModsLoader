@@ -8,7 +8,7 @@ using MemoryFileSystem.Internal;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-[assembly: TestFramework("Railroader.ModInjector.Tests.MyTestFramework", "Railroader-ModInjector.Tests")]
+[assembly: TestFramework("Railroader.ModManager.Tests.MyTestFramework", "Railroader.ModManager.Tests")]
 
 namespace Railroader.ModManager.Tests;
 
@@ -22,7 +22,7 @@ public sealed class MyTestFramework : XunitTestFramework
             // MemoryEntry.ExistingContent throws is used on directory on file with no content
             p.DeclaringType == typeof(MemoryEntry) && p.Name == nameof(MemoryEntry.ExistingContent);
 
-        //AssertionConfiguration.Current.Equivalency.Modify(o => o.WithStrictOrdering().Excluding(excluding));
-        AssertionOptions.AssertEquivalencyUsing(o => o.WithStrictOrdering().Excluding(excluding));
+        AssertionConfiguration.Current.Equivalency.Modify(o => o.WithStrictOrdering().Excluding(excluding));
+        //AssertionOptions.AssertEquivalencyUsing(o => o.WithStrictOrdering().Excluding(excluding));
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using MemoryFileSystem.Types;
 using NSubstitute;
-using Railroader.ModManager.Wrappers.FileSystem;
+using Railroader.ModManager.Services.Wrappers.FileSystem;
 
 namespace MemoryFileSystem.Internal;
 
@@ -34,7 +34,7 @@ public sealed class MemoryFile(IMemoryFileSystem fileSystem) : IFile
 
         throw new FileNotFoundException($"File not found: {path}");
     }
-
+    
     public void Delete(string path) {
         path = fileSystem.NormalizePath(path);
         if (!fileSystem.Items.TryGetValue(path, out var entry)) {

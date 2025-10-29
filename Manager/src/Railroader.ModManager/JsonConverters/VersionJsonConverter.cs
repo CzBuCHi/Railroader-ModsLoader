@@ -34,6 +34,6 @@ internal sealed class VersionJsonConverter : JsonConverter<Version>
             value += ".0";
         }
 
-        return Version.TryParse(value, out var version) ? version! : null;
+        return Version.TryParse(value, out var version) ? version : null;
     }
 }
