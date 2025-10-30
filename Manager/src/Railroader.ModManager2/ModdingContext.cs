@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using Railroader.ModManager.Delegates.HarmonyLib;
+using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
 using Serilog;
 using UI.Builder;
@@ -9,12 +12,20 @@ using UI.Common;
 namespace Railroader.ModManager;
 
 /// <summary> Implementation of <see cref="IModdingContext"/> providing basic modding services. </summary>
-internal sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logger) : IModdingContext
+[method: EditorBrowsable(EditorBrowsableState.Never)]
+internal sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logger, HarmonyFactory harmonyFactory) : IModdingContext
 {
+    [ExcludeFromCodeCoverage]
+    public ModdingContext(IReadOnlyCollection<IMod> mods) 
+        : this(mods, Log.Logger.ForSourceContext(), Harmony.Factory) {
+    }
+
     /// <inheritdoc />
     public IReadOnlyCollection<IMod> Mods { get; } = mods;
 
     public ILogger Logger { get; } = logger;
+
+    public HarmonyFactory HarmonyFactory { get; } = harmonyFactory;
 
     /// <inheritdoc />
     [ExcludeFromCodeCoverage]

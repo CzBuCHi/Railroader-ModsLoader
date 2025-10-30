@@ -156,6 +156,9 @@
   <member name="M:FluentAssertions.Specialized.DelegateAssertions`2.Throw``1(System.String,System.Object[])">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
+  <member name="M:FluentAssertions.Specialized.ExceptionAssertions`1.WithMessage(System.String,System.String,System.Object[])">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
   <member name="P:FluentAssertions.AndConstraint`1.And">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>

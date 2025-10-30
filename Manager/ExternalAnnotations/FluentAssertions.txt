@@ -46,6 +46,7 @@ M:FluentAssertions.Primitives.ReferenceTypeAssertions`2.BeOfType``1(System.Strin
 M:FluentAssertions.Primitives.ReferenceTypeAssertions`2.NotBeNull(System.String,System.Object[])
 M:FluentAssertions.Specialized.AsyncFunctionAssertions`2.ThrowAsync``1(System.String,System.Object[])
 M:FluentAssertions.Specialized.DelegateAssertions`2.Throw``1(System.String,System.Object[])
+M:FluentAssertions.Specialized.ExceptionAssertions`1.WithMessage(System.String,System.String,System.Object[])
 P:FluentAssertions.AndConstraint`1.And
 P:FluentAssertions.AndWhichConstraint`2.Which
 P:FluentAssertions.AssertionConfiguration.Current

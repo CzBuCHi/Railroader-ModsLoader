@@ -139,7 +139,7 @@ public class ModManager : MonoBehaviour
             mods[i] = new Mod(definition, outputDllPath);
         }
 
-        var moddingContext = new ModdingContext(mods);
+        var moddingContext = new ModdingContext(mods, logger);
         logger.Information("Created modding context ...");
         logger.Debug("mods: {mods}", JsonConvert.SerializeObject(moddingContext.Mods));
 

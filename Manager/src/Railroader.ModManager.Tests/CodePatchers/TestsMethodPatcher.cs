@@ -19,7 +19,8 @@
 //    [InlineData("PrivateInjectedMethod")]
 //    [InlineData("PrivateStaticInjectedMethod")]
 //    [InlineData("PublicInjectedMethod")]
-//    public void ThrowInvalidInjectorMethod(string injectorMethod) {
+//    public void ThrowInvalidInjectorMethod(string injectorMethod)
+//    {
 //        // Arrange
 //        var serviceManager = new TestServiceManager();
 
@@ -64,7 +65,8 @@
 //                        public class TargetType : BaseType { } 
 //                     }
 //                     """)]
-//    public void SkipNotMarkedTypes(string suffix, string source) {
+//    public void SkipNotMarkedTypes(string suffix, string source)
+//    {
 //        // Arrange
 //        var serviceManager = new TestServiceManager();
 
@@ -77,7 +79,7 @@
 //        // Act
 //        var actual = sut.Patch(assemblyDefinition, typeDefinition);
 //        TestUtils.Write(assemblyDefinition, outputPath, "patched");
-       
+
 //        // Assert
 //        actual.Should().BeFalse();
 
@@ -86,7 +88,8 @@
 //    }
 
 //    [Fact]
-//    public void ErrorIfTargetMethodNotExists() {
+//    public void ErrorIfTargetMethodNotExists()
+//    {
 //        // Arrange
 //        const string source = """
 //                              using Railroader.ModManager.Tests.CodePatchers;
@@ -100,9 +103,9 @@
 //        var (assemblyDefinition, outputPath) = TestUtils.BuildAssemblyDefinition(source);
 //        var typeDefinition = assemblyDefinition.MainModule.Types.First(o => o.FullName == "Foo.Bar.TargetType");
 
-        
 
-//        var sut = new MethodPatcher<IMarker, Patcher>(serviceManager.LoggerFactory,typeof(BaseType), "InvalidTargetMethod", "InjectedMethod");
+
+//        var sut = new MethodPatcher<IMarker, Patcher>(serviceManager.LoggerFactory, typeof(BaseType), "InvalidTargetMethod", "InjectedMethod");
 
 //        // Act
 //        var actual = sut.Patch(assemblyDefinition, typeDefinition);
@@ -120,7 +123,8 @@
 //    [InlineData("2")]
 //    [InlineData("3")]
 //    [InlineData("4")]
-//    public void CreateOverrideIfNeeded(string suffix) {
+//    public void CreateOverrideIfNeeded(string suffix)
+//    {
 //        // Arrange
 //        const string source = """
 //                              using System;
@@ -134,12 +138,12 @@
 
 //        var serviceManager = new TestServiceManager();
 
-//        var targetMethod   = "TargetMethod" + suffix;
-       
+//        var targetMethod = "TargetMethod" + suffix;
+
 //        var (assemblyDefinition, outputPath) = TestUtils.BuildAssemblyDefinition(source, suffix);
 //        var typeDefinition = assemblyDefinition.MainModule.Types.First(o => o.FullName == "Foo.Bar.TargetType");
 
-//        var sut = new MethodPatcher<IMarker, Patcher>(serviceManager.LoggerFactory,typeof(BaseType), targetMethod, "InjectedMethod");
+//        var sut = new MethodPatcher<IMarker, Patcher>(serviceManager.LoggerFactory, typeof(BaseType), targetMethod, "InjectedMethod");
 
 //        // Act
 //        var actual = sut.Patch(assemblyDefinition, typeDefinition);
@@ -161,8 +165,8 @@
 //        var targetMethodDefinition = typeDefinition.Methods.Should().Contain(o => o.Name == targetMethod).Which;
 //        targetMethodDefinition.Attributes.Should().Be(methodAttributes);
 
-//        var instructions           = targetMethodDefinition.Body.Instructions;
-        
+//        var instructions = targetMethodDefinition.Body.Instructions;
+
 //        instructions.Last().OpCode.Should().Be(OpCodes.Ret);
 
 //        var injectedMethodRef = (MethodReference)instructions[1]!.Operand!;
@@ -175,27 +179,29 @@
 
 //        var baseCalls = instructions
 //                        .Skip(2)
-//                        .Where(i => i.OpCode == OpCodes.Call && 
+//                        .Where(i => i.OpCode == OpCodes.Call &&
 //                                    (i.Operand as MethodReference)?.FullName!.Contains($"BaseType::{targetMethod}") == true)
 //                        .ToArray();
-    
+
 //        baseCalls.Should().HaveCount(1);
-    
+
 //        var baseCallIndex = Array.IndexOf(instructions.ToArray()!, baseCalls[0]!);
 
-//        var targetMethodInfo       = typeof(BaseType).GetMethod(targetMethod, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
+//        var targetMethodInfo = typeof(BaseType).GetMethod(targetMethod, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
 //        var targetMethodParameters = targetMethodInfo.GetParameters();
-        
+
 //        var expectedArgCount = targetMethodParameters.Length + 1; // this + params
 //        var argLoadInstructions = instructions
 //                                  .Skip(baseCallIndex - expectedArgCount) // Start EXACTLY expectedArgCount before base call
 //                                  .Take(expectedArgCount)                 // Take EXACTLY that many
 //                                  .ToArray();
-        
+
 //        argLoadInstructions.Should().HaveCount(expectedArgCount);
 
-//        for (int i = 0; i < expectedArgCount; i++) {
-//            var expectedOpcode = i switch {
+//        for (int i = 0; i < expectedArgCount; i++)
+//        {
+//            var expectedOpcode = i switch
+//            {
 //                0 => OpCodes.Ldarg_0, // this
 //                1 => OpCodes.Ldarg_1, // param 0
 //                2 => OpCodes.Ldarg_2, // param 1
@@ -203,18 +209,20 @@
 //                _ => OpCodes.Ldarg_S  // param 3+
 //            };
 //            argLoadInstructions[i]!.OpCode.Should().Be(expectedOpcode);
-    
+
 //            // Verify operands match parameter names
-//            if (i >= 3) {
+//            if (i >= 3)
+//            {
 //                var paramIndex = i - 1; // 0-based param index
-//                var paramName  = targetMethodParameters[paramIndex].Name;
+//                var paramName = targetMethodParameters[paramIndex].Name;
 //                (argLoadInstructions[i]!.Operand as ParameterReference)?.Name.Should().Be(paramName);
 //            }
 //        }
 //    }
 
 //    [Fact]
-//    public void SkipDuplicatePatch() {
+//    public void SkipDuplicatePatch()
+//    {
 //        // Arrange
 //        const string source = """
 //                              using Railroader.ModManager.Tests.CodePatchers;
@@ -228,12 +236,12 @@
 //        var (assemblyDefinition, outputPath) = TestUtils.BuildAssemblyDefinition(source);
 //        var typeDefinition = assemblyDefinition.MainModule.Types.First(o => o.FullName == "Foo.Bar.TargetType");
 
-//        var sut = new MethodPatcher<IMarker, Patcher>(serviceManager.LoggerFactory,typeof(BaseType), "TargetMethod1", "InjectedMethod");
+//        var sut = new MethodPatcher<IMarker, Patcher>(serviceManager.LoggerFactory, typeof(BaseType), "TargetMethod1", "InjectedMethod");
 
 //        // Act
 //        var first = sut.Patch(assemblyDefinition, typeDefinition);
 //        TestUtils.Write(assemblyDefinition, outputPath, "first");
-        
+
 //        var second = sut.Patch(assemblyDefinition, typeDefinition);
 //        TestUtils.Write(assemblyDefinition, outputPath, "second");
 
@@ -248,7 +256,8 @@
 //    }
 
 //    [Fact]
-//    public void CreateOverrideIfNeeded_GenericBase() {
+//    public void CreateOverrideIfNeeded_GenericBase()
+//    {
 //        // Arrange
 //        const string source = """
 //                              using Railroader.ModManager.Tests.CodePatchers;
@@ -262,9 +271,9 @@
 //        var (assemblyDefinition, outputPath) = TestUtils.BuildAssemblyDefinition(source);
 //        var typeDefinition = assemblyDefinition.MainModule.Types.First(o => o.FullName == "Foo.Bar.TargetType");
 
-        
 
-//        var sut = new MethodPatcher<IMarker, Patcher>(serviceManager.LoggerFactory,typeof(BaseType<>), "TargetMethod1", "InjectedMethod");
+
+//        var sut = new MethodPatcher<IMarker, Patcher>(serviceManager.LoggerFactory, typeof(BaseType<>), "TargetMethod1", "InjectedMethod");
 
 //        // Act
 //        var first = sut.Patch(assemblyDefinition, typeDefinition);
@@ -287,17 +296,21 @@
 //[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 //public abstract class BaseType
 //{
-//    public virtual void TargetMethod1() {
+//    public virtual void TargetMethod1()
+//    {
 //    }
 
-//    public virtual void TargetMethod2(DateTime arg1, object arg2, int arg3, decimal arg4, bool arg5) {
+//    public virtual void TargetMethod2(DateTime arg1, object arg2, int arg3, decimal arg4, bool arg5)
+//    {
 //    }
 
-//    public virtual DateTime TargetMethod3(double arg1, DateTime arg2) {
+//    public virtual DateTime TargetMethod3(double arg1, DateTime arg2)
+//    {
 //        return arg2.AddDays(arg1);
 //    }
 
-//    protected virtual int TargetMethod4(DateTime arg1, out object arg2, ref int arg3) {
+//    protected virtual int TargetMethod4(DateTime arg1, out object arg2, ref int arg3)
+//    {
 //        arg2 = arg1;
 //        return arg3;
 //    }
@@ -307,15 +320,17 @@
 //[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 //public sealed class Patcher
 //{
-//    public static void InjectedMethod(BaseType instance) {
+//    public static void InjectedMethod(BaseType instance)
+//    {
 //    }
 //}
 
 //[ExcludeFromCodeCoverage]
 //[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-//public abstract class BaseType<T> where T: BaseType<T>
+//public abstract class BaseType<T> where T : BaseType<T>
 //{
-//    public virtual void TargetMethod1() {
+//    public virtual void TargetMethod1()
+//    {
 //    }
 //}
 
