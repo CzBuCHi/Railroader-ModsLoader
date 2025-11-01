@@ -13,23 +13,32 @@ using SearchOption = System.IO.SearchOption;
 
 namespace Railroader.ModManager.Features;
 
-public delegate string? CompileModDelegate(ModDefinition definition, string[]? referenceNames = null);
+public enum CompileModResult
+{
+    Success,
+    Error,
+    Skipped
+}
+
+public delegate CompileModResult CompileModDelegate(ModDefinition definition, string[]? referenceNames = null);
 
 [PublicAPI]
 public static class CodeCompiler
 {
     [ExcludeFromCodeCoverage]
     public static CompileModDelegate Factory() =>
-        (definition, names) => CompileMod(Log.Logger.ForSourceContext(),
-            CompileAssembly.Execute,
-            DirectoryInfoWrapper.Create,
-            Directory.GetCurrentDirectory,
-            File.Exists,
-            File.GetLastWriteTime,
-            File.Delete,
-            definition,
-            names ?? DefaultReferenceNames
-        );
+        (definition, names) =>
+            CompileMod(
+                Log.Logger.ForSourceContext(),
+                CompileAssembly.Execute,
+                DirectoryInfoWrapper.Create,
+                Directory.GetCurrentDirectory,
+                File.Exists,
+                File.GetLastWriteTime,
+                File.Delete,
+                definition,
+                names ?? DefaultReferenceNames
+            );
 
     public static string[] DefaultReferenceNames => [
         "Assembly-CSharp",
@@ -39,7 +48,7 @@ public static class CodeCompiler
         "UnityEngine.CoreModule"
     ];
 
-    public static string? CompileMod(
+    public static CompileModResult CompileMod(
         ILogger logger,
         CompileAssemblyDelegate compileAssembly,
         DirectoryInfoFactory directoryInfo,
@@ -56,7 +65,7 @@ public static class CodeCompiler
                       .OrderByDescending(o => o.LastWriteTime)
                       .ToArray();
         if (csFiles.Length == 0) {
-            return null;
+            return CompileModResult.Skipped;
         }
 
         var assemblyPath = Path.Combine(definition.BasePath, definition.Identifier + ".dll");
@@ -64,7 +73,7 @@ public static class CodeCompiler
             var newestFile = csFiles[0];
             if (getLastWriteTime(assemblyPath) >= newestFile.LastWriteTime) {
                 logger.Information("Using existing mod {ModId} DLL at {Path}", definition.Identifier, assemblyPath);
-                return assemblyPath;
+                return CompileModResult.Skipped;
             }
 
             logger.Information("Deleting mod {ModId} DLL at {Path} because it is outdated", definition.Identifier, assemblyPath);
@@ -87,10 +96,10 @@ public static class CodeCompiler
 
         if (!compileAssembly(assemblyPath, sources, references.ToArray(), out _)) {
             logger.Error("Compilation failed for mod {ModId} ...", definition.Identifier);
-            return null;
+            return CompileModResult.Error;
         }
 
         logger.Information("Compilation complete for mod {ModId}", definition.Identifier);
-        return assemblyPath;
+        return CompileModResult.Success;
     }
 }

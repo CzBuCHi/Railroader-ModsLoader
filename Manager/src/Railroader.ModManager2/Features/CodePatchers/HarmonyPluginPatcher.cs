@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
-using Mono.Cecil;
 using Railroader.ModManager.Delegates.HarmonyLib;
 using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
@@ -10,17 +9,15 @@ using Serilog;
 
 namespace Railroader.ModManager.Features.CodePatchers;
 
-public delegate bool HarmonyPluginPatcherDelegate(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition);
-
 /// <summary> Patches types implementing <see cref="IHarmonyPlugin"/> to apply or remove Harmony patches when <c>OnIsEnabledChanged</c> is called. </summary>
 [PublicAPI]
 public sealed class HarmonyPluginPatcher
 {
     [ExcludeFromCodeCoverage]
-    public static HarmonyPluginPatcherDelegate Factory() => Factory(Log.Logger.ForSourceContext());
+    public static TypePatcherDelegate Factory() => Factory(Log.Logger.ForSourceContext());
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static HarmonyPluginPatcherDelegate Factory(ILogger logger) {
+    public static TypePatcherDelegate Factory(ILogger logger) {
         var method = MethodPatcher.Factory<IHarmonyPlugin>(logger, typeof(HarmonyPluginPatcher), typeof(PluginBase<>), "OnIsEnabledChanged");
         return (assemblyDefinition, typeDefinition) => method(assemblyDefinition, typeDefinition);
     }

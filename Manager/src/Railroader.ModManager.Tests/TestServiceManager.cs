@@ -26,12 +26,13 @@
 //public sealed class TestServiceManager
 //{
 //    public IServiceProvider ServiceProvider { get; }
-//    public MemoryFs         MemoryFs        { get; }
+//    public MemoryFs MemoryFs { get; }
 
-//    private readonly Dictionary<Type, object>     _Services   = new();
+//    private readonly Dictionary<Type, object> _Services = new();
 //    private readonly Dictionary<string, Assembly> _Assemblies = new();
 
-//    public TestServiceManager(string? currentDirectory = null) {
+//    public TestServiceManager(string? currentDirectory = null)
+//    {
 //        MemoryFs = new MemoryFs(currentDirectory);
 
 //        ServiceProvider = Substitute.For<IServiceProvider>();
@@ -59,39 +60,44 @@
 //    public TService GetService<TService>() => (TService)GetService(typeof(TService));
 
 //    // MOCKS
-//    public ILogger                         MainLogger              { get; }
-//    public ILogger                         ContextLogger           { get; } = Substitute.For<ILogger>();
-//    public ILoggerFactory                  LoggerFactory           { get; }
-//    public LoadFrom                LoadAssemblyFrom        { get; }
-//    public IHarmony                 Harmony          { get; } = Substitute.For<IHarmony>();
-//    public ReadAssemblyDefinition  ReadAssemblyDefinition  { get; } = Substitute.For<ReadAssemblyDefinition>();
+//    public ILogger MainLogger { get; }
+//    public ILogger ContextLogger { get; } = Substitute.For<ILogger>();
+//    public ILoggerFactory LoggerFactory { get; }
+//    public LoadFrom LoadAssemblyFrom { get; }
+//    public IHarmony Harmony { get; } = Substitute.For<IHarmony>();
+//    public ReadAssemblyDefinition ReadAssemblyDefinition { get; } = Substitute.For<ReadAssemblyDefinition>();
 //    public WriteAssemblyDefinition WriteAssemblyDefinition { get; } = Substitute.For<WriteAssemblyDefinition>();
-//    public IModdingContext                 ModdingContext          { get; } = Substitute.For<IModdingContext>();
-//    public IMemoryLogger                   MemoryLogger            { get; } = Substitute.For<IMemoryLogger>();
+//    public IModdingContext ModdingContext { get; } = Substitute.For<IModdingContext>();
+//    public IMemoryLogger MemoryLogger { get; } = Substitute.For<IMemoryLogger>();
 
 //    // MOCK factories
 
-//    private ILogger MockLogger() {
+//    private ILogger MockLogger()
+//    {
 //        var logger = Substitute.For<ILogger>();
 //        logger.ForContext("SourceContext", Arg.Any<string>()).Returns(_ => ContextLogger);
 //        return logger;
 //    }
 
-//    private ILoggerFactory MockLoggerFactory() {
+//    private ILoggerFactory MockLoggerFactory()
+//    {
 //        var loggerFactory = Substitute.For<ILoggerFactory>();
 //        loggerFactory.GetLogger(Arg.Any<string>()).Returns(_ => ContextLogger);
 //        return loggerFactory;
 //    }
 
-//    private IHarmonyFactory MockHarmonyFactory() {
+//    private IHarmonyFactory MockHarmonyFactory()
+//    {
 //        var harmonyFactory = Substitute.For<IHarmonyFactory>();
 //        harmonyFactory.CreateHarmony(Arg.Any<string>()).Returns(_ => Harmony);
 //        return harmonyFactory;
 //    }
 
-//    private LoadFrom MockLoadAssemblyFromDelegate() {
+//    private LoadFrom MockLoadAssemblyFromDelegate()
+//    {
 //        var loadAssemblyFrom = Substitute.For<LoadFrom>();
-//        loadAssemblyFrom.Invoke(Arg.Any<string>()).Returns(o => {
+//        loadAssemblyFrom.Invoke(Arg.Any<string>()).Returns(o =>
+//        {
 //            var assemblyFile = o.Arg<string>();
 //            _Assemblies.TryGetValue(assemblyFile, out var assembly);
 //            return assembly;
@@ -138,10 +144,11 @@
 //            ServiceProvider.GetService<ILogger>()
 //        );
 
-//    public CodeCompiler CreateCodeCompiler(string[]? referenceNames = null) {
-//        var fileSystem          = ServiceProvider.GetService<IFileSystem>();
-//        var assemblyCompiler    = ServiceProvider.GetService<CompileAssemblyDelegate>();
-//        var service             = ServiceProvider.GetService<ILogger>();
+//    public CodeCompiler CreateCodeCompiler(string[]? referenceNames = null)
+//    {
+//        var fileSystem = ServiceProvider.GetService<IFileSystem>();
+//        var assemblyCompiler = ServiceProvider.GetService<CompileAssemblyDelegate>();
+//        var service = ServiceProvider.GetService<ILogger>();
 //        var getCurrentDirectory = ServiceProvider.GetService<GetCurrentDirectory>();
 
 //        return referenceNames == null
@@ -149,19 +156,20 @@
 //            : new CodeCompiler(fileSystem, assemblyCompiler, service, getCurrentDirectory) { ReferenceNames = referenceNames };
 //    }
 
-//    public CodePatcher CreateCodePatcher(List<(Type InterfaceType, Type PluginPatcherType)>? pluginPatchers = null) {
-//        var fileSystem              = ServiceProvider.GetService<IFileSystem>();
-//        var readAssemblyDefinition  = ServiceProvider.GetService<ReadAssemblyDefinition>();
+//    public CodePatcher CreateCodePatcher(List<(Type InterfaceType, Type PluginPatcherType)>? pluginPatchers = null)
+//    {
+//        var fileSystem = ServiceProvider.GetService<IFileSystem>();
+//        var readAssemblyDefinition = ServiceProvider.GetService<ReadAssemblyDefinition>();
 //        var writeAssemblyDefinition = ServiceProvider.GetService<WriteAssemblyDefinition>();
-//        var service                 = ServiceProvider.GetService<ILogger>();
-//        var getCurrentDirectory     = ServiceProvider.GetService<GetCurrentDirectory>();
-//        var enumerateDirectories    = ServiceProvider.GetService<EnumerateDirectories>();
+//        var service = ServiceProvider.GetService<ILogger>();
+//        var getCurrentDirectory = ServiceProvider.GetService<GetCurrentDirectory>();
+//        var enumerateDirectories = ServiceProvider.GetService<EnumerateDirectories>();
 
 //        return pluginPatchers == null
-//            ? new CodePatcher(fileSystem, readAssemblyDefinition,writeAssemblyDefinition, service, getCurrentDirectory, enumerateDirectories)
-//            : new CodePatcher(fileSystem, readAssemblyDefinition, writeAssemblyDefinition,service, getCurrentDirectory, enumerateDirectories) { PluginPatchers = pluginPatchers };
+//            ? new CodePatcher(fileSystem, readAssemblyDefinition, writeAssemblyDefinition, service, getCurrentDirectory, enumerateDirectories)
+//            : new CodePatcher(fileSystem, readAssemblyDefinition, writeAssemblyDefinition, service, getCurrentDirectory, enumerateDirectories) { PluginPatchers = pluginPatchers };
 //    }
-    
+
 //    public HarmonyPluginPatcher CreateHarmonyPluginPatcher() =>
 //        new(
 //            ServiceProvider.GetService<ILoggerFactory>()
@@ -172,31 +180,36 @@
 //            ServiceProvider.GetService<ILoggerFactory>()
 //        );
 
-//    public CompileAssemblyDelegate CreateCompileAssembly() {
+//    public CompileAssemblyDelegate CreateCompileAssembly()
+//    {
 //        return (string outputPath, ICollection<string> sources, ICollection<string> references, out string messages) =>
 //            CompileAssemblyCore.CompileAssembly(ServiceProvider.GetService<InvokeCompiler>(), ServiceProvider.GetService<ILoggerFactory>().GetLogger())
 //                (outputPath, sources, references, out messages);
 //    }
 
 //    // Extensions
-//    public TestServiceManager WithFile(string path, string content, DateTime? lastWriteTime = null) {
+//    public TestServiceManager WithFile(string path, string content, DateTime? lastWriteTime = null)
+//    {
 //        MemoryFs.Add(path, content, lastWriteTime);
 //        return this;
 //    }
 
-//    public TestServiceManager WithAssemblyCompiler(Action<CompileAssemblyDelegate>? configure = null) {
+//    public TestServiceManager WithAssemblyCompiler(Action<CompileAssemblyDelegate>? configure = null)
+//    {
 //        var assemblyCompiler = Substitute.For<CompileAssemblyDelegate>();
 //        configure?.Invoke(assemblyCompiler);
 //        _Services.Add(typeof(CompileAssemblyDelegate), assemblyCompiler);
 //        return this;
 //    }
 
-//    public TestServiceManager WithAssemblyDefinition(AssemblyDefinition assemblyDefinition) {
+//    public TestServiceManager WithAssemblyDefinition(AssemblyDefinition assemblyDefinition)
+//    {
 //        ReadAssemblyDefinition.Invoke(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => assemblyDefinition);
-//        WriteAssemblyDefinition.When(o => o.Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>())).Do(o => {
-//            var       definition   = o.Arg<AssemblyDefinition>();
-//            var       fileName     = o.Arg<string>();
-//            using var stream       = MemoryFs.FileSystem.File.Create(fileName);
+//        WriteAssemblyDefinition.When(o => o.Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>())).Do(o =>
+//        {
+//            var definition = o.Arg<AssemblyDefinition>();
+//            var fileName = o.Arg<string>();
+//            using var stream = MemoryFs.FileSystem.File.Create(fileName);
 //            using var streamWriter = new StreamWriter(stream, Encoding.UTF8, 1024, true);
 //            streamWriter.Write(definition.Name.Name);
 //        });
@@ -204,9 +217,11 @@
 //        return this;
 //    }
 
-//    public TestServiceManager WithCompilerCallableEntryPoint(bool compilerResult, string compilerMessages) {
+//    public TestServiceManager WithCompilerCallableEntryPoint(bool compilerResult, string compilerMessages)
+//    {
 //        var compilerCallableEntryPoint = Substitute.For<InvokeCompiler>();
-//        compilerCallableEntryPoint.Invoke(Arg.Any<string[]>(), Arg.Is<TextWriter>(_ => true)).Returns(o => {
+//        compilerCallableEntryPoint.Invoke(Arg.Any<string[]>(), Arg.Is<TextWriter>(_ => true)).Returns(o =>
+//        {
 //            var writer = o.ArgAt<TextWriter>(1);
 //            writer.Write(compilerMessages);
 //            return compilerResult;
@@ -215,7 +230,8 @@
 //        return this;
 //    }
 
-//    public TestServiceManager WithAssembly(string path, string source) {
+//    public TestServiceManager WithAssembly(string path, string source)
+//    {
 //        _Assemblies.Add(path, TestUtils.BuildAssembly(source, [typeof(TestServiceManager).Assembly.GetName().Name]));
 //        return this;
 //    }

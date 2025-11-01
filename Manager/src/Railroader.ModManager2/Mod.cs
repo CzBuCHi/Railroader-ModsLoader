@@ -38,6 +38,9 @@ public sealed class Mod(ILogger logger, IModDefinition modDefinition, string? as
     }
 
     /// <inheritdoc />
+    public bool IsValid { get; internal set; }
+
+    /// <inheritdoc />
     public bool IsLoaded { get; internal set; }
 
     /// <inheritdoc />

@@ -13,6 +13,9 @@ public interface IMod
     /// <summary> Gets a value indicating whether this mod is enabled. </summary>
     bool IsEnabled { get; }
 
+    /// <summary> Gets a value indicating whether this mod is valid. </summary>
+    bool IsValid { get; }
+
     /// <summary> Gets a value indicating whether this mod is loaded. </summary>
     bool IsLoaded { get; }
 

@@ -19,7 +19,7 @@ public interface IDirectoryInfo
 [ExcludeFromCodeCoverage]
 public sealed class DirectoryInfoWrapper(_DirectoryInfo directoryInfo) : IDirectoryInfo
 {
-    public static DirectoryInfoFactory Create => o => new DirectoryInfoWrapper(new _DirectoryInfo(o));
+    public static IDirectoryInfo Create(string path) => new DirectoryInfoWrapper(new _DirectoryInfo(path));
 
     public IEnumerable<IFileInfo> EnumerateFiles(string searchPattern, SearchOption searchOption)
         => directoryInfo.EnumerateFiles(searchPattern, searchOption).Select(o => new FileInfoWrapper(o));

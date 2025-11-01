@@ -1,6 +1,6 @@
 {
   "stryker-config": {    
-    "solution": "Railroader.ModsLoader.sln",
+    "solution": "Railroader.ModManager.sln",
     "target-framework": "net48",
     "thresholds": {
       "high": 100,

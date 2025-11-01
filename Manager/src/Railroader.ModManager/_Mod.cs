@@ -39,6 +39,9 @@ public sealed class Mod(IModDefinition modDefinition, string? assemblyPath) : IM
     }
 
     /// <inheritdoc />
+    public bool IsValid { get; internal set; }
+
+    /// <inheritdoc />
     public bool IsLoaded { get; internal set; }
 
     /// <inheritdoc />

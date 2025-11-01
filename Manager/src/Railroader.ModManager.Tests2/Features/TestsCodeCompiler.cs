@@ -49,7 +49,7 @@ public sealed class TestsCodeCompiler
         var actual = compileMod(_ModDefinition);
 
         // Assert
-        actual.Should().BeNull();
+        actual.Should().Be(CompileModResult.Skipped);
 
         logger.ReceivedCalls().Should().BeEmpty();
     }
@@ -72,7 +72,7 @@ public sealed class TestsCodeCompiler
         var actual = compileMod(_ModDefinition);
 
         // Assert
-        actual.Should().Be(AssemblyPath);
+        actual.Should().Be(CompileModResult.Skipped);
 
         logger.Received().Information("Using existing mod {ModId} DLL at {Path}", _ModDefinition.Identifier, AssemblyPath);
         logger.ReceivedCalls().Should().HaveCount(1);
@@ -105,7 +105,7 @@ public sealed class TestsCodeCompiler
         var actual = compileMod(_ModDefinition);
 
         // Assert
-        actual.Should().BeNull();
+        actual.Should().Be(CompileModResult.Error);
 
         logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
         logger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
@@ -163,7 +163,7 @@ public sealed class TestsCodeCompiler
         var actual = compileMod(modDefinition);
 
         // Assert
-        actual.Should().Be(AssemblyPath);
+        actual.Should().Be(CompileModResult.Success);
 
         logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
         logger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
@@ -229,7 +229,7 @@ public sealed class TestsCodeCompiler
         var actual = compileMod(modDefinition);
 
         // Assert
-        actual.Should().Be(AssemblyPath);
+        actual.Should().Be(CompileModResult.Success);
 
         logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", modDefinition.Identifier, AssemblyPath);
         logger.Received().Information("Compiling mod {ModId} ...", modDefinition.Identifier);
