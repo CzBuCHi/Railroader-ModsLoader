@@ -4,11 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using MemoryFileSystem2.Types;
+using MemoryFileSystem.Types;
 using NSubstitute;
 using Railroader.ModManager.Delegates.System.IO.File;
 
-namespace MemoryFileSystem2;
+namespace MemoryFileSystem;
 
 partial class MemoryFileSystem : MemoryFileSystem.IFile
 {

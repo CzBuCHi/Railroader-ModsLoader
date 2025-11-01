@@ -10,19 +10,18 @@ public sealed class TestsMod
     [Fact]
     public void Constructor() {
         // Arrange
-        const string assemblyPath = "assemblyPath";
-
         var logger = Substitute.For<ILogger>();
         var modDefinition = Substitute.For<IModDefinition>();
 
         // Act
-        var sut = new Mod(logger, modDefinition, assemblyPath);
+        var sut = new Mod(logger, modDefinition);
 
         // Assert
         sut.Should().NotBeNull();
         sut.Definition.Should().Be(modDefinition);
-        sut.AssemblyPath.Should().Be(assemblyPath);
+        sut.AssemblyPath.Should().BeNull();
         sut.IsEnabled.Should().BeFalse();
+        sut.IsValid.Should().BeFalse();
         sut.IsLoaded.Should().BeFalse();
         sut.Plugins.Should().BeNull();
         sut.PluginNames.Should().BeNull();
@@ -33,7 +32,7 @@ public sealed class TestsMod
         // Arrange
         var logger        = Substitute.For<ILogger>();
         var modDefinition = Substitute.For<IModDefinition>();
-        var sut           = new Mod(logger, modDefinition, "assemblyPath");
+        var sut           = new Mod(logger, modDefinition);
         var plugin        = Substitute.For<IPlugin>();
 
         sut.Plugins = [plugin];
@@ -59,7 +58,7 @@ public sealed class TestsMod
         var logger        = Substitute.For<ILogger>();
         var modDefinition = Substitute.For<IModDefinition>();
         modDefinition.Identifier.Returns("Identifier");
-        var sut = new Mod(logger, modDefinition, "assemblyPath");
+        var sut = new Mod(logger, modDefinition);
 
         // Act
         var modLogger = sut.CreateLogger(scope);

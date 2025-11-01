@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace MemoryFileSystem2.Types;
+namespace MemoryFileSystem.Types;
 
 [DebuggerDisplay("{DebuggerDisplay,nq}")]
 [method: JsonConstructor]

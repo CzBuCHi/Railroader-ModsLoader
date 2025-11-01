@@ -1,6 +1,6 @@
 ﻿using System;
 using FluentAssertions;
-using MemoryFileSystem2;
+using MemoryFileSystem;
 using Newtonsoft.Json;
 using NSubstitute;
 using Railroader.ModManager.Features;

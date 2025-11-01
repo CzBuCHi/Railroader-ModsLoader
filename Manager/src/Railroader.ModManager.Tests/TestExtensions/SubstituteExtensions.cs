@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using FluentAssertions;
+using Newtonsoft.Json;
 using NSubstitute;
 using NSubstitute.Core;
 
@@ -18,13 +19,11 @@ public static class SubstituteExtensions
     public static void ShouldReceiveNoCalls<T>(this T substitute) where T : class =>
         substitute.ReceivedCalls().Should().BeEmpty();
 
-    public static string ToString(this IEnumerable<ICall>? calls, string prefix) {
+    public static string PrintReceivedCalls<T>(this T substitute) where T : class {
         var sb = new StringBuilder();
-        sb.Append(prefix).AppendLine("ShouldReceiveOnly(o => {");
-        if (calls != null) {
-            foreach (var call in calls) {
-                PrintCall(call);
-            }
+        sb.Append("substitute.").AppendLine("ShouldReceiveOnly(o => {");
+        foreach (var call in substitute.ReceivedCalls()!) {
+            PrintCall(call);
         }
 
         sb.AppendLine("});");
@@ -55,14 +54,20 @@ public static class SubstituteExtensions
             switch (arg) {
                 case null:
                     return "null";
+
                 case string str:
                     if (str.Contains("\"")) {
                         return $"\"\"\"{arg}\"\"\"";
                     }
 
                     return $"\"{arg}\"";
+
+                case ModdingContext moddingContext:
+                    var mods = JsonConvert.SerializeObject(moddingContext.Mods);
+                    return string.Join(", ", mods);
+
                 default:
-                    throw new NotImplementedException();
+                    throw new NotImplementedException("Arg type: " + arg.GetType());
             }
         }
     }

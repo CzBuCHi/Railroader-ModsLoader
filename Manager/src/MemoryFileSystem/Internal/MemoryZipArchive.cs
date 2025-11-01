@@ -5,7 +5,7 @@ using System.Linq;
 using NSubstitute;
 using Railroader.ModManager.Delegates.System.IO.Compression;
 
-namespace MemoryFileSystem2.Internal;
+namespace MemoryFileSystem.Internal;
 
 [DebuggerStepThrough]
 public sealed class MemoryZipArchive(MemoryZip memoryZip) : IZipArchive

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using MemoryFileSystem2.Types;
+using MemoryFileSystem.Types;
 using Newtonsoft.Json;
 
-namespace MemoryFileSystem2;
+namespace MemoryFileSystem;
 
 public sealed class MemoryZip : MemoryFileSystem
 {

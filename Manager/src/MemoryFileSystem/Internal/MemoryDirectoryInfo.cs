@@ -5,7 +5,7 @@ using System.Linq;
 using NSubstitute;
 using Railroader.ModManager.Delegates.System.IO;
 
-namespace MemoryFileSystem2.Internal;
+namespace MemoryFileSystem.Internal;
 
 [DebuggerStepThrough]
 public sealed class MemoryDirectoryInfo(MemoryFileSystem fileSystem, string path) : IDirectoryInfo

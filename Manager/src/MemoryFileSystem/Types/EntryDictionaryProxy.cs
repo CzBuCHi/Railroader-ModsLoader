@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using JetBrains.Annotations;
 
-namespace MemoryFileSystem2.Types;
+namespace MemoryFileSystem.Types;
 
 [ExcludeFromCodeCoverage]
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]

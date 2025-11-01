@@ -5,9 +5,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using MemoryFileSystem2.Types;
+using MemoryFileSystem.Types;
 
-namespace MemoryFileSystem2;
+namespace MemoryFileSystem;
 
 public abstract partial class MemoryFileSystem : IEnumerable<MemoryEntry>
 {

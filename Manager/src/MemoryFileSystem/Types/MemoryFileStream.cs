@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace MemoryFileSystem2.Types;
+namespace MemoryFileSystem.Types;
 
 [ExcludeFromCodeCoverage]
 public sealed class MemoryFileStream(Action<byte[], int, int> write, Action dispose) : Stream

@@ -43,7 +43,7 @@ public sealed class TestsHarmonyPluginPatcher
 
         var plugin = Substitute.For<IHarmonyPlugin>();
         plugin.IsEnabled.Returns(true);
-        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier", }, null));
+        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier", }));
         plugin.ModdingContext.Returns(moddingContext);
 
         // Act
@@ -66,7 +66,7 @@ public sealed class TestsHarmonyPluginPatcher
 
         var plugin = Substitute.For<IHarmonyPlugin>();
         plugin.IsEnabled.Returns(false);
-        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier", }, null));
+        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier", }));
         plugin.ModdingContext.Returns(moddingContext);
 
         // Act
@@ -88,7 +88,7 @@ public sealed class TestsHarmonyPluginPatcher
 
         var plugin = Substitute.For<IHarmonyPlugin>();
         plugin.IsEnabled.Returns(true);
-        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier", }, null));
+        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier", }));
         plugin.ModdingContext.Returns(moddingContext);
 
         // Act

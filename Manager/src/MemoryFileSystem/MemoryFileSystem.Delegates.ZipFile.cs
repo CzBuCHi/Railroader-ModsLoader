@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using MemoryFileSystem2.Internal;
+using MemoryFileSystem.Internal;
 using Newtonsoft.Json;
 using NSubstitute;
 using Railroader.ModManager.Delegates.System.IO.Compression.ZipFile;
 
-namespace MemoryFileSystem2;
+namespace MemoryFileSystem;
 
 partial class MemoryFileSystem : MemoryFileSystem.IZipFile
 {

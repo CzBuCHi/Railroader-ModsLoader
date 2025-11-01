@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using FluentAssertions;
-using MemoryFileSystem2;
-using MemoryFileSystem2.Types;
+using MemoryFileSystem;
+using MemoryFileSystem.Types;
 using Newtonsoft.Json;
 using NSubstitute;
 using Railroader.ModManager.Features;

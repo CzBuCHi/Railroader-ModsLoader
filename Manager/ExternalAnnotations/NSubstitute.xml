@@ -3,6 +3,12 @@
   <member name="M:NSubstitute.Arg.Any``1">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
+  <member name="M:NSubstitute.Arg.Do``1(System.Action{``0})">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
+  <member name="M:NSubstitute.Arg.Is``1(``0)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
   <member name="M:NSubstitute.Arg.Is``1(System.Linq.Expressions.Expression{System.Predicate{``0}})">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>

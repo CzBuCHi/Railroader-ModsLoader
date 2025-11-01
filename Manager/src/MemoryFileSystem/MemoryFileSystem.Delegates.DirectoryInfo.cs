@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
-using MemoryFileSystem2.Internal;
+using MemoryFileSystem.Internal;
 using Railroader.ModManager.Delegates.System.IO;
 
-namespace MemoryFileSystem2;
+namespace MemoryFileSystem;
 
 partial class MemoryFileSystem
 {

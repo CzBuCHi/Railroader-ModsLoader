@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using FluentAssertions;
-using MemoryFileSystem2;
+using MemoryFileSystem;
 using Mono.Cecil;
 using NSubstitute;
 using Railroader.ModManager.Delegates.Mono.Cecil;

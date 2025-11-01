@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace MemoryFileSystem2;
+namespace MemoryFileSystem;
 
 public sealed class MemoryFs  :MemoryFileSystem
 {

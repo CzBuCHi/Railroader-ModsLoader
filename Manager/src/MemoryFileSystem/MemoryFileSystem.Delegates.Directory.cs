@@ -4,7 +4,7 @@ using System.Linq;
 using NSubstitute;
 using Railroader.ModManager.Delegates.System.IO.Directory;
 
-namespace MemoryFileSystem2;
+namespace MemoryFileSystem;
 
 partial class MemoryFileSystem : MemoryFileSystem.IDirectory
 {

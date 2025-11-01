@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics;
 using System.IO;
-using MemoryFileSystem2.Types;
+using MemoryFileSystem.Types;
 using NSubstitute;
 using Railroader.ModManager.Delegates.System.IO.Compression;
 
-namespace MemoryFileSystem2.Internal;
+namespace MemoryFileSystem.Internal;
 
 [DebuggerStepThrough]
 public sealed class MemoryZipArchiveEntry(MemoryEntry entry) : IZipArchiveEntry

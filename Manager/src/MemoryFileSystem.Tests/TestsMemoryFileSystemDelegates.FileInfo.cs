@@ -1,10 +1,10 @@
 ﻿using System.IO;
 using System.Linq;
 using FluentAssertions;
-using MemoryFileSystem2.Types;
+using MemoryFileSystem.Types;
 using Xunit;
 
-namespace MemoryFileSystem2.Tests;
+namespace MemoryFileSystem.Tests;
 
 public class TestsMemoryFileSystemDelegatesFileInfo
 {

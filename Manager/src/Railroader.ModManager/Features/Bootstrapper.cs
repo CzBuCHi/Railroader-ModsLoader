@@ -93,9 +93,15 @@ public static class Bootstrapper
                 }
             }
 
-            var assemblyPath = Path.Combine(definition.BasePath, definition.Identifier + ".dll");
-            mods[i] = new Mod(logger, definition, assemblyPath) {
-                IsLoaded = result != CompileModResult.Error
+            var assemblyPath = result switch {
+                CompileModResult.None or CompileModResult.Error      => null,
+                CompileModResult.Success or CompileModResult.Skipped => Path.Combine(definition.BasePath, definition.Identifier + ".dll"),
+                _                                                    => throw new ArgumentOutOfRangeException()
+            };
+
+            mods[i] = new Mod(logger, definition) {
+                AssemblyPath = assemblyPath,
+                IsValid = result != CompileModResult.Error
             };
         }
 

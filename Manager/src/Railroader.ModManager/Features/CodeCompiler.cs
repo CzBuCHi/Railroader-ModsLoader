@@ -15,6 +15,7 @@ namespace Railroader.ModManager.Features;
 
 public enum CompileModResult
 {
+    None,
     Success,
     Error,
     Skipped
@@ -65,7 +66,7 @@ public static class CodeCompiler
                       .OrderByDescending(o => o.LastWriteTime)
                       .ToArray();
         if (csFiles.Length == 0) {
-            return CompileModResult.Skipped;
+            return CompileModResult.None;
         }
 
         var assemblyPath = Path.Combine(definition.BasePath, definition.Identifier + ".dll");

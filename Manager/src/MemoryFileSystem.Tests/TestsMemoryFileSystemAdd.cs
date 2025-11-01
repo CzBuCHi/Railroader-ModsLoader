@@ -3,10 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using FluentAssertions;
-using MemoryFileSystem2.Types;
+using MemoryFileSystem.Types;
 using Xunit;
 
-namespace MemoryFileSystem2.Tests;
+namespace MemoryFileSystem.Tests;
 
 [SuppressMessage("ReSharper", "UseObjectOrCollectionInitializer")]
 public sealed class TestsMemoryFileSystemAdd

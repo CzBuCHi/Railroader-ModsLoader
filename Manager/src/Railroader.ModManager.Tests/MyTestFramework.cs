@@ -4,11 +4,11 @@ using System.Linq.Expressions;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
 using JetBrains.Annotations;
-using MemoryFileSystem2.Types;
+using MemoryFileSystem.Types;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-[assembly: TestFramework("Railroader.ModManager.Tests.MyTestFramework", "Railroader.ModManager2.Tests")]
+[assembly: TestFramework("Railroader.ModManager.Tests.MyTestFramework", "Railroader.ModManager.Tests")]
 
 namespace Railroader.ModManager.Tests;
 

@@ -2,7 +2,7 @@
 using FluentAssertions;
 using Xunit;
 
-namespace MemoryFileSystem2.Tests;
+namespace MemoryFileSystem.Tests;
 
 public class TestsMemoryFileSystemDelegatesDirectory
 {

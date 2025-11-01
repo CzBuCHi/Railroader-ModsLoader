@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MemoryFileSystem2.Types;
+using MemoryFileSystem.Types;
 
-namespace MemoryFileSystem2;
+namespace MemoryFileSystem;
 
 partial class MemoryFileSystem
 {

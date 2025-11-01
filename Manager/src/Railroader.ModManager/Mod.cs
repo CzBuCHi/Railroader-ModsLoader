@@ -7,13 +7,13 @@ using Serilog;
 namespace Railroader.ModManager;
 
 /// <summary> Implementation of <see cref="IMod"/> for a loaded mod instance. </summary>
-public sealed class Mod(ILogger logger, IModDefinition modDefinition, string? assemblyPath) : IMod
+public sealed class Mod(ILogger logger, IModDefinition modDefinition) : IMod
 {
     /// <inheritdoc />
     public IModDefinition Definition { get; } = modDefinition;
 
     /// <summary> Gets or sets the output DLL path for this mod. </summary>
-    public string? AssemblyPath { get; } = assemblyPath;
+    public string? AssemblyPath { get; internal set; }
 
     private bool _IsEnabled;
 

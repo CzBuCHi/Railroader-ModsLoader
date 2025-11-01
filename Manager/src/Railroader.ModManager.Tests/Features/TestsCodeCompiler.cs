@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using FluentAssertions;
-using MemoryFileSystem2;
-using MemoryFileSystem2.Types;
+using MemoryFileSystem;
+using MemoryFileSystem.Types;
 using NSubstitute;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Interfaces;
@@ -49,7 +49,7 @@ public sealed class TestsCodeCompiler
         var actual = compileMod(_ModDefinition);
 
         // Assert
-        actual.Should().Be(CompileModResult.Skipped);
+        actual.Should().Be(CompileModResult.None);
 
         logger.ReceivedCalls().Should().BeEmpty();
     }

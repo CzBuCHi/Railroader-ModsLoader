@@ -17,7 +17,7 @@ public sealed class TestsPluginManager
         var logger         = Substitute.For<ILogger>();
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
-        var mod            = new Mod(logger, Substitute.For<IModDefinition>(), "assemblyPath");
+        var mod            = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
@@ -48,7 +48,7 @@ public sealed class TestsPluginManager
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, Substitute.For<IModDefinition>(), "assemblyPath");
+        var mod = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
@@ -72,7 +72,7 @@ public sealed class TestsPluginManager
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, Substitute.For<IModDefinition>(), "assemblyPath");
+        var mod = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
@@ -101,7 +101,7 @@ public sealed class TestsPluginManager
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, Substitute.For<IModDefinition>(), "assemblyPath");
+        var mod = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
@@ -143,7 +143,7 @@ public sealed class TestsPluginManager
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, Substitute.For<IModDefinition>(), "assemblyPath");
+        var mod = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
@@ -186,7 +186,7 @@ public sealed class TestsPluginManager
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, Substitute.For<IModDefinition>(), "assemblyPath");
+        var mod = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
