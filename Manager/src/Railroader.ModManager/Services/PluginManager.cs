@@ -8,13 +8,13 @@ using Serilog;
 namespace Railroader.ModManager.Services;
 
 /// <summary> Manages plugin instantiation for mods. </summary>
-internal interface IPluginManager
+public interface IPluginManager
 {
     IPlugin[] CreatePlugins(Mod mod);
 }
 
 /// <inheritdoc />
-internal sealed class PluginManager(IModdingContext moddingContext, ILogger logger, LoadFrom loadFrom)
+public sealed class PluginManager(IModdingContext moddingContext, ILogger logger, LoadFrom loadFrom)
     : IPluginManager
 {
     public PluginManager(IModdingContext moddingContext, ILogger logger) : this(moddingContext, logger, Assembly.LoadFrom) {

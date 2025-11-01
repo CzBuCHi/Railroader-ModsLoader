@@ -46,6 +46,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager2", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager2.Tests", "src\Railroader.ModManager.Tests2\Railroader.ModManager2.Tests.csproj", "{625688D6-CC94-032F-C03A-C25DAF2235A3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryFileSystem2", "src\MemoryFileSystem2\MemoryFileSystem2.csproj", "{A95643C7-9CF1-2493-4D0F-630DF3110859}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryFileSystem2.Tests", "src\MemoryFileSystem2.Tests\MemoryFileSystem2.Tests.csproj", "{5A70ED21-CDF1-8976-6C6F-076A6D00C8D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,6 +104,14 @@ Global
 		{625688D6-CC94-032F-C03A-C25DAF2235A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{625688D6-CC94-032F-C03A-C25DAF2235A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{625688D6-CC94-032F-C03A-C25DAF2235A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A95643C7-9CF1-2493-4D0F-630DF3110859}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A95643C7-9CF1-2493-4D0F-630DF3110859}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A95643C7-9CF1-2493-4D0F-630DF3110859}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A95643C7-9CF1-2493-4D0F-630DF3110859}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A70ED21-CDF1-8976-6C6F-076A6D00C8D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A70ED21-CDF1-8976-6C6F-076A6D00C8D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A70ED21-CDF1-8976-6C6F-076A6D00C8D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A70ED21-CDF1-8976-6C6F-076A6D00C8D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -117,6 +129,8 @@ Global
 		{6B866B34-16C2-9808-F47C-77F28CED4B2C} = {41EAF235-CFE0-4DC8-B489-0DB9E958A0EE}
 		{35B3F7CB-4718-6522-18DE-8DF756CEA35D} = {8A13D9A0-7312-44C4-A884-F7F26EC151C1}
 		{625688D6-CC94-032F-C03A-C25DAF2235A3} = {41EAF235-CFE0-4DC8-B489-0DB9E958A0EE}
+		{A95643C7-9CF1-2493-4D0F-630DF3110859} = {DB57033A-B114-4B18-8586-B3D525FF5A60}
+		{5A70ED21-CDF1-8976-6C6F-076A6D00C8D4} = {41EAF235-CFE0-4DC8-B489-0DB9E958A0EE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8ED8BFD4-3F8C-4E30-9660-49C14B3A6AFE}

@@ -12,15 +12,17 @@ using Serilog;
 
 namespace Railroader.ModManager.Features;
 
+public delegate bool CompileAssemblyDelegate(string outputPath, ICollection<string> sources, ICollection<string> references, out string messages);
+
 [PublicAPI]
-internal static class CompileAssembly
+public static class CompileAssembly
 {
     [ExcludeFromCodeCoverage]
     public static bool Execute(string outputPath, ICollection<string> sources, ICollection<string> references, out string messages) => 
         Execute(CompilerCallableEntryPoint.InvokeCompiler, Log.Logger.ForSourceContext(), outputPath, sources, references, out messages);
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal static bool Execute(InvokeCompiler invokeCompiler, ILogger logger, string outputPath, ICollection<string> sources, ICollection<string> references, out string messages) {
+    public static bool Execute(InvokeCompiler invokeCompiler, ILogger logger, string outputPath, ICollection<string> sources, ICollection<string> references, out string messages) {
         var args = CompilerArguments(outputPath, sources, references).ToArray();
 
         logger.Information("Compiling assembly {outputPath} ...", outputPath);

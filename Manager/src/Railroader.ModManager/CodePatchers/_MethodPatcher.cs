@@ -9,12 +9,12 @@ using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 namespace Railroader.ModManager.CodePatchers;
 
-internal interface IMethodPatcher
+public interface IMethodPatcher
 {
     bool Patch(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition);
 }
 
-internal sealed class MethodPatcher<TMarker, TPluginPatcher> : IMethodPatcher
+public sealed class MethodPatcher<TMarker, TPluginPatcher> : IMethodPatcher
     where TMarker : class
 {
     private readonly Type       _TargetBaseType;

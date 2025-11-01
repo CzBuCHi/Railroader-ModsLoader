@@ -34,4 +34,4 @@ public sealed class TestsTypePatcher
     }
 }
 
-internal sealed class TestTypePatcher(IMethodPatcher[] methodPatchers) : TypePatcher(methodPatchers);
+public sealed class TestTypePatcher(IMethodPatcher[] methodPatchers) : TypePatcher(methodPatchers);

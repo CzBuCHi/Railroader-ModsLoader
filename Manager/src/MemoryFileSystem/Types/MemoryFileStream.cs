@@ -5,7 +5,7 @@ using System.IO;
 namespace MemoryFileSystem.Types;
 
 [ExcludeFromCodeCoverage]
-internal sealed class MemoryFileStream(Action<byte[], int, int> write, Action dispose) : Stream
+public sealed class MemoryFileStream(Action<byte[], int, int> write, Action dispose) : Stream
 {
     public override void Flush() {
     }

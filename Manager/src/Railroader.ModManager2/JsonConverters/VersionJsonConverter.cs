@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 namespace Railroader.ModManager.JsonConverters;
 
 /// <summary> JsonConverter for <see cref="Version"/>. </summary>
-internal sealed class VersionJsonConverter : JsonConverter<Version>
+public sealed class VersionJsonConverter : JsonConverter<Version>
 {
     private const string Expected = "Expected a valid System.Version (e.g., '1', '1.2', '1.2.3' or '1.2.3.4').";
 
@@ -29,7 +29,7 @@ internal sealed class VersionJsonConverter : JsonConverter<Version>
         throw new JsonSerializationException($"Invalid version token {reader.TokenType}. {Expected}");
     }
 
-    internal static Version? ParseString(string value) {
+    public static Version? ParseString(string value) {
         if (value.IndexOf('.') == -1) { // to support "version": "1" instead of "1.0"
             value += ".0";
         }

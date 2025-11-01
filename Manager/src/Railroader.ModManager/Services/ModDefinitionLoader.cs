@@ -11,7 +11,7 @@ using Path = System.IO.Path;
 namespace Railroader.ModManager.Services;
 
 /// <summary> Loads mod definitions from JSON files and handles early logging. </summary>
-internal interface IModDefinitionLoader
+public interface IModDefinitionLoader
 {
     /// <summary>An array of loaded mod definitions.</summary>
     ModDefinition[] ModDefinitions { get; }
@@ -21,7 +21,7 @@ internal interface IModDefinitionLoader
 }
 
 /// <inheritdoc />
-internal sealed class ModDefinitionLoader(
+public sealed class ModDefinitionLoader(
     IMemoryLogger logger,
     GetCurrentDirectory getCurrentDirectory,
     EnumerateDirectories enumerateDirectories,

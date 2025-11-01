@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace Railroader.ModManager.Services;
 
-internal sealed class ServiceManager : IServiceProvider
+public sealed class ServiceManager : IServiceProvider
 {
-    internal sealed record ServiceContext(Func<IServiceProvider, object?> Factory, bool IsSingleton, object? Instance);
+    public sealed record ServiceContext(Func<IServiceProvider, object?> Factory, bool IsSingleton, object? Instance);
 
-    internal Dictionary<Type, ServiceContext> Services { get; } = new();
+    public Dictionary<Type, ServiceContext> Services { get; } = new();
 
     public void AddSingleton<TInterface, TService>() where TService : class, TInterface, new() => Add<TInterface>(_ => new TService(), true);
     public void AddTransient<TInterface, TService>() where TService : class, TInterface, new() => Add<TInterface>(_ => new TService(), false);

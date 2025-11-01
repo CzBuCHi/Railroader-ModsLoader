@@ -11,43 +11,10 @@
 
 //public sealed class MemoryFile(IMemoryFileSystem fileSystem) : IFile
 //{
-//    public bool Exists(string path) => fileSystem.Items.TryGetValue(fileSystem.NormalizePath(path), out var entry) && entry is { IsDirectory: false };
 
-//    public string ReadAllText(string path) {
-//        path = fileSystem.NormalizePath(path);
-//        if (!fileSystem.Items.TryGetValue(path, out var entry) || entry is not { IsDirectory: false }) {
-//            throw new FileNotFoundException($"File not found: {path}");
-//        }
-
-//        if (entry.ReadException != null) {
-//            throw entry.ReadException;
-//        }
-
-//        return Encoding.UTF8.GetString(entry.ExistingContent);
-//    }
-
-//    public DateTime GetLastWriteTime(string path) {
-//        path = fileSystem.NormalizePath(path);
-//        if (fileSystem.Items.TryGetValue(path, out var entry) && entry is { IsDirectory: false }) {
-//            return entry.LastWriteTime;
-//        }
-
-//        throw new FileNotFoundException($"File not found: {path}");
-//    }
     
 //    public void Delete(string path) {
-//        path = fileSystem.NormalizePath(path);
-//        if (!fileSystem.Items.TryGetValue(path, out var entry)) {
-//            return;
-//        }
 
-//        if (entry.IsDirectory) {
-//            throw new InvalidOperationException($"Entry at {path} is directory.");
-//        }
-
-//        entry.CheckLock();
-        
-//        fileSystem.Items.TryRemove(path, out _);
 //    }
 
 //    private readonly object _MoveLock = new();

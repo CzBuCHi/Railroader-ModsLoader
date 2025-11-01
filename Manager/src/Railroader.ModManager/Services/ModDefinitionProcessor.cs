@@ -7,12 +7,12 @@ using Serilog;
 
 namespace Railroader.ModManager.Services;
 
-internal interface IModDefinitionProcessor
+public interface IModDefinitionProcessor
 {
     bool PreprocessModDefinitions(ref ModDefinition[] modDefinitions);
 }
 
-internal sealed class ModDefinitionProcessor(ILogger logger) : IModDefinitionProcessor
+public sealed class ModDefinitionProcessor(ILogger logger) : IModDefinitionProcessor
 {
     public List<string> Errors { get; } = new();
 

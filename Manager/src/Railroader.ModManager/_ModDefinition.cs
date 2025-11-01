@@ -10,7 +10,7 @@ namespace Railroader.ModManager;
 
 /// <summary> Implementation of <see cref="IModDefinition"/> for mod metadata. </summary>
 [DebuggerDisplay("{Identifier,nq} [{Version}] ")]
-internal sealed class ModDefinition : IModDefinition
+public sealed class ModDefinition : IModDefinition
 {
     /// <inheritdoc />
     [JsonProperty("id", Required = Required.DisallowNull)]

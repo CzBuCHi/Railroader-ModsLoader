@@ -17,7 +17,7 @@ using Object = UnityEngine.Object;
 
 namespace Railroader.ModManager.Features.CodePatchers;
 
-internal delegate bool TopRightButtonPluginPatcherDelegate(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition);
+public delegate bool TopRightButtonPluginPatcherDelegate(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition);
 
 /// <summary> Patches types implementing <see cref="ITopRightButtonPlugin"/> to add UI button in the top-right area. </summary>
 [PublicAPI]
@@ -28,10 +28,10 @@ public static class TopRightButtonPluginPatcher
     // System.Security.SecurityException("ECall methods must be packaged into a system module.")
 
     [ExcludeFromCodeCoverage]
-    internal static TopRightButtonPluginPatcherDelegate Factory() => Factory(Log.Logger.ForSourceContext());
+    public static TopRightButtonPluginPatcherDelegate Factory() => Factory(Log.Logger.ForSourceContext());
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal static TopRightButtonPluginPatcherDelegate Factory(ILogger logger) {
+    public static TopRightButtonPluginPatcherDelegate Factory(ILogger logger) {
         var method = MethodPatcher.Factory<ITopRightButtonPlugin>(logger, typeof(TopRightButtonPluginPatcher), typeof(PluginBase<>), "OnIsEnabledChanged");
         return (assemblyDefinition, typeDefinition) => method(assemblyDefinition, typeDefinition);
     }

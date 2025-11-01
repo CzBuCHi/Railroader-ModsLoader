@@ -4,9 +4,9 @@ using System.Text.RegularExpressions;
 
 namespace Stryker;
 
-internal sealed record ProjectInfo(string Name, string Path);
+public sealed record ProjectInfo(string Name, string Path);
 
-internal sealed record TestTestedPairs(string Identifier, string Project, string TestProject);
+public sealed record TestTestedPairs(string Identifier, string Project, string TestProject);
 
 public static class Program
 {

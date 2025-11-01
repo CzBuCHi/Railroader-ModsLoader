@@ -18,7 +18,7 @@ namespace Railroader.ModManager.CodePatchers.Special;
 [ExcludeFromCodeCoverage]
 public sealed class TopRightButtonPluginPatcher : TypePatcher
 {
-    internal TopRightButtonPluginPatcher(ILoggerFactory loggerFactory)
+    public TopRightButtonPluginPatcher(ILoggerFactory loggerFactory)
         : base([new MethodPatcher<ITopRightButtonPlugin, TopRightButtonPluginPatcher>(loggerFactory, typeof(PluginBase<>), "OnIsEnabledChanged")]) {
     }
 

@@ -9,7 +9,7 @@ using UI.Common;
 namespace Railroader.ModManager;
 
 /// <summary> Implementation of <see cref="IModdingContext"/> providing basic modding services. </summary>
-internal sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logger) : IModdingContext
+public sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logger) : IModdingContext
 {
     /// <inheritdoc />
     public IReadOnlyCollection<IMod> Mods { get; } = mods;

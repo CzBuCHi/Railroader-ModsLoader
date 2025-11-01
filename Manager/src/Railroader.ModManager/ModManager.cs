@@ -86,7 +86,7 @@ public class ModManager : MonoBehaviour
         return serviceManager;
     }
 
-    internal static void ConfigureLogger() {
+    public static void ConfigureLogger() {
         var memoryLogger = (MemoryLogger)ServiceProvider.GetService<ILogger>();
         memoryLogger.Information("Finalizing logger configuration");
 

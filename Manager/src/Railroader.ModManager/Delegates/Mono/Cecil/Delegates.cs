@@ -5,8 +5,8 @@ namespace Railroader.ModManager.Delegates.Mono.Cecil;
 
 /// <inheritdoc cref="_AssemblyDefinition.ReadAssembly(string, _ReaderParameters)"/>
 /// /// <remarks> Wraps <see cref="_AssemblyDefinition.ReadAssembly(string, _ReaderParameters)"/> for testability. </remarks>
-internal delegate _AssemblyDefinition? ReadAssemblyDefinition(string fileName, _ReaderParameters parameters);
+public delegate _AssemblyDefinition? ReadAssemblyDefinition(string fileName, _ReaderParameters parameters);
 
 /// <inheritdoc cref="_AssemblyDefinition.Write(string)"/>
 /// /// /// <remarks> Wraps <see cref="_AssemblyDefinition.Write(string)"/> for testability. </remarks>
-internal delegate void WriteAssemblyDefinition(_AssemblyDefinition assemblyDefinition, string fileName);
+public delegate void WriteAssemblyDefinition(_AssemblyDefinition assemblyDefinition, string fileName);

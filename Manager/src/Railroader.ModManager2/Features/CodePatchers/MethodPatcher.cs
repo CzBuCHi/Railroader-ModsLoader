@@ -14,10 +14,10 @@ using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 namespace Railroader.ModManager.Features.CodePatchers;
 
-internal delegate bool MethodPatcherDelegate(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition);
+public delegate bool MethodPatcherDelegate(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition);
 
 [PublicAPI]
-internal static class MethodPatcher
+public static class MethodPatcher
 {
     private sealed record MethodPatcherContext(ILogger Logger, Type MarkerType, Type TargetBaseType, string TargetMethod, MethodInfo InjectedMethod);
 
@@ -42,7 +42,7 @@ internal static class MethodPatcher
             }
 
             var parameters = injectedMethod.GetParameters();
-            if (parameters.Length != 1 || parameters[0].ParameterType.IsAssignableFrom(typeof(TMarker))) {
+            if (parameters.Length != 1 || !parameters[0].ParameterType.IsAssignableFrom(typeof(TMarker))) {
                 errors.Add($"Injected method must have single parameter assignable from {typeof(TMarker)}.");
             }
         }

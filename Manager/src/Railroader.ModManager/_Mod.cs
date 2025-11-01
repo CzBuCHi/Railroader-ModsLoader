@@ -8,7 +8,7 @@ using Serilog;
 namespace Railroader.ModManager;
 
 /// <summary> Implementation of <see cref="IMod"/> for a loaded mod instance. </summary>
-internal sealed class Mod(IModDefinition modDefinition, string? assemblyPath) : IMod
+public sealed class Mod(IModDefinition modDefinition, string? assemblyPath) : IMod
 {
     /// <inheritdoc />
     public IModDefinition Definition { get; } = modDefinition;
@@ -46,7 +46,7 @@ internal sealed class Mod(IModDefinition modDefinition, string? assemblyPath) : 
     public IPlugin[]? Plugins { get; internal set; }
 
     [JsonProperty("Plugins")]
-    internal string[]? PluginNames => Plugins?.Select(o => o.GetType().FullName).ToArray();
+    public string[]? PluginNames => Plugins?.Select(o => o.GetType().FullName).ToArray();
 
     /// <inheritdoc />
     public ILogger CreateLogger(string? scope = null)

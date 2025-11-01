@@ -7,11 +7,11 @@ namespace Railroader.ModManager.Delegates.HarmonyLib.Harmony;
 
 /// <inheritdoc cref="_Harmony(string)"/>
 /// <remarks> Wraps <see cref="_Harmony(string)"/> for testability. </remarks>
-internal delegate IHarmony HarmonyFactory(string path);
+public delegate IHarmony HarmonyFactory(string path);
 
 /// <summary> Wrapper for <see cref="_Harmony"/>. </summary>
 [PublicAPI]
-internal interface IHarmony
+public interface IHarmony
 {
     void PatchAll(Assembly assembly);
     void PatchAllUncategorized(Assembly assembly);
@@ -20,7 +20,7 @@ internal interface IHarmony
 }
 
 [ExcludeFromCodeCoverage]
-internal sealed class Harmony(_Harmony harmony) : IHarmony
+public sealed class Harmony(_Harmony harmony) : IHarmony
 {
     // TODO: not mocked
     public static HarmonyFactory Create => o => new Harmony(new _Harmony(o));

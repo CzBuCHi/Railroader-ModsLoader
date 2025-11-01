@@ -6,7 +6,7 @@ using Serilog.Events;
 namespace Railroader.ModManager.JsonConverters;
 
 /// <summary> JsonConverter for <see cref="LogEventLevel"/>. </summary>
-internal sealed class LogEventLevelJsonConverter : JsonConverter<LogEventLevel?>
+public sealed class LogEventLevelJsonConverter : JsonConverter<LogEventLevel?>
 {
     /// <inheritdoc />
     public override void WriteJson(JsonWriter writer, LogEventLevel? value, JsonSerializer serializer) {

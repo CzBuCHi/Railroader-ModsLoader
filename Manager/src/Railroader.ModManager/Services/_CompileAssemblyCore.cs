@@ -9,9 +9,9 @@ using Serilog;
 
 namespace Railroader.ModManager.Services;
 
-internal delegate bool CompileAssemblyDelegate(string outputPath, ICollection<string> sources, ICollection<string> references, out string messages);
+public delegate bool CompileAssemblyDelegate(string outputPath, ICollection<string> sources, ICollection<string> references, out string messages);
 
-internal static class CompileAssemblyCore
+public static class CompileAssemblyCore
 {
     public static CompileAssemblyDelegate CompileAssembly(ILogger logger) =>
         (string outputPath, ICollection<string> sources, ICollection<string> references, out string messages) =>

@@ -14,7 +14,7 @@ using Serilog;
 
 namespace Railroader.ModManager.Services;
 
-internal interface ICodePatcher
+public interface ICodePatcher
 {
     /// <summary> Gets or sets the mapping of plugin marker interfaces to their corresponding patcher types. </summary>
     /// <remarks>Plugins are applied in reverse order.</remarks>
@@ -24,7 +24,7 @@ internal interface ICodePatcher
 }
 
 /// <summary> Compiles mod source code into a DLL and applies registered patches to the assembly. </summary>
-internal sealed class CodePatcher(
+public sealed class CodePatcher(
     ILogger logger,
     ReadAssemblyDefinition readAssemblyDefinition,
     WriteAssemblyDefinition writeAssemblyDefinition,

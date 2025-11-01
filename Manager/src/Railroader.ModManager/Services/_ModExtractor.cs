@@ -10,13 +10,13 @@ using ZipFile = System.IO.Compression.ZipFile;
 
 namespace Railroader.ModManager.Services;
 
-internal interface IModExtractor
+public interface IModExtractor
 {
     void ExtractMods();
 }
 
 /// <inheritdoc />
-internal sealed class ModExtractor(
+public sealed class ModExtractor(
     IMemoryLogger logger,
     DirectoryInfoFactory directoryInfo,
     GetCurrentDirectory getCurrentDirectory,

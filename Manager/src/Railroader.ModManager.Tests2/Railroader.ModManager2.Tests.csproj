@@ -39,6 +39,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\MemoryFileSystem2\MemoryFileSystem2.csproj" />
       <ProjectReference Include="..\Railroader.ModManager2\Railroader.ModManager2.csproj" />
     </ItemGroup>
 

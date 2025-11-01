@@ -7,11 +7,11 @@ using Serilog.Events;
 
 namespace Railroader.ModManager.Services;
 
-internal interface IMemoryLogger : ILogger;
+public interface IMemoryLogger : ILogger;
 
 /// <summary> Initial logger - used before real logger is configured </summary>
 [ExcludeFromCodeCoverage] // Ignored by coverage as code is basically wrapper
-internal sealed class MemoryLogger : IMemoryLogger
+public sealed class MemoryLogger : IMemoryLogger
 {
     private record LogMessage(LogEventLevel Level, Exception Exception, string MessageTemplate, params object?[] PropertyValues);
 

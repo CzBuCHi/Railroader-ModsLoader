@@ -1,54 +1,37 @@
-﻿using System.IO;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
+using Railroader.ModManager.Delegates.System.IO;
 using Railroader.ModManager.Delegates.System.IO.Directory;
-using Railroader.ModManager.Delegates.System.IO.DirectoryInfo;
 using Railroader.ModManager.Delegates.System.IO.File;
-using DirectoryInfo = System.IO.DirectoryInfo;
+using Railroader.ModManager.Extensions;
+using Serilog;
 using ILogger = Serilog.ILogger;
 using Path = System.IO.Path;
 using SearchOption = System.IO.SearchOption;
 
-namespace Railroader.ModManager.Services;
+namespace Railroader.ModManager.Features;
 
-/// <summary>
-/// Defines a contract for compiling mod source code and applying patches to the resulting assembly.
-/// </summary>
-internal interface ICodeCompiler
+public delegate string? CompileModDelegate(ModDefinition definition, string[]? referenceNames = null);
+
+[PublicAPI]
+public static class CodeCompiler
 {
-    /// <summary>
-    /// Gets or sets the names of reference assemblies required for compilation.
-    /// </summary>
-    string[] ReferenceNames { get; }
+    [ExcludeFromCodeCoverage]
+    public static CompileModDelegate Factory() =>
+        (definition, names) => CompileMod(Log.Logger.ForSourceContext(),
+            CompileAssembly.Execute,
+            DirectoryInfoWrapper.Create,
+            Directory.GetCurrentDirectory,
+            File.Exists,
+            File.GetLastWriteTime,
+            File.Delete,
+            definition,
+            names ?? DefaultReferenceNames
+        );
 
-    /// <summary>
-    /// Compiles the mod's source code and applies patches to the resulting assembly.
-    /// </summary>
-    /// <param name="definition">The mod definition containing the base path and identifier. Must not be null.</param>
-    /// <returns>The path to the compiled and patched assembly DLL, or null if compilation or patching fails.</returns>
-    string? CompileMod(ModDefinition definition);
-}
-
-/// <summary> Compiles mod source code into a DLL and applies registered patches to the assembly. </summary>
-internal sealed class CodeCompiler(
-    ILogger logger,
-    CompileAssemblyDelegate compileAssembly,
-    DirectoryInfoFactory directoryInfo,
-    GetCurrentDirectory getCurrentDirectory,
-    Exists exists,
-    GetLastWriteTime getLastWriteTime,
-    Delete delete)
-    : ICodeCompiler
-{
-    public CodeCompiler(ILogger logger) : this(logger,
-        CompileAssemblyCore.CompileAssembly(logger),
-        o => new DirectoryInfoWrapper(new DirectoryInfo(o)),
-        Directory.GetCurrentDirectory,
-        File.Exists, File.GetLastWriteTime, File.Delete) {
-    }
-
-
-    /// <inheritdoc />
-    public string[] ReferenceNames { get; init; } = [
+    public static string[] DefaultReferenceNames => [
         "Assembly-CSharp",
         "0Harmony",
         "Railroader.ModManager.Interfaces",
@@ -56,8 +39,17 @@ internal sealed class CodeCompiler(
         "UnityEngine.CoreModule"
     ];
 
-    /// <inheritdoc />
-    public string? CompileMod(ModDefinition definition) {
+    public static string? CompileMod(
+        ILogger logger,
+        CompileAssemblyDelegate compileAssembly,
+        DirectoryInfoFactory directoryInfo,
+        GetCurrentDirectory getCurrentDirectory,
+        Exists exists,
+        GetLastWriteTime getLastWriteTime,
+        Delete delete,
+        ModDefinition definition, 
+        string[] referenceNames
+        ) {
 
         var csFiles = directoryInfo(definition.BasePath)
                       .EnumerateFiles("*.cs", SearchOption.AllDirectories)
@@ -84,7 +76,7 @@ internal sealed class CodeCompiler(
         var sources = csFiles.Select(o => o.FullName).ToArray();
 
         var managedPath = Path.Combine(getCurrentDirectory(), "Railroader_Data", "Managed");
-        var references  = ReferenceNames.Select(o => Path.Combine(managedPath, o + ".dll")).ToList();
+        var references  = referenceNames.Select(o => Path.Combine(managedPath, o + ".dll")).ToList();
 
         if (definition.Requires?.Count > 0) {
             logger.Information("Adding references to {Mods} ...", definition.Requires.Keys);

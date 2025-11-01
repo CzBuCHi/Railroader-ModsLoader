@@ -16,7 +16,7 @@ namespace Railroader.ModManager.HarmonyPatches;
 [HarmonyPatch]
 [HarmonyPatchCategory("LogManager")]
 [ExcludeFromCodeCoverage]
-internal static class LogManagerPatch
+public static class LogManagerPatch
 {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(LogManager), "Awake")]

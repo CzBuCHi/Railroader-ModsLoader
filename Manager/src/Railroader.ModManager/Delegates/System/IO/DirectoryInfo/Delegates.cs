@@ -9,7 +9,7 @@ namespace Railroader.ModManager.Delegates.System.IO.DirectoryInfo;
 
 /// <inheritdoc cref="_DirectoryInfo(string)"/>
 /// <remarks> Wraps <see cref="_DirectoryInfo(string)"/> for testability. </remarks>
-internal delegate IDirectoryInfo DirectoryInfoFactory(string path);
+public delegate IDirectoryInfo DirectoryInfoFactory(string path);
 
 public interface IDirectoryInfo
 {
@@ -18,7 +18,7 @@ public interface IDirectoryInfo
 }
 
 [ExcludeFromCodeCoverage]
-internal sealed class DirectoryInfoWrapper(_DirectoryInfo directoryInfo) : IDirectoryInfo
+public sealed class DirectoryInfoWrapper(_DirectoryInfo directoryInfo) : IDirectoryInfo
 {
     public static DirectoryInfoFactory Create => o => new DirectoryInfoWrapper(new _DirectoryInfo(o));
 

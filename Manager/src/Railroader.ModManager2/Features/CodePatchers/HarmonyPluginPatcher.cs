@@ -10,17 +10,17 @@ using Serilog;
 
 namespace Railroader.ModManager.Features.CodePatchers;
 
-internal delegate bool HarmonyPluginPatcherDelegate(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition);
+public delegate bool HarmonyPluginPatcherDelegate(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition);
 
 /// <summary> Patches types implementing <see cref="IHarmonyPlugin"/> to apply or remove Harmony patches when <c>OnIsEnabledChanged</c> is called. </summary>
 [PublicAPI]
 public sealed class HarmonyPluginPatcher
 {
     [ExcludeFromCodeCoverage]
-    internal static HarmonyPluginPatcherDelegate Factory() => Factory(Log.Logger.ForSourceContext());
+    public static HarmonyPluginPatcherDelegate Factory() => Factory(Log.Logger.ForSourceContext());
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal static HarmonyPluginPatcherDelegate Factory(ILogger logger) {
+    public static HarmonyPluginPatcherDelegate Factory(ILogger logger) {
         var method = MethodPatcher.Factory<IHarmonyPlugin>(logger, typeof(HarmonyPluginPatcher), typeof(PluginBase<>), "OnIsEnabledChanged");
         return (assemblyDefinition, typeDefinition) => method(assemblyDefinition, typeDefinition);
     }

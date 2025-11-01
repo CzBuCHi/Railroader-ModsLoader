@@ -13,7 +13,7 @@ namespace Railroader.ModManager;
 
 /// <summary> Implementation of <see cref="IModdingContext"/> providing basic modding services. </summary>
 [method: EditorBrowsable(EditorBrowsableState.Never)]
-internal sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logger, HarmonyFactory harmonyFactory) : IModdingContext
+public sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logger, HarmonyFactory harmonyFactory) : IModdingContext
 {
     [ExcludeFromCodeCoverage]
     public ModdingContext(IReadOnlyCollection<IMod> mods) 

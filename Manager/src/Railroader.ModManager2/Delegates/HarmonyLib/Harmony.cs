@@ -1,11 +1,12 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using _Harmony = HarmonyLib.Harmony;
 
 namespace Railroader.ModManager.Delegates.HarmonyLib;
 
-internal delegate IHarmony HarmonyFactory(string id);
+public delegate IHarmony HarmonyFactory(string id);
 
-internal interface IHarmony
+public interface IHarmony
 {
     void PatchAll(Assembly assembly);
 
@@ -18,9 +19,10 @@ internal interface IHarmony
     void UnpatchAll(string id);
 }
 
-internal sealed class Harmony(string id) : IHarmony
+[ExcludeFromCodeCoverage]
+public sealed class Harmony(string id) : IHarmony
 {
-    internal static IHarmony Factory(string id) => new Harmony(id);
+    public static IHarmony Factory(string id) => new Harmony(id);
 
     private readonly _Harmony _Harmony = new(id);
 

@@ -5,7 +5,7 @@ using System.Xml.Linq;
 
 // converts simple txt with Xml DOC id into valid ExternalAnnotations.xml for ReSharper to use ...
 
-internal static class Program {
+public static class Program {
 
     private const string NotNull = "M:JetBrains.Annotations.NotNullAttribute.#ctor";
     private const string CanBeNull = "M:JetBrains.Annotations.CanBeNullAttribute.#ctor";

@@ -10,7 +10,7 @@ namespace Railroader.ModManager.CodePatchers.Special;
 /// <summary> Patches types implementing <see cref="IHarmonyPlugin"/> to apply or remove Harmony patches when <c>OnIsEnabledChanged</c> is called. </summary>
 public sealed class HarmonyPluginPatcher : TypePatcher
 {
-    internal HarmonyPluginPatcher(ILoggerFactory loggerFactory)
+    public HarmonyPluginPatcher(ILoggerFactory loggerFactory)
         : base([new MethodPatcher<IHarmonyPlugin, HarmonyPluginPatcher>(loggerFactory, typeof(PluginBase<>), "OnIsEnabledChanged")]) {
     }
 

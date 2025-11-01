@@ -23,7 +23,7 @@
 //namespace Railroader.ModManager.Tests;
 
 //[ExcludeFromCodeCoverage]
-//internal sealed class TestServiceManager
+//public sealed class TestServiceManager
 //{
 //    public IServiceProvider ServiceProvider { get; }
 //    public MemoryFs         MemoryFs        { get; }

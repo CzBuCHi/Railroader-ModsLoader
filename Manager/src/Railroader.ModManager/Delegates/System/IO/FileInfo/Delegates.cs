@@ -6,7 +6,7 @@ namespace Railroader.ModManager.Delegates.System.IO.FileInfo;
 
 /// <inheritdoc cref="_FileInfo(string)"/>
 /// <remarks> Wraps <see cref="_FileInfo(string)"/> for testability. </remarks>
-internal delegate IFileInfo FileInfoInfoFactory(string path);
+public delegate IFileInfo FileInfoInfoFactory(string path);
 
 public interface IFileInfo
 {
@@ -21,7 +21,7 @@ public interface IFileInfo
 }
 
 [ExcludeFromCodeCoverage]
-internal sealed class FileInfoWrapper(_FileInfo fileInfo) : IFileInfo
+public sealed class FileInfoWrapper(_FileInfo fileInfo) : IFileInfo
 {
     public static FileInfoInfoFactory Create => o => new FileInfoWrapper(new _FileInfo(o));
 

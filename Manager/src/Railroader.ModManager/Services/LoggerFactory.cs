@@ -2,13 +2,13 @@
 
 namespace Railroader.ModManager.Services;
 
-internal interface ILoggerFactory
+public interface ILoggerFactory
 {
     ILogger GetLogger(string? scope = null);
 }
 
 /// <inheritdoc />
-internal class LoggerFactory(ILogger logger) : ILoggerFactory
+public class LoggerFactory(ILogger logger) : ILoggerFactory
 {
     /// <inheritdoc />
     public ILogger GetLogger(string? scope = null) => logger.ForContext("SourceContext", scope ?? "Railroader.ModInjector");

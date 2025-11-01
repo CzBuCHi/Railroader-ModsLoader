@@ -21,7 +21,7 @@ public class TestMethodPatcher
     [InlineData("PrivateInstanceMethod", "Injected method must be public and static.")]
     [InlineData("PublicInstanceMethod", "Injected method must be public and static.")]
     [InlineData("PrivateStaticMethod", "Injected method must be public and static.")]
-    [InlineData("PublicStaticMethodWithInvalidParameters", "Injected method must have single parameter assignable from Railroader.ModManager.Tests.Features.IMarker.")]
+    [InlineData("PublicStaticMethodWithInvalidParameters", "Injected method must have single parameter assignable from Railroader.ModManager.Tests.Features.CodePatchers.IMarker.")]
     [InlineData("PublicStaticMethodWithBoolReturnType", "Injected method must bave void return type.")]
     public void ThrowInvalidInjectorMethod(string injectorMethod, string error) {
         // Arrange
@@ -57,14 +57,14 @@ public class TestMethodPatcher
                      }
                      """)]
     [InlineData("2", """
-                     using Railroader.ModManager.Tests.Features;
+                     using Railroader.ModManager.Tests.Features.CodePatchers;
 
                      namespace Foo.Bar { 
                         public class TargetType : IMarker { } 
                      }
                      """)]
     [InlineData("3", """
-                     using Railroader.ModManager.Tests.Features;
+                     using Railroader.ModManager.Tests.Features.CodePatchers;
 
                      namespace Foo.Bar { 
                         public class TargetType : BaseType { } 
@@ -94,7 +94,7 @@ public class TestMethodPatcher
     public void ErrorIfTargetMethodNotExists() {
         // Arrange
         const string source = """
-                              using Railroader.ModManager.Tests.Features;
+                              using Railroader.ModManager.Tests.Features.CodePatchers;
 
                               namespace Foo.Bar { 
                                   public class TargetType : BaseType, IMarker { }
@@ -129,7 +129,7 @@ public class TestMethodPatcher
         // Arrange
         const string source = """
                               using System;
-                              using Railroader.ModManager.Tests.Features;
+                              using Railroader.ModManager.Tests.Features.CodePatchers;
 
                               namespace Foo.Bar { 
                                   public class TargetType : BaseType, IMarker {
@@ -175,7 +175,7 @@ public class TestMethodPatcher
 
         instructions[0]!.OpCode.Should().Be(OpCodes.Ldarg_0);
         instructions[1]!.OpCode.Should().Be(OpCodes.Call);
-        injectedMethodRef.FullName.Should().Be("System.Void Railroader.ModManager.Tests.Features.Patcher::PublicStaticMethod(Railroader.ModManager.Tests.Features.BaseType)");
+        injectedMethodRef.FullName.Should().Be("System.Void Railroader.ModManager.Tests.Features.CodePatchers.Patcher::PublicStaticMethod(Railroader.ModManager.Tests.Features.CodePatchers.IMarker)");
         injectedMethodRef.Parameters.Should().HaveCount(1);
 
         var baseCalls = instructions
@@ -222,7 +222,7 @@ public class TestMethodPatcher
     public void SkipDuplicatePatch() {
         // Arrange
         const string source = """
-                              using Railroader.ModManager.Tests.Features;
+                              using Railroader.ModManager.Tests.Features.CodePatchers;
 
                               namespace Foo.Bar { 
                                   public class TargetType : BaseType, IMarker { }
@@ -257,7 +257,7 @@ public class TestMethodPatcher
     public void CreateOverrideIfNeeded_GenericBase() {
         // Arrange
         const string source = """
-                              using Railroader.ModManager.Tests.Features;
+                              using Railroader.ModManager.Tests.Features.CodePatchers;
 
                               namespace Foo.Bar { 
                                   public class TargetType : BaseType<TargetType>, IMarker { }
@@ -310,7 +310,7 @@ public abstract class BaseType
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 internal sealed class InternalPatcher
 {
-    public static void PublicStaticMethod(BaseType instance) {
+    public static void PublicStaticMethod(IMarker instance) {
     }
 }
 
@@ -330,9 +330,9 @@ public sealed class Patcher
     public static void PublicStaticMethodWithInvalidParameters() {
     }
 
-    public static bool PublicStaticMethodWithBoolReturnType(BaseType instance) => true;
+    public static bool PublicStaticMethodWithBoolReturnType(IMarker instance) => true;
 
-    public static void PublicStaticMethod(BaseType instance) {
+    public static void PublicStaticMethod(IMarker instance) {
     }
 }
 
