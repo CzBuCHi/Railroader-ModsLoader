@@ -20,7 +20,7 @@
 
 
     <ItemGroup>
-      <ProjectReference Include="..\MemoryFileSystem2\MemoryFileSystem2.csproj" />
+      <ProjectReference Include="..\MemoryFileSystem\MemoryFileSystem.csproj" />
     </ItemGroup>
     
 </Project>

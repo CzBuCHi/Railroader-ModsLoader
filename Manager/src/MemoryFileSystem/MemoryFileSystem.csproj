@@ -22,7 +22,7 @@
 
 
     <ItemGroup>
-      <ProjectReference Include="..\Railroader.ModManager2\Railroader.ModManager2.csproj" />
+      <ProjectReference Include="..\Railroader.ModManager\Railroader.ModManager.csproj" />
     </ItemGroup>
     
 </Project>

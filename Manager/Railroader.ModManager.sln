@@ -34,13 +34,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mocks", "mocks", "{DB57033A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager.Interfaces.Tests", "src\Railroader.ModManager.Interfaces.Tests\Railroader.ModManager.Interfaces.Tests.csproj", "{6B866B34-16C2-9808-F47C-77F28CED4B2C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager2", "src\Railroader.ModManager2\Railroader.ModManager2.csproj", "{35B3F7CB-4718-6522-18DE-8DF756CEA35D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager2", "src\Railroader.ModManager\Railroader.ModManager.csproj", "{35B3F7CB-4718-6522-18DE-8DF756CEA35D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager2.Tests", "src\Railroader.ModManager.Tests2\Railroader.ModManager2.Tests.csproj", "{625688D6-CC94-032F-C03A-C25DAF2235A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager2.Tests", "src\Railroader.ModManager.Tests\Railroader.ModManager.Tests.csproj", "{625688D6-CC94-032F-C03A-C25DAF2235A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryFileSystem2", "src\MemoryFileSystem2\MemoryFileSystem2.csproj", "{A95643C7-9CF1-2493-4D0F-630DF3110859}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryFileSystem2", "src\MemoryFileSystem\MemoryFileSystem.csproj", "{A95643C7-9CF1-2493-4D0F-630DF3110859}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryFileSystem2.Tests", "src\MemoryFileSystem2.Tests\MemoryFileSystem2.Tests.csproj", "{5A70ED21-CDF1-8976-6C6F-076A6D00C8D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryFileSystem2.Tests", "src\MemoryFileSystem.Tests\MemoryFileSystem.Tests.csproj", "{5A70ED21-CDF1-8976-6C6F-076A6D00C8D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
