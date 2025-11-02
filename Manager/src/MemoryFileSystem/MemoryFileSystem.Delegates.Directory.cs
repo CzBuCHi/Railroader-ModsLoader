@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using NSubstitute;
 using Railroader.ModManager.Delegates.System.IO.Directory;
@@ -16,18 +16,19 @@ partial class MemoryFileSystem : MemoryFileSystem.IDirectory
 
     public IDirectory Directory => this;
 
-    private EnumerateDirectories? _EnumerateDirectories;
-    private GetCurrentDirectory?  _GetCurrentDirectory;
-
-    EnumerateDirectories IDirectory.EnumerateDirectories {
-        [DebuggerStepThrough]
-        get { return _EnumerateDirectories ??= CreateEnumerateDirectories(); }
+    [MemberNotNull(nameof(_EnumerateDirectories))]
+    [MemberNotNull(nameof(_GetCurrentDirectory))]
+    private void Init_Directory() {
+        _EnumerateDirectories = CreateEnumerateDirectories();
+        _GetCurrentDirectory = CreateGetCurrentDirectory();
     }
 
-    GetCurrentDirectory IDirectory.GetCurrentDirectory {
-        [DebuggerStepThrough]
-        get { return _GetCurrentDirectory ??= CreateGetCurrentDirectory(); }
-    }
+    private EnumerateDirectories _EnumerateDirectories;
+    private GetCurrentDirectory  _GetCurrentDirectory;
+
+    EnumerateDirectories IDirectory.EnumerateDirectories => _EnumerateDirectories;
+
+    GetCurrentDirectory IDirectory.GetCurrentDirectory => _GetCurrentDirectory;
 
     private EnumerateDirectories CreateEnumerateDirectories() {
         var mock = Substitute.For<EnumerateDirectories>();

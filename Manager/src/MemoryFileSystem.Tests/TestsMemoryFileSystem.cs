@@ -162,6 +162,35 @@ public sealed class TestsMemoryFileSystemBase
         result.ShouldBeEquivalentTo(expected);
     }
 
+    [Fact]
+    public void Enumerator_ReturnsOrderedNames() {
+        // Arrange
+        var sut = new MemoryFileSystemBaseImpl {
+            { @"C:\Path\Test\File2.txt", [1, 2, 3] },
+            { @"C:\Bar\File1.doc", [4, 5, 6] }
+        };
+
+        var expected = new List<MemoryEntry> {
+            new(@"c:\"),
+            new(@"c:\bar"),
+            new(@"c:\bar\file1.doc", [4, 5, 6]),
+            new(@"c:\path"),
+            new(@"c:\path\test"),
+            new(@"c:\path\test\file2.txt", [1, 2, 3])
+        };
+
+        // Act
+        using var enumerator = sut.GetEnumerator();
+
+        // Assert
+        List<MemoryEntry> list = [];
+        while (enumerator.MoveNext()) {
+            list.Add(enumerator.Current);
+        }
+
+        list.ShouldBeEquivalentTo(expected);
+    }
+
     private static readonly MemoryEntry[] _EnumerateSpecificWildcardPatternsMatchesCorrectlyEntries = [
         // @formatter:off
         new(@"c:\test\__.__",  [0 ] ),

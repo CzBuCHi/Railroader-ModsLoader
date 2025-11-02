@@ -92,6 +92,9 @@ public sealed class TestsPluginManager
                 public IModdingContext ModdingContext { get; }
                 public IMod Mod { get; }
                 public bool IsEnabled { get; set; }
+                
+                public Foo(IModdingContext moddingContext, IMod mod) {
+                }
             }
             """;
 

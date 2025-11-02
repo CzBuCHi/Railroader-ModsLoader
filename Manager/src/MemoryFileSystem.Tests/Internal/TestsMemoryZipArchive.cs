@@ -24,7 +24,7 @@ public sealed class TestsMemoryZipArchive
     }
 
     [Fact]
-    public void GetEntry() {
+    public void GetEntry_ReturnsCorrectZipArchiveEntry() {
         // Arrange
         var memoryZip = new MemoryZip {
             "Directory",
@@ -39,5 +39,18 @@ public sealed class TestsMemoryZipArchive
         actual.ShouldNotBeNull();
         actual.FullName.ShouldBe("Path/File.txt");
         actual.Name.ShouldBe("File.txt");
+    }
+
+    [Fact]
+    public void GetEntry_ReturnNull_WhenNotFound() {
+        // Arrange
+        var memoryZip = new MemoryZip();
+        var sut       = new MemoryZipArchive(memoryZip);
+
+        // Act
+        var actual = sut.GetEntry("Path/File.txt");
+
+        // Assert
+        actual.ShouldBeNull();
     }
 }

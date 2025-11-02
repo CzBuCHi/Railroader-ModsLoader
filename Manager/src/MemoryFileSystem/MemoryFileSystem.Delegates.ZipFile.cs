@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using MemoryFileSystem.Internal;
@@ -18,18 +18,18 @@ partial class MemoryFileSystem : MemoryFileSystem.IZipFile
 
     public IZipFile ZipFile => this;
 
-    private ExtractToDirectory? _ExtractToDirectory;
-    private OpenRead?           _OpenRead;
-
-    ExtractToDirectory IZipFile.ExtractToDirectory {
-        [DebuggerStepThrough]
-        get { return _ExtractToDirectory ??= CreateExtractToDirectory(); }
+    [MemberNotNull(nameof(_ExtractToDirectory))]
+    [MemberNotNull(nameof(_OpenRead))]
+    private void Init_ZipFile() {
+        _ExtractToDirectory = CreateExtractToDirectory();
+        _OpenRead = CreateOpenRead();
     }
 
-    OpenRead IZipFile.OpenRead {
-        [DebuggerStepThrough]
-        get { return _OpenRead ??= CreateOpenRead(); }
-    }
+    private ExtractToDirectory _ExtractToDirectory;
+    private OpenRead           _OpenRead;
+
+    ExtractToDirectory IZipFile.ExtractToDirectory => _ExtractToDirectory;
+    OpenRead IZipFile.          OpenRead           => _OpenRead;
 
     private ExtractToDirectory CreateExtractToDirectory() {
         var mock = Substitute.For<ExtractToDirectory>();

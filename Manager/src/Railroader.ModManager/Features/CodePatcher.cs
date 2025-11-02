@@ -89,8 +89,8 @@ public static class CodePatcher
                                                  .Select(o => o.Factory());
 
                     foreach (var patcher in patchers) {
-                        patcher!(assemblyDefinition, type);
                         hasPatch = true;
+                        patcher!(assemblyDefinition, type);
                     }
                 } catch (Exception ex) {
                     logger.Error(ex, "Failed to patch type {TypeName} for mod {ModId}", type.FullName, modId);
@@ -99,7 +99,6 @@ public static class CodePatcher
             }
 
             success = hasPatch && !hasError;
-
             if (success) {
                 writeAssemblyDefinition(assemblyDefinition, tempFilePath);
                 logger.Debug("Wrote patched assembly to temporary file {TempPath} for mod {ModId}", tempFilePath, modId);
@@ -107,7 +106,7 @@ public static class CodePatcher
                 logger.Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", assemblyPath, modId);
             }
 
-            return true;
+            return !hasPatch || !hasError;
         } finally {
             assemblyDefinition?.Dispose();
             if (success) {

@@ -105,7 +105,6 @@ public class TestsMemoryFileSystemDelegatesFile
             { @"c:\path", "Content" }
         };
 
-
         // Act
         fileSystem.File.Delete(@"C:\path");
 

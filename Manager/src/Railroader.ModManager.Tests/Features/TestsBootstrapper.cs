@@ -88,7 +88,7 @@ public sealed class TestsBootstrapper
         Bootstrapper.Execute(extractMods, ModDefinitionLoader(), Harmony(), CreateManagerBehaviour());
 
         // Assert
-        extractMods.ShouldReceiveOnly(o => o.Invoke());
+        extractMods.Received().Invoke();
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public sealed class TestsBootstrapper
         Bootstrapper.Execute(ExtractMods(), modDefinitionLoader, Harmony(), CreateManagerBehaviour());
 
         // Assert
-        modDefinitionLoader.ShouldReceiveOnly(o => o.Invoke());
+        modDefinitionLoader.Received().Invoke();
         Bootstrapper.ModDefinitions.ShouldBeEquivalentTo(modDefinitions);
     }
 
@@ -114,7 +114,7 @@ public sealed class TestsBootstrapper
         Bootstrapper.Execute(ExtractMods(), ModDefinitionLoader(), harmony, CreateManagerBehaviour());
 
         // Assert
-        harmony.ShouldReceiveOnly(o => o.PatchCategory(typeof(ModManager).Assembly, "LogManager"));
+        harmony.Received().PatchCategory(typeof(ModManager).Assembly, "LogManager");
     }
 
     [Fact]
@@ -126,7 +126,7 @@ public sealed class TestsBootstrapper
         Bootstrapper.Execute(ExtractMods(), ModDefinitionLoader(), Harmony(), createManagerBehaviour);
 
         // Assert
-        createManagerBehaviour.ShouldReceiveOnly(o => o.Invoke());
+        createManagerBehaviour.Received().Invoke();
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public sealed class TestsBootstrapper
         Bootstrapper.LoadMods(logger, [], Processor(), Compiler(), Patcher(), PluginFactory(), Harmony());
 
         // Assert
-        logger.ShouldReceiveOnly(o => o.Information("No mods where found."));
+        logger.Received().Information("No mods where found.");
     }
 
     [Fact]
@@ -152,10 +152,9 @@ public sealed class TestsBootstrapper
         Bootstrapper.LoadMods(logger, [_ModDefinition], processor, Compiler(), Patcher(), PluginFactory(), Harmony());
 
         // Assert
-        logger.ShouldReceiveOnly(o => {
-            o.Information("Validating mods ...");
-            o.Error("Validation error detected. Canceling mod loading.");
-        });
+        logger.Received().Information("Validating mods ...");
+        logger.Received().Error("Validation error detected. Canceling mod loading.");
+        logger.DidNotReceive().Information("Created modding context ...");
     }
 
     [Fact]
@@ -168,7 +167,7 @@ public sealed class TestsBootstrapper
         Bootstrapper.LoadMods(Logger(), [_ModDefinition], Processor([_ModDefinition]), compiler, patcher, PluginFactory(), Harmony());
 
         // Assert
-        compiler.ShouldReceiveOnly(o => o.Invoke(_ModDefinition));
+        compiler.Received().Invoke(_ModDefinition);
         patcher.ShouldReceiveNoCalls();
     }
 
@@ -183,8 +182,8 @@ public sealed class TestsBootstrapper
         Bootstrapper.LoadMods(logger, [_ModDefinition], Processor([_ModDefinition]), compiler, patcher, PluginFactory(), Harmony());
 
         // Assert
-        compiler.ShouldReceiveOnly(o => o.Invoke(_ModDefinition));
-        patcher.ShouldReceiveOnly(o => o.Invoke(_ModDefinition));
+        compiler.Received().Invoke(_ModDefinition);
+        patcher.Received().Invoke(_ModDefinition);
 
         logger.Received().Debug("mods: {mods}", """[{"Definition":{"id":"Identifier","name":"Name","version":"1.0","logLevel":"Debug","requires":null,"conflictsWith":null},"AssemblyPath":null,"IsEnabled":false,"IsValid":false,"IsLoaded":false,"Plugins":null}]""");
     }
@@ -199,6 +198,10 @@ public sealed class TestsBootstrapper
         Bootstrapper.LoadMods(logger, [_ModDefinition], Processor([_ModDefinition]), Compiler(), Patcher(), pluginFactory, Harmony());
 
         // Assert
+        logger.Received().Debug("mods: {mods}", """[{"Definition":{"id":"Identifier","name":"Name","version":"1.0","logLevel":"Debug","requires":null,"conflictsWith":null},"AssemblyPath":"BasePath\\Identifier.dll","IsEnabled":false,"IsValid":true,"IsLoaded":false,"Plugins":null}]"""); 
+        logger.Received().Information("Created modding context ...");
+        logger.Received().Information("Instantiating plugins ...");
+
         pluginFactory.Received().Invoke(
             Arg.Do<IModdingContext>([ExcludeFromCodeCoverage](o) => {
                 o.Mods.Count.ShouldBe(1);
@@ -207,6 +210,20 @@ public sealed class TestsBootstrapper
                 mod.IsValid.ShouldBeTrue();
                 mod.AssemblyPath.ShouldBe(@"BasePath\Identifier.dll");
             }));
+    }
+
+    [Fact]
+    public void LoadMods_Calls_Harmony() {
+        // Arrange
+        var logger  = Logger();
+        var harmony = Harmony();
+
+        // Act
+        Bootstrapper.LoadMods(logger, [_ModDefinition], Processor([_ModDefinition]), Compiler(), Patcher(), PluginFactory(), harmony);
+
+        // Assert
+        logger.Received().Information("Applying harmony patches ...");
+        harmony.Received().PatchAllUncategorized(typeof(ModManager).Assembly);
     }
 
     [Fact]

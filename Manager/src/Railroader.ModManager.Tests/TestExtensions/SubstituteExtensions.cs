@@ -12,15 +12,8 @@ namespace Railroader.ModManager.Tests.TestExtensions;
 [ExcludeFromCodeCoverage]
 public static class SubstituteExtensions
 {
-    public static void ShouldReceiveOnly<T>(this T substitute, Action<T> received) where T : class {
-        var dummy = Substitute.For<T>();
-        received(dummy);
-        substitute.ReceivedCalls().ShouldBeEquivalentTo(dummy.ReceivedCalls());
-    }
-
     public static void ShouldReceiveNoCalls<T>(this T substitute) where T : class =>
         substitute.ReceivedCalls().ShouldBeEmpty();
-
 
     public static void ShouldReceiveCallCount<T>(this T substitute, int count) where T : class =>
         substitute.ReceivedCalls().Count().ShouldBe(count);

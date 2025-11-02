@@ -54,9 +54,10 @@ public sealed class TestsCodePatcher
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         // Act
-        applyPatches(_ModDefinition);
+        var actual = applyPatches(_ModDefinition);
 
         // Assert
+        actual.ShouldBeTrue();
         logger.ShouldReceiveNoCalls();
     }
 
@@ -75,9 +76,10 @@ public sealed class TestsCodePatcher
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         // Act
-        applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), TestPluginPatcher.Factory));
+        var actual = applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), TestPluginPatcher.Factory));
 
         // Assert
+        actual.ShouldBeFalse();
         logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
         logger.Received().Error("Failed to load definition for assembly {AssemblyPath} for mod {ModId}", AssemblyPath, _ModDefinition.Identifier);
         logger.Received().Error("Failed to apply patches to assembly {AssemblyPath} for mod {ModId}", AssemblyPath, _ModDefinition.Identifier);
@@ -128,9 +130,10 @@ public sealed class TestsCodePatcher
         ];
 
         // Act
-        applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), TestPluginPatcher.Factory));
+        var actual = applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), TestPluginPatcher.Factory));
 
         // Assert
+        actual.ShouldBeTrue();
         logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
         logger.Received().Debug("Wrote patched assembly to temporary file {TempPath} for mod {ModId}", Arg.Any<string>(), _ModDefinition.Identifier);
         logger.Received().Information("Patching complete for mod {ModId}", _ModDefinition.Identifier);
@@ -202,10 +205,10 @@ public sealed class TestsCodePatcher
         ];
 
         // Act
-        applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), TestPluginPatcher.Factory));
-
+        var actual = applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), TestPluginPatcher.Factory));
 
         // Assert
+        actual.ShouldBeTrue();
         logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
         logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
         logger.Received().Information("Patching complete for mod {ModId}", _ModDefinition.Identifier);
@@ -224,7 +227,6 @@ public sealed class TestsCodePatcher
     public void CompileMod_Compilation_WithPatches_HandleThrowingPatcher1()
     {
         // Arrange
-
         const string source = """
                               using Railroader.ModManager.Interfaces;
                               using Serilog;
@@ -255,7 +257,6 @@ public sealed class TestsCodePatcher
                                
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
-
         string[] expectedDirectories = [
             ".",
             "bin",
@@ -264,9 +265,10 @@ public sealed class TestsCodePatcher
         ];
 
         // Act
-        applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), ThrowingPatcher.Factory));
+        var actual = applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), ThrowingPatcher.Factory));
 
         // Assert
+        actual.ShouldBeFalse();
         logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
         logger.Received().Error(Arg.Is<Exception>(o => o.Message == "ThrowingPatcher"), "Failed to patch type {TypeName} for mod {ModId}", "Foo.Bar.FirstPlugin", _ModDefinition.Identifier);
         logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
@@ -325,16 +327,17 @@ public sealed class TestsCodePatcher
         ];
 
         // Act
-        applyPatches(_ModDefinition,
+        var actual = applyPatches(_ModDefinition,
             new TypePatcherInfo(typeof(IHarmonyPlugin), TestPluginPatcher.Factory),
             new TypePatcherInfo(typeof(IHarmonyPlugin), ThrowingPatcher.Factory)
         );
 
         // Assert
+        actual.ShouldBeFalse();
         logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
         logger.Received().Error(Arg.Any<Exception>(), "Failed to patch type {TypeName} for mod {ModId}", "Foo.Bar.FirstPlugin", _ModDefinition.Identifier);
         logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
-        logger.Received().Information("Patching complete for mod {ModId}", _ModDefinition.Identifier);
+        logger.Received().Error("Failed to apply patches to assembly {AssemblyPath} for mod {ModId}", AssemblyPath, _ModDefinition.Identifier);
         logger.ShouldReceiveCallCount(4);
 
         readAssemblyDefinition.Received(1).Invoke(AssemblyPath,

@@ -33,6 +33,12 @@ public interface IMemoryFileSystem : IEnumerable<MemoryEntry>
 
 public abstract partial class MemoryFileSystem : IMemoryFileSystem
 {
+    protected MemoryFileSystem() {
+        Init_Directory();
+        Init_File();
+        Init_ZipFile();
+    }
+
     [ExcludeFromCodeCoverage]
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

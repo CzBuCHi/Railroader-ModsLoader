@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -24,42 +25,34 @@ partial class MemoryFileSystem : MemoryFileSystem.IFile
 
     public IFile File => this;
 
-    private Exists?           _Exists;
-    private ReadAllText?      _ReadAllText;
-    private GetLastWriteTime? _GetLastWriteTime;
-    private Delete?           _Delete;
-    private Move?             _Move;
-    private Create?           _Create;
-
-    Exists IFile.Exists {
-        [DebuggerStepThrough]
-        get => _Exists ??= CreateExists();
+    [MemberNotNull(nameof(_Exists))]
+    [MemberNotNull(nameof(_ReadAllText))]
+    [MemberNotNull(nameof(_GetLastWriteTime))]
+    [MemberNotNull(nameof(_Delete))]
+    [MemberNotNull(nameof(_Move))]
+    [MemberNotNull(nameof(_Create))]
+    private void Init_File() {
+        _Exists = CreateExists();
+        _ReadAllText = CreateReadAllText();
+        _GetLastWriteTime = CreateGetLastWriteTime();
+        _Delete = CreateDelete();
+        _Move = CreateMove();
+        _Create = CreateCreate();
     }
 
-    ReadAllText IFile.ReadAllText {
-        [DebuggerStepThrough]
-        get { return _ReadAllText ??= CreateReadAllText(); }
-    }
+    private Exists           _Exists;
+    private ReadAllText      _ReadAllText;
+    private GetLastWriteTime _GetLastWriteTime;
+    private Delete           _Delete;
+    private Move             _Move;
+    private Create           _Create;
 
-    GetLastWriteTime IFile.GetLastWriteTime {
-        [DebuggerStepThrough]
-        get { return _GetLastWriteTime ??= CreateGetLastWriteTime(); }
-    }
-
-    Delete IFile.Delete {
-        [DebuggerStepThrough]
-        get { return _Delete ??= CreateDelete(); }
-    }
-
-    Move IFile.Move {
-        [DebuggerStepThrough]
-        get { return _Move ??= CreateMove(); }
-    }
-
-    Create IFile.Create {
-        [DebuggerStepThrough]
-        get { return _Create ??= CreateCreate(); }
-    }
+    Exists IFile.          Exists           => _Exists;
+    ReadAllText IFile.     ReadAllText      => _ReadAllText;
+    GetLastWriteTime IFile.GetLastWriteTime => _GetLastWriteTime;
+    Delete IFile.          Delete           => _Delete; 
+    Move IFile.            Move             => _Move;
+    Create IFile.          Create           => _Create;
 
     private Exists CreateExists() {
         var mock = Substitute.For<Exists>();

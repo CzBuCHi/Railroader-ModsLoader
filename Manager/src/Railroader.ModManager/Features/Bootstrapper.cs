@@ -117,15 +117,8 @@ public static class Bootstrapper
             mod.IsLoaded = true;
         }
 
-        foreach (var mod in mods) {
-            logger.Debug("enabling mod {id}", mod.Definition.Identifier);
-            mod.IsEnabled = true;
-        }
-
         logger.Information("Applying harmony patches ...");
 
         harmony.PatchAllUncategorized(typeof(ModManager).Assembly);
-
-        logger.Information("Mod loader loaded ...");
     }
 }
