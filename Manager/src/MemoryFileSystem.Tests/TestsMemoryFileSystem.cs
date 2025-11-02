@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using FluentAssertions;
+using MemoryFileSystem.Tests.TestExtensions;
 using MemoryFileSystem.Types;
+using Shouldly;
 using Xunit;
 
 namespace MemoryFileSystem.Tests;
@@ -11,8 +12,7 @@ namespace MemoryFileSystem.Tests;
 public sealed class TestsMemoryFileSystemBase
 {
     [Fact]
-    public void LockFile()
-    {
+    public void LockFile() {
         // Arrange
         var sut = new MemoryFileSystemBaseImpl {
             { "C:\\File.txt", [1, 2, 3] }
@@ -21,27 +21,35 @@ public sealed class TestsMemoryFileSystemBase
         sut.LockFile("C:\\File.txt");
 
         // Assert
-        sut.Items.Should().ContainKey("C:\\File.txt").WhoseValue.Locked.Should().BeTrue();
+        sut.Items.ShouldContainKeyWhereValue("C:\\File.txt", o => o.Locked.ShouldBeTrue());
     }
 
     [Fact]
-    public void UnlockFile()
-    {
+    public void UnlockFile() {
         // Arrange
         var sut = new MemoryFileSystemBaseImpl {
-            new MemoryEntry("C:\\File.txt", false, MemoryEntry.DefaultLastWriteTime, [1, 2, 3], null, true)
+            new MemoryEntry("C:\\File.txt", [1, 2, 3], MemoryEntry.DefaultLastWriteTime, true)
         };
 
         // Act
         sut.UnlockFile("C:\\File.txt");
 
         // Assert
-        sut.Items.Should().ContainKey("C:\\File.txt").WhoseValue.Locked.Should().BeFalse();
+        sut.Items.ShouldContainKeyWhereValue("C:\\File.txt", o => o.Locked.ShouldBeFalse());
     }
 
     [Fact]
-    public void Enumerate_TopDirectoryOnly_MatchesPattern()
-    {
+    public void Enumerate_WhenDirectoryNotExists() {
+        // Arrange
+        var sut = new MemoryFileSystemBaseImpl();
+
+        // Act & Assert
+        Should.Throw<DirectoryNotFoundException>(() => sut.Enumerate(@"c:\test", "*.txt").ToArray())
+              .Message.ShouldBe(@"Directory not found: 'c:\test'.");
+    }
+
+    [Fact]
+    public void Enumerate_TopDirectoryOnly_MatchesPattern() {
         // Arrange
         var sut = new MemoryFileSystemBaseImpl {
             @"C:\Test\Dir1",                      // Directory
@@ -52,17 +60,19 @@ public sealed class TestsMemoryFileSystemBase
             @"C:\Test\Dir3\SubDir",               // Nested Directory
             { @"C:\Test\Dir3\File3.txt", [7, 8] } // Nested File
         };
+        var expected = new[] {
+            new MemoryEntry(@"c:\test\file1.txt", [1, 2, 3])
+        };
 
         // Act
-        var result = sut.Enumerate(@"C:\Test", "*.txt").ToList();
+        var result = sut.Enumerate(@"C:\Test", "*.txt").ToArray();
 
         // Assert
-        result.Should().BeEquivalentTo([new MemoryEntry(@"c:\test\file1.txt", [1, 2, 3])]);
+        result.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
-    public void Enumerate_AllDirectories_MatchesPattern()
-    {
+    public void Enumerate_AllDirectories_MatchesPattern() {
         // Arrange
         var sut = new MemoryFileSystemBaseImpl {
             @"C:\Test\Dir1",
@@ -73,21 +83,20 @@ public sealed class TestsMemoryFileSystemBase
             @"C:\Test\Dir3\SubDir",
             { @"C:\Test\Dir3\File3.txt", [7, 8] }
         };
+        var expected = new MemoryEntry[] {
+            new(@"c:\test\dir3\file3.txt", [7, 8]),
+            new(@"c:\test\file1.txt", [1, 2, 3])
+        };
 
         // Act
-        var result = sut.Enumerate(@"C:\Test", "*.txt", SearchOption.AllDirectories).ToList();
+        var result = sut.Enumerate(@"C:\Test", "*.txt", SearchOption.AllDirectories).ToArray();
 
         // Assert
-        result.Should().BeEquivalentTo([
-            new MemoryEntry(@"c:\test\dir3\file3.txt", [7, 8]),
-            new MemoryEntry(@"c:\test\file1.txt", [1, 2, 3]),
-        ]);
-
+        result.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
-    public void Enumerate_NoMatchingFiles_ReturnsEmpty()
-    {
+    public void Enumerate_NoMatchingFiles_ReturnsEmpty() {
         // Arrange
         var sut = new MemoryFileSystemBaseImpl {
             @"C:\Test\Dir1",
@@ -95,65 +104,62 @@ public sealed class TestsMemoryFileSystemBase
         };
 
         // Act
-        var result = sut.Enumerate(@"C:\Test", "*.txt").ToList();
+        var result = sut.Enumerate(@"C:\Test", "*.txt").ToArray();
 
         // Assert
-        result.Should().BeEmpty();
+        result.ShouldBeEmpty();
     }
 
     [Fact]
-    public void Enumerate_InvalidSearchPattern_ThrowsArgumentException()
-    {
+    public void Enumerate_InvalidSearchPattern_ThrowsArgumentException() {
         // Arrange
         var sut = new MemoryFileSystemBaseImpl {
             { @"C:\Test\File1.txt", [1, 2, 3] }
         };
 
-        // Act
-        var act = () => sut.Enumerate(@"C:\Test", "File<1>.txt").ToArray();
-
-        // Assert
-        act.Should().Throw<ArgumentException>().WithMessage("Invalid search pattern.");
+        // Act & Assert
+        Should.Throw<ArgumentException>(() => sut.Enumerate(@"C:\Test", "File<1>.txt").ToArray())
+              .Message.ShouldBe("Invalid search pattern.");
     }
 
     [Fact]
-    public void Enumerate_CaseInsensitivePathAndPattern_MatchesCorrectly()
-    {
+    public void Enumerate_CaseInsensitivePathAndPattern_MatchesCorrectly() {
         // Arrange
         var sut = new MemoryFileSystemBaseImpl {
             { @"C:\TEST\FILE1.TXT", [1, 2, 3] },
             { @"C:\test\file2.txt", [4, 5, 6] }
         };
+        var expected = new[] {
+            new MemoryEntry(@"c:\test\file1.txt", [1, 2, 3]),
+            new MemoryEntry(@"c:\test\file2.txt", [4, 5, 6])
+        };
 
         // Act
-        var result = sut.Enumerate(@"c:\test", "*.TXT").ToList();
+        var result = sut.Enumerate(@"c:\test", "*.TXT").ToArray();
 
         // Assert
-        result.Should().BeEquivalentTo([
-            new MemoryEntry(@"c:\test\file1.txt", [1, 2, 3]),
-            new MemoryEntry(@"c:\test\file2.txt", [4, 5, 6]),
-        ]);
+        result.ShouldBeEquivalentTo(expected);
     }
 
     [Fact]
-    public void Enumerate_WildcardPattern_MatchesAllFiles()
-    {
+    public void Enumerate_WildcardPattern_MatchesAllFiles() {
         // Arrange
         var sut = new MemoryFileSystemBaseImpl {
             @"C:\Test\Dir1",
             { @"C:\Test\File1.txt", [1, 2, 3] },
             { @"C:\Test\File2.doc", [4, 5, 6] }
         };
-
-        // Act
-        var result = sut.Enumerate(@"C:\Test", "*.*").ToList();
-
-        // Assert
-        result.Should().BeEquivalentTo([
+        var expected = new[] {
             new MemoryEntry(@"c:\test\dir1"),
             new MemoryEntry(@"c:\test\file1.txt", [1, 2, 3]),
-            new MemoryEntry(@"c:\test\file2.doc", [4, 5, 6]),
-        ]);
+            new MemoryEntry(@"c:\test\file2.doc", [4, 5, 6])
+        };
+
+        // Act
+        var result = sut.Enumerate(@"C:\Test", "*.*").ToArray();
+
+        // Assert
+        result.ShouldBeEquivalentTo(expected);
     }
 
     private static readonly MemoryEntry[] _EnumerateSpecificWildcardPatternsMatchesCorrectlyEntries = [
@@ -181,59 +187,54 @@ public sealed class TestsMemoryFileSystemBase
         new(@"c:\test\__.__d", [16] ),
         new(@"c:\test\-.__d",  [17] ),
         new(@"c:\test\__.-d",  [18] ),
-        new(@"c:\test\-.-d",   [19] ),
+        new(@"c:\test\-.-d",   [19] )
         // @formatter:on
     ];
 
-    public static IEnumerable<object?[]> Enumerate_SpecificWildcardPatterns_MatchesCorrectlyData()
-    {
+    public static IEnumerable<object?[]> Enumerate_SpecificWildcardPatterns_MatchesCorrectlyData() {
         return Enumerate().Select(o => new object?[] {
             o.searchPattern,
             o.entries!.Select(p => _EnumerateSpecificWildcardPatternsMatchesCorrectlyEntries[p]).ToArray()
         });
 
-        IEnumerable<(string searchPattern, int[] entries)> Enumerate()
-        {
+        IEnumerable<(string searchPattern, int[] entries)> Enumerate() {
             // @formatter:off
-
-            // Core wildcard patterns
-            yield return ("*.*", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
-            yield return ("?.*", [1, 3, 13, 15, 17, 19]);
-            yield return ("*.?", [2, 3, 6, 7, 10, 11,]);
-            yield return ("?.?", [3]);
-            yield return ("a*.*", [4, 5, 6, 7]);
-            yield return ("a?.*", [5, 7]);
-            yield return ("a*.?", [6, 7]);
-            yield return ("a?.?", [7]);
-            yield return ("*b.*", [8, 9, 10, 11]);
-            yield return ("?b.*", [9, 11]);
-            yield return ("*b.?", [10, 11]);
-            yield return ("?b.?", [11]);
-            yield return ("*.c*", [12, 13, 14, 15]);
-            yield return ("?.c*", [13, 15]);
-            yield return ("*.c?", [14, 15]);
-            yield return ("?.c?", [15]);
-            yield return ("*.*d", [16, 17, 18, 19]);
-            yield return ("?.*d", [17, 19]);
-            yield return ("*.?d", [18, 19]);
-            yield return ("?.?d", [19]);
+            yield return ("*.*",  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
+            yield return ("?.*",  [   1,    3,                               13,     15,     17,     19]);
+            yield return ("*.?",  [      2, 3,       6, 7,       10, 11                                ]);
+            yield return ("?.?",  [         3                                                          ]);
+            yield return ("a*.*", [            4, 5, 6, 7                                              ]);
+            yield return ("a?.*", [               5,    7                                              ]);
+            yield return ("a*.?", [                  6, 7                                              ]);
+            yield return ("a?.?", [                     7                                              ]);
+            yield return ("*b.*", [                        8, 9, 10, 11                                ]);
+            yield return ("?b.*", [                           9,     11                                ]);
+            yield return ("*b.?", [                              10, 11                                ]);
+            yield return ("?b.?", [                                  11                                ]);
+            yield return ("*.c*", [                                      12, 13, 14, 15                ]);
+            yield return ("?.c*", [                                          13,     15                ]);
+            yield return ("*.c?", [                                              14, 15                ]);
+            yield return ("?.c?", [                                                  15                ]);
+            yield return ("*.*d", [                                                      16, 17, 18, 19]);
+            yield return ("?.*d", [                                                          17,     19]);
+            yield return ("*.?d", [                                                              18, 19]);
+            yield return ("?.?d", [                                                                  19]);
             // @formatter:on
         }
     }
 
     [Theory]
     [MemberData(nameof(Enumerate_SpecificWildcardPatterns_MatchesCorrectlyData))]
-    public void Enumerate_SpecificWildcardPatterns_MatchesCorrectly(string searchPattern, MemoryEntry[] entries)
-    {
+    public void Enumerate_SpecificWildcardPatterns_MatchesCorrectly(string searchPattern, MemoryEntry[] entries) {
         // Arrange
         var sut = new MemoryFileSystemBaseImpl();
         sut.AddRange(_EnumerateSpecificWildcardPatternsMatchesCorrectlyEntries);
 
         // Act
-        var result = sut.Enumerate(@"C:\Test", searchPattern).ToList();
+        var result = sut.Enumerate(@"C:\Test", searchPattern).OrderBy(o => o.Path).ToArray();
 
         // Assert
-        result.Should().BeEquivalentTo(entries, o => o.WithoutStrictOrdering(), "pattern is {0}", searchPattern);
+        result.ShouldBeEquivalentTo(entries.OrderBy(o => o.Path).ToArray(), "pattern is " + searchPattern);
     }
 
     private sealed class MemoryFileSystemBaseImpl : MemoryFileSystem

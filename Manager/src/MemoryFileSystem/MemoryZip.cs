@@ -6,7 +6,12 @@ using Newtonsoft.Json;
 
 namespace MemoryFileSystem;
 
-public sealed class MemoryZip : MemoryFileSystem
+public interface IMemoryZip : IMemoryFileSystem
+{
+    byte[] GetBytes();
+}
+
+public sealed class MemoryZip : MemoryFileSystem, IMemoryZip
 {
     public MemoryZip() {
     }

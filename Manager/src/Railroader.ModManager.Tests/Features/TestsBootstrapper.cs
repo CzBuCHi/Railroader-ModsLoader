@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using FluentAssertions;
 using NSubstitute;
 using Railroader.ModManager.Delegates.HarmonyLib;
 using Railroader.ModManager.Features;
@@ -11,6 +11,7 @@ using Railroader.ModManager.Interfaces;
 using Railroader.ModManager.Tests.TestExtensions;
 using Serilog;
 using Serilog.Events;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests.Features;
 
@@ -73,7 +74,7 @@ public sealed class TestsBootstrapper
     private static readonly ModDefinition _ModDefinition = new() {
         Identifier = "Identifier",
         Name = "Name",
-        Version = new Version(1,0),
+        Version = new Version(1, 0),
         LogLevel = LogEventLevel.Debug,
         BasePath = "BasePath"
     };
@@ -101,7 +102,7 @@ public sealed class TestsBootstrapper
 
         // Assert
         modDefinitionLoader.ShouldReceiveOnly(o => o.Invoke());
-        Bootstrapper.ModDefinitions.Should().BeEquivalentTo(modDefinitions);
+        Bootstrapper.ModDefinitions.ShouldBeEquivalentTo(modDefinitions);
     }
 
     [Fact]
@@ -141,13 +142,12 @@ public sealed class TestsBootstrapper
     }
 
     [Fact]
-    public void LoadMods_When_Validation_Fails_Should_Log_Error_And_Cancel()
-    {
+    public void LoadMods_When_Validation_Fails_Should_Log_Error_And_Cancel() {
         // Arrange
         var logger = Logger();
 
         var processor = Processor([]);
-        
+
         // Act
         Bootstrapper.LoadMods(logger, [_ModDefinition], processor, Compiler(), Patcher(), PluginFactory(), Harmony());
 
@@ -194,38 +194,47 @@ public sealed class TestsBootstrapper
         // Arrange
         var logger        = Logger();
         var pluginFactory = PluginFactory();
-        
+
         // Act
         Bootstrapper.LoadMods(logger, [_ModDefinition], Processor([_ModDefinition]), Compiler(), Patcher(), pluginFactory, Harmony());
 
         // Assert
         pluginFactory.Received().Invoke(
-            Arg.Do<IModdingContext>(o => {
-                o.Mods.Should().HaveCount(1);
-                var mod = o.Mods.First().Should().BeOfType<Mod>().Which;
-                mod.Definition.Should().Be(_ModDefinition);
-                mod.IsValid.Should().BeTrue();
-                mod.AssemblyPath.Should().Be(@"BasePath\Identifier.dll");
+            Arg.Do<IModdingContext>([ExcludeFromCodeCoverage](o) => {
+                o.Mods.Count.ShouldBe(1);
+                var mod = o.Mods.First().ShouldBeOfType<Mod>();
+                mod.Definition.ShouldBe(_ModDefinition);
+                mod.IsValid.ShouldBeTrue();
+                mod.AssemblyPath.ShouldBe(@"BasePath\Identifier.dll");
             }));
-
     }
 
     [Fact]
     public void LoadMods_Calls_TryInstantiatePlugins() {
         // Arrange
-        var logger                = Logger();
-        var createPluginsDelegate = Substitute.For<CreatePluginsDelegate>();
-        var plugin                = Substitute.For<IPlugin>();
+        var  logger                = Logger();
+        var  createPluginsDelegate = Substitute.For<CreatePluginsDelegate>();
+        var  plugin                = Substitute.For<IPlugin>();
         Mod? mod                   = null;
         createPluginsDelegate.Invoke(Arg.Any<Mod>()).Returns([plugin]).AndDoes(o => mod = o.Arg<Mod>());
         var pluginFactory = PluginFactory(createPluginsDelegate);
-        
+
         // Act
         Bootstrapper.LoadMods(logger, [_ModDefinition], Processor([_ModDefinition]), Compiler(), Patcher(), pluginFactory, Harmony());
 
         // Assert
-        mod.Should().NotBeNull();
-        mod.IsLoaded.Should().BeTrue();
-        mod.Plugins.Should().BeEquivalentTo([plugin]);
+        mod.ShouldNotBeNull();
+        mod.IsLoaded.ShouldBeTrue();
+        mod.Plugins.ShouldBeEquivalentTo(new[] { plugin });
+    }
+
+    [Fact]
+    public void LoadMods_InvalidCodeCompilerResult() {
+        // Arrange
+        var compiler = Compiler((CompileModResult)(-1));
+        var patcher  = Patcher();
+
+        // Act & Assert
+        Should.Throw<ArgumentOutOfRangeException>(() => Bootstrapper.LoadMods(Logger(), [_ModDefinition], Processor([_ModDefinition]), compiler, patcher, PluginFactory(), Harmony()));
     }
 }

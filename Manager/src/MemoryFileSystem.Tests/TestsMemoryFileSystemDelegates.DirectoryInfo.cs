@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace MemoryFileSystem.Tests;
@@ -18,7 +18,7 @@ public class TestsMemoryFileSystemDelegatesDirectoryInfo
         var files = fileSystem.DirectoryInfo(@"C:\\Path").EnumerateFiles("*.*").ToArray();
 
         // Assert
-        files.Should().HaveCount(1);
-        files[0].FullName.Should().Be(@"C:\Path\File.txt");
+        files.Length.ShouldBe(1);
+        files[0].FullName.ShouldBe(@"C:\Path\File.txt");
     }
 }

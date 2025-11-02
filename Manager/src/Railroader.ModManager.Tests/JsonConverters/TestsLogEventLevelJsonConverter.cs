@@ -1,7 +1,7 @@
-﻿using FluentAssertions;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Railroader.ModManager.JsonConverters;
 using Serilog.Events;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests.JsonConverters;
 
@@ -22,28 +22,22 @@ public sealed class TestsLogEventLevelJsonConverter
         var actual = JsonConvert.DeserializeObject<TestData>(json);
 
         // Assert
-        actual.Should().NotBeNull();
-        actual.LogLevel.Should().Be(expected);
+        actual.ShouldNotBeNull();
+        actual.LogLevel.ShouldBe(expected);
     }
 
     [Fact]
     public void ReadInvalidValue() {
-        // Act
-        var act = () => JsonConvert.DeserializeObject<TestData>("""{ "logLevel": "invalid" }""");
-
-        // Assert
-        act.Should().Throw<JsonReaderException>()
-           .WithMessage($"Unexpected token value 'invalid' when reading {typeof(LogEventLevel?)}. Expected: 'Verbose', 'Debug', 'Information', 'Warning', 'Error', 'Fatal' or null");
+        // Act & Assert
+        Should.Throw<JsonReaderException>(() => JsonConvert.DeserializeObject<TestData>("""{ "logLevel": "invalid" }"""))
+              .Message.ShouldBe($"Unexpected token value 'invalid' when reading {typeof(LogEventLevel?)}. Expected: 'Verbose', 'Debug', 'Information', 'Warning', 'Error', 'Fatal' or null");
     }
 
     [Fact]
     public void ReadInvalidType() {
-        // Act
-        var act = () => JsonConvert.DeserializeObject<TestData>("""{ "logLevel": 42 }""");
-
-        // Assert
-        act.Should().Throw<JsonReaderException>()
-           .WithMessage($"Unexpected token type {JsonToken.Integer} when reading {typeof(LogEventLevel?)}. Expected: {JsonToken.Null} or {JsonToken.String}.");
+        // Act & Assert
+        Should.Throw<JsonReaderException>(() => JsonConvert.DeserializeObject<TestData>("""{ "logLevel": 42 }"""))
+              .Message.ShouldBe($"Unexpected token type {JsonToken.Integer} when reading {typeof(LogEventLevel?)}. Expected: {JsonToken.Null} or {JsonToken.String}.");
     }
 
     [Fact]
@@ -52,7 +46,7 @@ public sealed class TestsLogEventLevelJsonConverter
         var actual = JsonConvert.SerializeObject(new TestData { LogLevel = LogEventLevel.Debug });
 
         // Assert
-        actual.Should().Be("""{"logLevel":"Debug"}""");
+        actual.ShouldBe("""{"logLevel":"Debug"}""");
     }
 
     private sealed class TestData

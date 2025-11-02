@@ -1,10 +1,12 @@
 ﻿using System.Linq;
-using FluentAssertions;
+
 using NSubstitute;
 using Railroader.ModManager.Delegates.HarmonyLib;
 using Railroader.ModManager.Features.CodePatchers;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Tests.TestExtensions;
 using Serilog;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests.Features.CodePatchers;
 
@@ -28,7 +30,7 @@ public sealed class TestsHarmonyPluginPatcher
 
         // Act
         var harmonyPluginPatcher = HarmonyPluginPatcher.Factory(logger);
-        harmonyPluginPatcher(assemblyDefinition, typeDefinition).Should().BeFalse();
+        harmonyPluginPatcher(assemblyDefinition, typeDefinition).ShouldBeFalse();
 
         // Assert
         logger.Debug("Skipping patching for type {TypeName}: not derived from {BaseType} or does not implement {MarkerInterface}", typeDefinition.FullName, typeof(HarmonyPluginPatcher), typeof(IMarker));
@@ -51,7 +53,7 @@ public sealed class TestsHarmonyPluginPatcher
 
         // Assert
         harmony.Received(1).PatchAll(plugin.GetType().Assembly);
-        harmony.ReceivedCalls().Should().HaveCount(1);
+        harmony.ShouldReceiveCallCount(1);
 
         logger.Received().Information("Applying Harmony patch for mod {ModId}", "Identifier");
     }
@@ -74,7 +76,7 @@ public sealed class TestsHarmonyPluginPatcher
 
         // Assert
         harmony.Received(1).UnpatchAll("Identifier");
-        harmony.ReceivedCalls().Should().HaveCount(1);
+        harmony.ShouldReceiveCallCount(1);
 
         logger.Received().Information("Removing Harmony patch for mod {ModId}", "Identifier");
     }
@@ -97,7 +99,7 @@ public sealed class TestsHarmonyPluginPatcher
 
         // Assert
         harmony.Received(1).PatchAll(plugin.GetType().Assembly);
-        harmony.ReceivedCalls().Should().HaveCount(1);
+        harmony.ShouldReceiveCallCount(1);
 
         logger.Received(1).Information("Applying Harmony patch for mod {ModId}", "Identifier");
     }

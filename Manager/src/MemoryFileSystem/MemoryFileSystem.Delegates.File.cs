@@ -80,7 +80,7 @@ partial class MemoryFileSystem : MemoryFileSystem.IFile
                 throw entry.ReadException;
             }
 
-            return Encoding.UTF8.GetString(entry.ExistingContent);
+            return Encoding.UTF8.GetString(entry.Content!);
         });
         return mock;
     }

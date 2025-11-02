@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using FluentAssertions;
 using NSubstitute;
 using Railroader.ModManager.Delegates.System.Reflection.Assembly;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Interfaces;
 using Serilog;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests.Features;
 
@@ -23,7 +23,7 @@ public sealed class TestsPluginManager
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
-        plugins.Should().BeEmpty();
+        plugins.ShouldBeEmpty();
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public sealed class TestsPluginManager
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
-        plugins.Should().BeEmpty();
+        plugins.ShouldBeEmpty();
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public sealed class TestsPluginManager
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
-        plugins.Should().BeEmpty();
+        plugins.ShouldBeEmpty();
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public sealed class TestsPluginManager
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
-        plugins.Should().BeEmpty();
+        plugins.ShouldBeEmpty();
 
         logger.Received().Warning("Type {type} inherits IPluginBase but not PluginBase<> in mod {ModId}", Arg.Is<Type>(o => o.Name == "Foo"), mod.Definition.Identifier);
     }
@@ -149,7 +149,7 @@ public sealed class TestsPluginManager
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
-        plugins.Should().BeEmpty();
+        plugins.ShouldBeEmpty();
 
         logger.Received().Warning("Cannot find constructor that accepts IModdingContext, IMod parameters on plugin {plugin} in mod {ModId}", Arg.Is<Type>(o => o.Name == "TestPlugin"), mod.Definition.Identifier);
     }
@@ -192,6 +192,6 @@ public sealed class TestsPluginManager
         var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
-        plugins.Select(o => o.GetType().FullName).Should().BeEquivalentTo("Foo.Bar.FirstPlugin", "Foo.Bar.SecondPlugin");
+        plugins.Select(o => o.GetType().FullName).ToArray().ShouldBeEquivalentTo(new[] { "Foo.Bar.FirstPlugin", "Foo.Bar.SecondPlugin" });
     }
 }

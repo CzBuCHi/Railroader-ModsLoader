@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using FluentAssertions;
 using Railroader.ModManager.Extensions;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests.Extensions;
 
@@ -15,7 +15,7 @@ public sealed class KeyValuePairExtensionsTests
         var (key, value) = sut;
 
         // Assert
-        key.Should().Be(42);
-        value.Should().Be("answer");
+        key.ShouldBe(42);
+        value.ShouldBe("answer");
     }
 }

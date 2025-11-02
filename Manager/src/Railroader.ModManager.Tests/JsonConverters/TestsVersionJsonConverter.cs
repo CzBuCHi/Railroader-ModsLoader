@@ -1,8 +1,8 @@
 ﻿using System;
-using FluentAssertions;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Railroader.ModManager.JsonConverters;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests.JsonConverters;
 
@@ -20,42 +20,33 @@ public sealed class TestsVersionJsonConverter
         var actual = JsonConvert.DeserializeObject<TestData>(json);
 
         // Assert
-        actual.Should().NotBeNull();
-        actual.Version.ToString().Should().Be(version);
+        actual.ShouldNotBeNull();
+        actual.Version.ToString().ShouldBe(version);
     }
 
     [Theory]
     [InlineData("""{ "version": "invalid" }""", "invalid")]
     [InlineData("""{ "version": "-1" }""", "-1")]
     public void ReadInvalidValue(string json, string value) {
-        // Act
-        var act = () => JsonConvert.DeserializeObject<TestData>(json);
-
-        // Assert
-        act.Should().Throw<JsonSerializationException>()
-           .WithMessage($"Invalid version format '{value}'. {Expected}");
+        // Act & Assert
+        Should.Throw<JsonSerializationException>(() => JsonConvert.DeserializeObject<TestData>(json))
+              .Message.ShouldBe($"Invalid version format '{value}'. {Expected}");
     }
 
     [Theory]
     [InlineData("""{ "version": {} }""", JsonToken.StartObject)]
     [InlineData("""{ "version": null }""", JsonToken.Null)]
     public void ReadInvalidType(string json, JsonToken jsonToken) {
-        // Act
-        var act = () => JsonConvert.DeserializeObject<TestData>(json);
-
-        // Assert
-        act.Should().Throw<JsonSerializationException>()
-           .WithMessage($"Invalid version token {jsonToken}. {Expected}");
+        // Act & Assert
+        Should.Throw<JsonSerializationException>(() => JsonConvert.DeserializeObject<TestData>(json))
+              .Message.ShouldBe($"Invalid version token {jsonToken}. {Expected}");
     }
 
     [Fact]
     public void ReadJsonWithoutVersion() {
-        // Act
-        var act = () => JsonConvert.DeserializeObject<TestData>("{ }");
-
-        // Assert
-        act.Should().Throw<JsonSerializationException>()
-           .WithMessage("Required property 'version' not found in JSON. *");
+        // Act & Assert
+        Should.Throw<JsonSerializationException>(() => JsonConvert.DeserializeObject<TestData>("{ }"))
+              .Message.ShouldStartWith("Required property 'version' not found in JSON.");
     }
 
     [Fact]
@@ -64,7 +55,7 @@ public sealed class TestsVersionJsonConverter
         var actual = JsonConvert.SerializeObject(new TestData { Version = new Version(1,2,3) });
 
         // Assert
-        actual.Should().Be("""{"version":"1.2.3"}""");
+        actual.ShouldBe("""{"version":"1.2.3"}""");
     }
 
     [UsedImplicitly]

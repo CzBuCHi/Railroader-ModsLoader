@@ -1,18 +1,23 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace MemoryFileSystem;
 
-public sealed class MemoryFs  :MemoryFileSystem
+public interface IMemoryFs : IMemoryFileSystem
 {
-    public MemoryFs(string? currentDirectory = null) {
-        CurrentDirectory = currentDirectory ?? "C:\\";
-    }
+    string CurrentDirectory { get; set; }
+}
+
+public sealed class MemoryFs : MemoryFileSystem, IMemoryFs
+{
+    public MemoryFs(string? currentDirectory = null) => CurrentDirectory = currentDirectory ?? "C:\\";
 
     private string _CurrentDirectory = null!;
 
     public string CurrentDirectory {
         get => _CurrentDirectory;
+        [ExcludeFromCodeCoverage]
         set {
             var normalized = NormalizePath(value);
             VerifyParents(normalized);
@@ -20,8 +25,7 @@ public sealed class MemoryFs  :MemoryFileSystem
         }
     }
 
-    public override string NormalizePath(string path)
-    {
+    public override string NormalizePath(string path) {
         if (string.IsNullOrEmpty(path)) {
             throw new ArgumentException("Path cannot be null or empty.");
         }

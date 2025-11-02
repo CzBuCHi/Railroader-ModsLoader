@@ -8,7 +8,7 @@ using Railroader.ModManager.Delegates.System.IO.Compression;
 namespace MemoryFileSystem.Internal;
 
 [DebuggerStepThrough]
-public sealed class MemoryZipArchive(MemoryZip memoryZip) : IZipArchive
+public sealed class MemoryZipArchive(IMemoryZip memoryZip) : IZipArchive
 {
     public IReadOnlyCollection<IZipArchiveEntry> Entries { get; } =
         memoryZip
@@ -22,6 +22,7 @@ public sealed class MemoryZipArchive(MemoryZip memoryZip) : IZipArchive
     public void Dispose() {
     }
 
+    [ExcludeFromCodeCoverage]
     public IZipArchive Mock() {
         var mock = Substitute.For<IZipArchive>();
         mock.Entries.Returns(_ => Entries);

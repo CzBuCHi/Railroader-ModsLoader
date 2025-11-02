@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Linq;
-using FluentAssertions;
 using MemoryFileSystem.Types;
+using Shouldly;
 using Xunit;
 
 namespace MemoryFileSystem.Tests;
@@ -18,9 +18,9 @@ public class TestsMemoryFileSystemDelegatesFileInfo
 
         // Act
         var actual = file.LastWriteTime;
+
         // Assert
-        
-        actual.Should().Be(MemoryEntry.DefaultLastWriteTime);
+        actual.ShouldBe(MemoryEntry.DefaultLastWriteTime);
     }
 
     [Fact]
@@ -29,15 +29,12 @@ public class TestsMemoryFileSystemDelegatesFileInfo
         var fileSystem = new MemoryFs {
             { @"C:\Path\File.txt", "File" }
         };
-        var file = fileSystem.DirectoryInfo(@"C:\\Path").EnumerateFiles("*.*").First();
+        var file = fileSystem.DirectoryInfo(@"C:\Path").EnumerateFiles("*.*").First();
         fileSystem.Items.Clear();
 
-        // Act
-        var act = () => file.LastWriteTime;
-
-        // Assert
-        act.Should().Throw<FileNotFoundException>()
-           .WithMessage(@"File not found: C:\Path\File.txt");
+        // Act & Assert
+        Should.Throw<FileNotFoundException>(() => file.LastWriteTime)
+              .Message.ShouldBe(@"File not found: 'C:\Path\File.txt'.");
     }
 
     [Fact]
@@ -50,9 +47,9 @@ public class TestsMemoryFileSystemDelegatesFileInfo
 
         // Act
         var actual = file.FullName;
+
         // Assert
-        
-        actual.Should().Be(@"C:\Path\File.txt");
+        actual.ShouldBe(@"C:\Path\File.txt");
     }
 
     [Fact]
@@ -67,7 +64,7 @@ public class TestsMemoryFileSystemDelegatesFileInfo
         file.MoveTo(@"C:\Path\Target.txt");
 
         // Assert
-        fileSystem.Items.Should().NotContainKey(@"C:\Path\File.txt");
-        fileSystem.Items.Should().ContainKey(@"C:\Path\Target.txt");
+        fileSystem.Items.ShouldNotContainKey(@"C:\Path\File.txt");
+        fileSystem.Items.ShouldContainKey(@"C:\Path\Target.txt");
     }
 }

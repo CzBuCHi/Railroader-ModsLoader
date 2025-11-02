@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using FluentAssertions;
 using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using NSubstitute;
 using Railroader.ModManager.Exceptions;
 using Railroader.ModManager.Features.CodePatchers;
+using Railroader.ModManager.Tests.TestExtensions;
 using Serilog;
+using Shouldly;
 using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 namespace Railroader.ModManager.Tests.Features.CodePatchers;
@@ -27,13 +29,12 @@ public class TestMethodPatcher
         // Arrange
         var logger = Substitute.For<ILogger>();
 
-        // Act
-        var act = () => MethodPatcher.Factory<IMarker>(logger, typeof(Patcher), typeof(BaseType), "TargetMethod1", injectorMethod);
-
-        // Assert
-        act.Should().Throw<ValidationException>()
-           .WithMessage("Failed to resolve injected method. See errors for details.")
-           .Which.Errors.Should().BeEquivalentTo(error);
+        // Act & Assert
+        Should.Throw<ValidationException>(() => MethodPatcher.Factory<IMarker>(logger, typeof(Patcher), typeof(BaseType), "TargetMethod1", injectorMethod))
+              .ShouldSatisfyAllConditions(o => {
+                  o.Message.ShouldBe("Failed to resolve injected method. See errors for details.");
+                  o.Errors.ShouldBeEquivalentTo(new List<string> { error });
+              });
     }
 
     [Fact]
@@ -41,13 +42,12 @@ public class TestMethodPatcher
         // Arrange
         var logger = Substitute.For<ILogger>();
 
-        // Act
-        var act = () => MethodPatcher.Factory<IMarker>(logger, typeof(InternalPatcher), typeof(BaseType), "TargetMethod1", "PublicStaticMethod");
-
-        // Assert
-        act.Should().Throw<ValidationException>()
-           .WithMessage("Failed to resolve injected method. See errors for details.")
-           .Which.Errors.Should().BeEquivalentTo("Injected method declaring type must be public.");
+        // Act & Assert
+        Should.Throw<ValidationException>(() => MethodPatcher.Factory<IMarker>(logger, typeof(InternalPatcher), typeof(BaseType), "TargetMethod1", "PublicStaticMethod"))
+              .ShouldSatisfyAllConditions(o => {
+                  o.Message.ShouldBe("Failed to resolve injected method. See errors for details.");
+                  o.Errors.ShouldBeEquivalentTo(new List<string> { "Injected method declaring type must be public." });
+              });
     }
 
     [Theory]
@@ -84,10 +84,10 @@ public class TestMethodPatcher
         TestUtils.Write(assemblyDefinition, outputPath, "patched");
 
         // Assert
-        actual.Should().BeFalse();
+        actual.ShouldBeFalse();
 
         logger.Received().Debug("Skipping patching for type {TypeName}: not derived from {BaseType} or does not implement {MarkerInterface}", typeDefinition.FullName, typeof(BaseType), typeof(IMarker));
-        logger.ReceivedCalls().Should().HaveCount(1);
+        logger.ShouldReceiveCallCount(1);
     }
 
     [Fact]
@@ -113,11 +113,11 @@ public class TestMethodPatcher
         TestUtils.Write(assemblyDefinition, outputPath, "patched");
 
         // Assert
-        actual.Should().BeFalse();
+        actual.ShouldBeFalse();
 
         logger.Received().Debug("{MethodName} method not found in {TypeName}, creating override", "NotExistingMethod", typeDefinition.FullName);
         logger.Received().Error("Virtual method '{MethodName}' not found in {TypeName} hierarchy!", "NotExistingMethod", typeDefinition.FullName);
-        logger.ReceivedCalls().Should().HaveCount(2);
+        logger.ShouldReceiveCallCount(2);
     }
 
     [Theory]
@@ -151,32 +151,33 @@ public class TestMethodPatcher
         TestUtils.Write(assemblyDefinition, outputPath, "patched");
 
         // Assert
-        actual.Should().BeTrue();
+        actual.ShouldBeTrue();
 
         logger.Received().Debug("{MethodName} method not found in {TypeName}, creating override", targetMethod, typeDefinition.FullName);
         logger.Received().Debug("Created {MethodName} override with base call in {TypeName}", targetMethod, typeDefinition.FullName);
         logger.Received().Information("Successfully patched {TypeName} for {PluginInterface}", typeDefinition.FullName, typeof(IMarker));
-        logger.ReceivedCalls().Should().HaveCount(3);
+        logger.ShouldReceiveCallCount(3);
 
         var baseMethodDef = typeDefinition.BaseType!.Resolve()!.Methods.First(m => m.Name == targetMethod && m.IsVirtual);
 
-        var methodAttributes = baseMethodDef.Attributes & ~(MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.NewSlot) |
+        var methodAttributes = (baseMethodDef.Attributes & ~(MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.NewSlot)) |
                                MethodAttributes.Virtual | MethodAttributes.ReuseSlot | MethodAttributes.HideBySig;
 
-        var targetMethodDefinition = typeDefinition.Methods.Should().Contain(o => o.Name == targetMethod).Which;
-        targetMethodDefinition.Attributes.Should().Be(methodAttributes);
+        typeDefinition.Methods.ShouldContain(o => o.Name == targetMethod);
+        var targetMethodDefinition = typeDefinition.Methods.First(o => o.Name == targetMethod);
+        targetMethodDefinition.Attributes.ShouldBe(methodAttributes);
 
         var instructions = targetMethodDefinition.Body.Instructions;
 
-        instructions.Last().OpCode.Should().Be(OpCodes.Ret);
+        instructions.Last().OpCode.ShouldBe(OpCodes.Ret);
 
         var injectedMethodRef = (MethodReference)instructions[1]!.Operand!;
 
 
-        instructions[0]!.OpCode.Should().Be(OpCodes.Ldarg_0);
-        instructions[1]!.OpCode.Should().Be(OpCodes.Call);
-        injectedMethodRef.FullName.Should().Be("System.Void Railroader.ModManager.Tests.Features.CodePatchers.Patcher::PublicStaticMethod(Railroader.ModManager.Tests.Features.CodePatchers.IMarker)");
-        injectedMethodRef.Parameters.Should().HaveCount(1);
+        instructions[0]!.OpCode.ShouldBe(OpCodes.Ldarg_0);
+        instructions[1]!.OpCode.ShouldBe(OpCodes.Call);
+        injectedMethodRef.FullName.ShouldBe("System.Void Railroader.ModManager.Tests.Features.CodePatchers.Patcher::PublicStaticMethod(Railroader.ModManager.Tests.Features.CodePatchers.IMarker)");
+        injectedMethodRef.Parameters.Count.ShouldBe(1);
 
         var baseCalls = instructions
                         .Skip(2)
@@ -184,7 +185,7 @@ public class TestMethodPatcher
                                     (i.Operand as MethodReference)?.FullName!.Contains($"BaseType::{targetMethod}") == true)
                         .ToArray();
 
-        baseCalls.Should().HaveCount(1);
+        baseCalls.Length.ShouldBe(1);
 
         var baseCallIndex = Array.IndexOf(instructions.ToArray()!, baseCalls[0]!);
 
@@ -197,7 +198,7 @@ public class TestMethodPatcher
                                   .Take(expectedArgCount)                 // Take EXACTLY that many
                                   .ToArray();
 
-        argLoadInstructions.Should().HaveCount(expectedArgCount);
+        argLoadInstructions.Length.ShouldBe(expectedArgCount);
 
         for (var i = 0; i < expectedArgCount; i++) {
             var expectedOpcode = i switch {
@@ -207,13 +208,13 @@ public class TestMethodPatcher
                 3 => OpCodes.Ldarg_3, // param 2
                 _ => OpCodes.Ldarg_S  // param 3+
             };
-            argLoadInstructions[i]!.OpCode.Should().Be(expectedOpcode);
+            argLoadInstructions[i]!.OpCode.ShouldBe(expectedOpcode);
 
             // Verify operands match parameter names
             if (i >= 3) {
                 var paramIndex = i - 1; // 0-based param index
                 var paramName  = targetMethodParameters[paramIndex].Name;
-                (argLoadInstructions[i]!.Operand as ParameterReference)?.Name.Should().Be(paramName);
+                (argLoadInstructions[i]!.Operand as ParameterReference)?.Name.ShouldBe(paramName);
             }
         }
     }
@@ -244,13 +245,13 @@ public class TestMethodPatcher
         TestUtils.Write(assemblyDefinition, outputPath, "second");
 
         // Assert
-        first.Should().BeTrue();
-        second.Should().BeFalse();
+        first.ShouldBeTrue();
+        second.ShouldBeFalse();
         logger.Received().Debug("{MethodName} method not found in {TypeName}, creating override", "TargetMethod1", typeDefinition.FullName);
         logger.Received().Debug("Created {MethodName} override with base call in {TypeName}", "TargetMethod1", typeDefinition.FullName);
         logger.Received().Information("Successfully patched {TypeName} for {PluginInterface}", typeDefinition.FullName, typeof(IMarker));
         logger.Received().Information("Skipping patch of {TypeName} as it already contain code for {PluginInterface}", typeDefinition.FullName, typeof(IMarker));
-        logger.ReceivedCalls().Should().HaveCount(4);
+        logger.ShouldReceiveCallCount(4);
     }
 
     [Fact]
@@ -276,12 +277,12 @@ public class TestMethodPatcher
         TestUtils.Write(assemblyDefinition, outputPath, "patched");
 
         // Assert
-        first.Should().BeTrue();
+        first.ShouldBeTrue();
 
         logger.Received().Debug("{MethodName} method not found in {TypeName}, creating override", "TargetMethod1", typeDefinition.FullName);
         logger.Received().Debug("Created {MethodName} override with base call in {TypeName}", "TargetMethod1", typeDefinition.FullName);
         logger.Received().Information("Successfully patched {TypeName} for {PluginInterface}", typeDefinition.FullName, typeof(IMarker));
-        logger.ReceivedCalls().Should().HaveCount(3);
+        logger.ShouldReceiveCallCount(3);
     }
 }
 

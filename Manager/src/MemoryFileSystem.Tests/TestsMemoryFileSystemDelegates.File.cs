@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
-using FluentAssertions;
+using MemoryFileSystem.Tests.TestExtensions;
 using MemoryFileSystem.Types;
+using Shouldly;
 using Xunit;
 
 namespace MemoryFileSystem.Tests;
@@ -24,7 +25,7 @@ public class TestsMemoryFileSystemDelegatesFile
         var actual = fileSystem.File.Exists(@"C:\path");
 
         // Assert
-        actual.Should().Be(type == "File");
+        actual.ShouldBe(type == "File");
     }
 
     [Fact]
@@ -38,7 +39,7 @@ public class TestsMemoryFileSystemDelegatesFile
         var actual = fileSystem.File.ReadAllText(@"C:\path");
 
         // Assert
-        actual.Should().Be("Content");
+        actual.ShouldBe("Content");
     }
 
     [Fact]
@@ -49,11 +50,8 @@ public class TestsMemoryFileSystemDelegatesFile
             { @"C:\Path", exception }
         };
 
-        // Act
-        var act = () => fileSystem.File.ReadAllText(@"C:\path");
-
-        // Assert
-        act.Should().Throw<Exception>().Which.Should().Be(exception);
+        // Act & Assert
+        Should.Throw<Exception>(() => fileSystem.File.ReadAllText(@"C:\path")).ShouldBe(exception);
     }
 
     [Theory]
@@ -66,11 +64,9 @@ public class TestsMemoryFileSystemDelegatesFile
             fileSystem.Add(@"C:\Path");
         }
 
-        // Act
-        var act = () => fileSystem.File.ReadAllText(@"C:\path");
-
-        // Assert
-        act.Should().Throw<FileNotFoundException>().WithMessage(@"File not found: c:\path");
+        // Act & Assert
+        Should.Throw<FileNotFoundException>(() => fileSystem.File.ReadAllText(@"c:\path"))
+              .Message.ShouldBe(@"File not found: c:\path");
     }
 
     [Fact]
@@ -84,7 +80,7 @@ public class TestsMemoryFileSystemDelegatesFile
         var actual = fileSystem.File.GetLastWriteTime(@"C:\path");
 
         // Assert
-        actual.Should().Be(MemoryEntry.DefaultLastWriteTime);
+        actual.ShouldBe(MemoryEntry.DefaultLastWriteTime);
     }
 
     [Theory]
@@ -97,11 +93,9 @@ public class TestsMemoryFileSystemDelegatesFile
             fileSystem.Add(@"c:\path");
         }
 
-        // Act
-        var act = () => fileSystem.File.GetLastWriteTime(@"C:\path");
-
-        // Assert
-        act.Should().Throw<FileNotFoundException>().WithMessage(@"File not found: c:\path");
+        // Act & Assert
+        Should.Throw<FileNotFoundException>(() => fileSystem.File.GetLastWriteTime(@"c:\path"))
+              .Message.ShouldBe(@"File not found: c:\path");
     }
 
     [Fact]
@@ -116,7 +110,7 @@ public class TestsMemoryFileSystemDelegatesFile
         fileSystem.File.Delete(@"C:\path");
 
         // Assert
-        fileSystem.Items.Should().HaveCount(1);
+        fileSystem.Items.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -130,7 +124,7 @@ public class TestsMemoryFileSystemDelegatesFile
         fileSystem.File.Delete(@"C:\path");
 
         // Assert
-        fileSystem.Items.Should().HaveCount(2);
+        fileSystem.Items.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -140,11 +134,9 @@ public class TestsMemoryFileSystemDelegatesFile
             @"c:\path"
         };
 
-        // Act
-        var act = () => fileSystem.File.Delete(@"C:\path");
-
-        // Assert
-        act.Should().Throw<InvalidOperationException>().WithMessage(@"Entry at c:\path is directory.");
+        // Act & Assert
+        Should.Throw<InvalidOperationException>(() => fileSystem.File.Delete(@"c:\path"))
+              .Message.ShouldBe(@"Entry at c:\path is directory.");
     }
 
     [Fact]
@@ -155,11 +147,9 @@ public class TestsMemoryFileSystemDelegatesFile
         };
         fileSystem.LockFile(@"c:\path");
 
-        // Act
-        var act = () => fileSystem.File.Delete(@"C:\path");
-
-        // Assert
-        act.Should().Throw<InvalidOperationException>().WithMessage(@"File 'c:\path' is locked.");
+        // Act & Assert
+        Should.Throw<InvalidOperationException>(() => fileSystem.File.Delete(@"c:\path"))
+              .Message.ShouldBe(@"File 'c:\path' is locked.");
     }
 
     [Theory]
@@ -172,11 +162,9 @@ public class TestsMemoryFileSystemDelegatesFile
             fileSystem.Add(@"c:\path");
         }
 
-        // Act
-        var act = () => fileSystem.File.Move(@"C:\path", @"C:\target");
-
-        // Assert
-        act.Should().Throw<FileNotFoundException>().WithMessage(@"Source file not found: 'C:\path'.");
+        // Act & Assert
+        Should.Throw<FileNotFoundException>(() => fileSystem.File.Move(@"C:\path", @"C:\target"))
+              .Message.ShouldBe(@"Source file not found: 'C:\path'.");
     }
 
     [Fact]
@@ -186,11 +174,9 @@ public class TestsMemoryFileSystemDelegatesFile
         fileSystem.Add(@"c:\path", "Source");
         fileSystem.Add(@"c:\target", "target");
 
-        // Act
-        var act = () => fileSystem.File.Move(@"C:\path", @"C:\target");
-
-        // Assert
-        act.Should().Throw<InvalidOperationException>().WithMessage(@"Destination path already exists: 'C:\target'.");
+        // Act & Assert
+        Should.Throw<InvalidOperationException>(() => fileSystem.File.Move(@"C:\path", @"C:\target"))
+              .Message.ShouldBe(@"Destination path already exists: 'C:\target'.");
     }
 
     [Fact]
@@ -201,11 +187,9 @@ public class TestsMemoryFileSystemDelegatesFile
         };
         fileSystem.LockFile(@"C:\path");
 
-        // Act
-        var act = () => fileSystem.File.Move(@"C:\path", @"C:\target");
-
-        // Assert
-        act.Should().Throw<InvalidOperationException>().WithMessage(@"File 'C:\path' is locked.");
+        // Act & Assert
+        Should.Throw<InvalidOperationException>(() => fileSystem.File.Move(@"C:\path", @"C:\target"))
+              .Message.ShouldBe(@"File 'C:\path' is locked.");
     }
 
     [Fact]
@@ -219,7 +203,7 @@ public class TestsMemoryFileSystemDelegatesFile
         fileSystem.File.Move(@"C:\path", @"C:\target");
 
         // Assert
-        fileSystem.Items.Should().ContainKey(@"C:\target").WhoseValue.Should().BeEquivalentTo(new MemoryEntry(@"C:\target", [1, 2, 3]));
+        fileSystem.Items.ShouldContainKeyWhereValue(@"C:\target", o => o.ShouldBeEquivalentTo(new MemoryEntry(@"C:\target", [1, 2, 3])));
     }
 
     [Fact]
@@ -229,11 +213,8 @@ public class TestsMemoryFileSystemDelegatesFile
             new MemoryEntry(@"c:\path", [1, 2, 3])
         };
 
-        // Act
-        var act = () => fileSystem.File.Create(@"C:\path");
-
-        // Assert
-        act.Should().Throw<InvalidOperationException>();
+        // Act & Assert
+        Should.Throw<InvalidOperationException>(() => fileSystem.File.Create(@"C:\path"));
     }
 
     [Fact]
@@ -245,15 +226,15 @@ public class TestsMemoryFileSystemDelegatesFile
         var actual = fileSystem.File.Create(@"C:\path");
 
         // Assert
-        actual.Should().BeOfType<MemoryFileStream>();
+        actual.ShouldBeOfType<MemoryFileStream>();
 
-        fileSystem.Items.Should().HaveCount(2);
-        fileSystem.Items.Should().ContainKey(@"C:\").WhoseValue.Should().BeEquivalentTo(new MemoryEntry(@"C:\"));
-        fileSystem.Items.Should().ContainKey(@"C:\path").WhoseValue.Should().BeEquivalentTo(new MemoryEntry(@"C:\path", []));
+
+        fileSystem.Items.Count.ShouldBe(2);
+        fileSystem.Items.ShouldContainKeyWhereValue(@"C:\", o => o.ShouldBeEquivalentTo(new MemoryEntry(@"C:\")));
+        fileSystem.Items.ShouldContainKeyWhereValue(@"C:\path", o => o.ShouldBeEquivalentTo(new MemoryEntry(@"C:\path", [])));
 
         actual.Write([1, 2, 3], 0, 3);
         actual.Dispose();
-
-        fileSystem.Items.Should().ContainKey(@"C:\path").WhoseValue.Should().BeEquivalentTo(new MemoryEntry(@"C:\path", [1, 2, 3]));
+        fileSystem.Items.ShouldContainKeyWhereValue(@"C:\path", o => o.ShouldBeEquivalentTo(new MemoryEntry(@"C:\path", [1, 2, 3])));
     }
 }

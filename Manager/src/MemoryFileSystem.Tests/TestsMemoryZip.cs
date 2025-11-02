@@ -1,6 +1,7 @@
 ﻿using System;
-using FluentAssertions;
+using MemoryFileSystem.Tests.TestExtensions;
 using MemoryFileSystem.Types;
+using Shouldly;
 using Xunit;
 
 namespace MemoryFileSystem.Tests;
@@ -8,18 +9,16 @@ namespace MemoryFileSystem.Tests;
 public class TestsMemoryZip
 {
     [Fact]
-    public void Constructor_CreateEmptyZip()
-    {
+    public void Constructor_CreateEmptyZip() {
         // Act
         var sut = new MemoryZip();
 
         // Assert
-        sut.Items.Should().BeEmpty();
+        sut.Items.ShouldBeEmpty();
     }
 
     [Fact]
-    public void Constructor_DeserializeEntriesFromByteArray()
-    {
+    public void Constructor_DeserializeEntriesFromByteArray() {
         // Arrange
         var zip = new MemoryZip();
         zip.Add("Path/To/File.txt", [1, 2, 3]);
@@ -29,43 +28,36 @@ public class TestsMemoryZip
         var sut = new MemoryZip(bytes);
 
         // Assert
-        sut.Items.Should().HaveCount(3);
-        sut.Items.Should().ContainKey("Path").WhoseValue.Should().BeEquivalentTo(new MemoryEntry("Path"));
-        sut.Items.Should().ContainKey("Path/To").WhoseValue.Should().BeEquivalentTo(new MemoryEntry("Path/To"));
-        sut.Items.Should().ContainKey("Path/To/File.txt").WhoseValue.Should().BeEquivalentTo(new MemoryEntry("Path/To/File.txt", [1, 2, 3]));
+        sut.Items.Count.ShouldBe(3);
+        sut.Items.ShouldContainKeyWhereValue("Path", o => o.ShouldBeEquivalentTo(new MemoryEntry("Path")));
+        sut.Items.ShouldContainKeyWhereValue("Path/To", o => o.ShouldBeEquivalentTo(new MemoryEntry("Path/To")));
+        sut.Items.ShouldContainKeyWhereValue("Path/To/File.txt", o => o.ShouldBeEquivalentTo(new MemoryEntry("Path/To/File.txt", [1, 2, 3])));
     }
 
     [Theory]
     [InlineData(null!)]
     [InlineData("")]
-    public void NormalizePath_ThrowWhenEmpty(string? path)
-    {
+    public void NormalizePath_ThrowWhenEmpty(string? path) {
         // Arrange
         var sut = new MemoryZip();
 
-        // Act
-        var act = () => sut.NormalizePath(path!);
-
-        // Assert
-        act.Should().Throw<ArgumentException>().WithMessage("Path cannot be null or empty.");
+        // Act & Assert
+        Should.Throw<ArgumentException>(() => sut.NormalizePath(path!))
+              .Message.ShouldBe("Path cannot be null or empty.");
     }
 
     [Fact]
-    public void NormalizePath_ThrowWhenAbsolute()
-    {
+    public void NormalizePath_ThrowWhenAbsolute() {
         // Arrange
         var sut = new MemoryZip();
 
-        // Act
-        var act = () => sut.NormalizePath("C:\\Path");
-
-        // Assert
-        act.Should().Throw<ArgumentException>().WithMessage("Zip file do not support absolute paths.");
+        // Act & Assert
+        Should.Throw<ArgumentException>(() => sut.NormalizePath("C:\\Path"))
+              .Message.ShouldBe("Zip file do not support absolute paths.");
     }
 
     [Fact]
-    public void NormalizePath_WhenValidPath()
-    {
+    public void NormalizePath_WhenValidPath() {
         // Arrange
         var sut = new MemoryZip();
 
@@ -73,6 +65,6 @@ public class TestsMemoryZip
         var actual = sut.NormalizePath(@"\Path\To\File.txt");
 
         // Assert
-        actual.Should().Be("Path/To/File.txt");
+        actual.ShouldBe("Path/To/File.txt");
     }
 }

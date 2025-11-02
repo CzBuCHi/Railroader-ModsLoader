@@ -1,6 +1,7 @@
 ﻿using System;
-using FluentAssertions;
+using MemoryFileSystem.Tests.TestExtensions;
 using MemoryFileSystem.Types;
+using Shouldly;
 using Xunit;
 
 namespace MemoryFileSystem.Tests;
@@ -8,49 +9,41 @@ namespace MemoryFileSystem.Tests;
 public class TestsMemoryFs
 {
     [Fact]
-    public void Constructor_SetDefaultCurrentDirectory()
-    {
+    public void Constructor_SetDefaultCurrentDirectory() {
         // Act
         var sut = new MemoryFs();
 
         // Assert
-        sut.CurrentDirectory.Should().Be("C:\\");
+        sut.CurrentDirectory.ShouldBe("C:\\");
     }
 
     [Fact]
-    public void Constructor_SetCurrentDirectoryAddsAlParents()
-    {
+    public void Constructor_SetCurrentDirectoryAddsAlParents() {
         // Act
         var sut = new MemoryFs(@"D:\Path\To\Current");
 
         // Assert
-        sut.CurrentDirectory.Should().Be(@"D:\Path\To\Current");
-        sut.Should().BeEquivalentTo([
-            new MemoryEntry(@"D:\"),
-            new MemoryEntry(@"D:\Path"),
-            new MemoryEntry(@"D:\Path\To"),
-            new MemoryEntry(@"D:\Path\To\Current")
-        ]);
+        sut.CurrentDirectory.ShouldBe(@"D:\Path\To\Current");
+        sut.Items.ShouldContainKeyWhereValue(@"D:\", o => o.ShouldBeEquivalentTo(new MemoryEntry(@"D:\")));
+        sut.Items.ShouldContainKeyWhereValue(@"D:\Path", o => o.ShouldBeEquivalentTo(new MemoryEntry(@"D:\Path")));
+        sut.Items.ShouldContainKeyWhereValue(@"D:\Path\To", o => o.ShouldBeEquivalentTo(new MemoryEntry(@"D:\Path\To")));
+        sut.Items.ShouldContainKeyWhereValue(@"D:\Path\To\Current", o => o.ShouldBeEquivalentTo(new MemoryEntry(@"D:\Path\To\Current")));
     }
 
     [Theory]
     [InlineData(null!)]
     [InlineData("")]
-    public void NormalizePath_ThrowWhenEmpty(string? path)
-    {
+    public void NormalizePath_ThrowWhenEmpty(string? path) {
         // Arrange
         var sut = new MemoryFs();
 
-        // Act
-        var act = () => sut.NormalizePath(path!);
-
-        // Assert
-        act.Should().Throw<ArgumentException>().WithMessage("Path cannot be null or empty.");
+        // Act & Assert
+        Should.Throw<ArgumentException>(() => sut.NormalizePath(path!))
+              .Message.ShouldBe("Path cannot be null or empty.");
     }
 
     [Fact]
-    public void NormalizePath_RelativePath_FromCurrent()
-    {
+    public void NormalizePath_RelativePath_FromCurrent() {
         // Arrange
         var sut = new MemoryFs(@"C:\Current");
 
@@ -58,12 +51,11 @@ public class TestsMemoryFs
         var actual = sut.NormalizePath(@"Relative\Path.txt");
 
         // Assert
-        actual.Should().Be(@"C:\Current\Relative\Path.txt");
+        actual.ShouldBe(@"C:\Current\Relative\Path.txt");
     }
 
     [Fact]
-    public void NormalizePath_TrimTrailingSlash()
-    {
+    public void NormalizePath_TrimTrailingSlash() {
         // Arrange
         var sut = new MemoryFs(@"C:\Current");
 
@@ -71,12 +63,11 @@ public class TestsMemoryFs
         var actual = sut.NormalizePath(@"C:\Absolute\Path\");
 
         // Assert
-        actual.Should().Be(@"C:\Absolute\Path");
+        actual.ShouldBe(@"C:\Absolute\Path");
     }
 
     [Fact]
-    public void NormalizePath_KeepTrailingSlashOnRoot()
-    {
+    public void NormalizePath_KeepTrailingSlashOnRoot() {
         // Arrange
         var sut = new MemoryFs(@"C:\Current");
 
@@ -84,6 +75,6 @@ public class TestsMemoryFs
         var actual = sut.NormalizePath(@"C:\");
 
         // Assert
-        actual.Should().Be(@"C:\");
+        actual.ShouldBe(@"C:\");
     }
 }

@@ -1,7 +1,7 @@
-﻿using FluentAssertions;
-using NSubstitute;
+﻿using NSubstitute;
 using Railroader.ModManager.Interfaces;
 using Serilog;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests;
 
@@ -17,14 +17,14 @@ public sealed class TestsMod
         var sut = new Mod(logger, modDefinition);
 
         // Assert
-        sut.Should().NotBeNull();
-        sut.Definition.Should().Be(modDefinition);
-        sut.AssemblyPath.Should().BeNull();
-        sut.IsEnabled.Should().BeFalse();
-        sut.IsValid.Should().BeFalse();
-        sut.IsLoaded.Should().BeFalse();
-        sut.Plugins.Should().BeNull();
-        sut.PluginNames.Should().BeNull();
+        sut.ShouldNotBeNull();
+        sut.Definition.ShouldBe(modDefinition);
+        sut.AssemblyPath.ShouldBeNull();
+        sut.IsEnabled.ShouldBeFalse();
+        sut.IsValid.ShouldBeFalse();
+        sut.IsLoaded.ShouldBeFalse();
+        sut.Plugins.ShouldBeNull();
+        sut.PluginNames.ShouldBeNull();
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public sealed class TestsMod
         // Assert
         plugin.Received(2).IsEnabled = true;
         plugin.Received(1).IsEnabled = false;
-        sut.PluginNames.Should().BeEquivalentTo(plugin.GetType().FullName!);
+        sut.PluginNames.ShouldBeEquivalentTo(new[] { plugin.GetType().FullName! });
     }
 
     [Theory]
@@ -64,7 +64,7 @@ public sealed class TestsMod
         var modLogger = sut.CreateLogger(scope);
 
         // Assert
-        modLogger.Should().NotBeNull();
+        modLogger.ShouldNotBeNull();
         logger.Received().ForContext("SourceContext", scope == null ? "Identifier" : $"Identifier.{scope}");
     }
 }

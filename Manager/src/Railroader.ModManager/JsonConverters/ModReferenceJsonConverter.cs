@@ -40,7 +40,7 @@ public sealed class ModReferenceJsonConverter : JsonConverter<Dictionary<string,
             }
 
             if (property.Value.Type != JTokenType.String) {
-                throw new JsonSerializationException($"Invalid version constraint for mod '{identifier}' in {objectType.Name}. Expected a string.");
+                throw new JsonSerializationException($"Invalid version constraint for mod '{identifier}' in {objectType}. Expected a string.");
             }
 
             var constraint    = property.Value.ToString();

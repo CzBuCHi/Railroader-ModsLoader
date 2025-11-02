@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using NSubstitute;
 using Railroader.ModManager.Delegates.System.IO;
 
 namespace MemoryFileSystem.Internal;
 
-[DebuggerStepThrough]
-public sealed class MemoryFileInfo(MemoryFileSystem fileSystem, string path) : IFileInfo
+//[DebuggerStepThrough]
+public sealed class MemoryFileInfo(IMemoryFileSystem fileSystem, string path) : IFileInfo
 {
     public DateTime LastWriteTime {
         get {
@@ -15,7 +15,7 @@ public sealed class MemoryFileInfo(MemoryFileSystem fileSystem, string path) : I
                 return entry.LastWriteTime;
             }
 
-            throw new FileNotFoundException($"File not found: {FullName}");
+            throw new FileNotFoundException($"File not found: '{FullName}'.");
         }
     }
 
@@ -27,11 +27,12 @@ public sealed class MemoryFileInfo(MemoryFileSystem fileSystem, string path) : I
         FullName = destFileName;
     }
 
+    [ExcludeFromCodeCoverage]
     public IFileInfo Mock() {
         var mock = Substitute.For<IFileInfo>();
         mock.FullName.Returns(_ => FullName);
         mock.LastWriteTime.Returns(_ => LastWriteTime);
-        mock.When(o => o.MoveTo(Arg.Any<string>())).Do(o => MoveTo(o.Arg<string>()));
+        mock.When(o => o.MoveTo(Arg.Any<string>())).Do([ExcludeFromCodeCoverage](o) => MoveTo(o.Arg<string>()));
         return mock;
     }
 }

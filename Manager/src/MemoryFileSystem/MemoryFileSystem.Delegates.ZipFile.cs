@@ -43,7 +43,7 @@ partial class MemoryFileSystem : MemoryFileSystem.IZipFile
 
             // Deserialize zip contents
             try {
-                var entries = new MemoryZip(zipEntry.ExistingContent);
+                var entries = new MemoryZip(zipEntry.Content!);
                 foreach (var entry in entries.OrderBy(p => p.Path.Length)) {
                     Add(entry with { Path = Path.Combine(normalizedDest, entry.Path) });
                 }
@@ -62,7 +62,7 @@ partial class MemoryFileSystem : MemoryFileSystem.IZipFile
                 throw new FileNotFoundException($"Zip file '{normalizedPath}' not found.");
             }
 
-            return new MemoryZipArchive(new MemoryZip(zipEntry.ExistingContent)).Mock();
+            return new MemoryZipArchive(new MemoryZip(zipEntry.Content!)).Mock();
         });
         return mock;
     }

@@ -1,5 +1,6 @@
 ﻿using System;
-using FluentAssertions;
+using System.Linq;
+using Shouldly;
 using Xunit;
 
 namespace MemoryFileSystem.Tests;
@@ -15,10 +16,10 @@ public class TestsMemoryFileSystemDelegatesDirectory
         };
 
         // Act
-        var actual = fileSystem.Directory.EnumerateDirectories(@"C:\\Path");
+        var actual = fileSystem.Directory.EnumerateDirectories(@"C:\\Path").ToArray();
 
         // Assert
-        actual.Should().BeEquivalentTo(@"C:\Path\Folder");
+        actual.ShouldBeEquivalentTo(new[] { @"C:\Path\Folder" });
     }
 
     [Fact]
@@ -30,7 +31,7 @@ public class TestsMemoryFileSystemDelegatesDirectory
         var currentDirectory = fileSystem.Directory.GetCurrentDirectory();
 
         // Assert
-        currentDirectory.Should().Be(@"C:\Current\Path");
+        currentDirectory.ShouldBe(@"C:\Current\Path");
     }
 
     [Fact]
@@ -38,11 +39,8 @@ public class TestsMemoryFileSystemDelegatesDirectory
         // Arrange
         var fileSystem = new MemoryZip();
 
-        // Act
-        var act = () => fileSystem.Directory.GetCurrentDirectory();
-
-        // Assert
-        act.Should().Throw<InvalidOperationException>()
-           .WithMessage($"Only {typeof(MemoryFs)} supports concept of '{nameof(MemoryFs.CurrentDirectory)}'.");
+        // Act & Assert
+        Should.Throw<InvalidOperationException>(() => fileSystem.Directory.GetCurrentDirectory())
+              .Message.ShouldBe($"Only {typeof(MemoryFs)} supports concept of '{nameof(MemoryFs.CurrentDirectory)}'.");
     }
 }

@@ -1,5 +1,5 @@
 ﻿using System;
-using FluentAssertions;
+using Shouldly;
 
 namespace Railroader.ModManager.Interfaces.Tests;
 
@@ -20,6 +20,6 @@ public sealed class TestsFluentVersion
         var actual = sut.ToString();
 
         // Assert
-        actual.Should().Be(expected);
+        actual.ShouldBe(expected);
     }
 }

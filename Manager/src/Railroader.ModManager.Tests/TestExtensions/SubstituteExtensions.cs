@@ -1,28 +1,34 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
-using FluentAssertions;
 using Newtonsoft.Json;
 using NSubstitute;
 using NSubstitute.Core;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests.TestExtensions;
 
+[ExcludeFromCodeCoverage]
 public static class SubstituteExtensions
 {
     public static void ShouldReceiveOnly<T>(this T substitute, Action<T> received) where T : class {
         var dummy = Substitute.For<T>();
         received(dummy);
-        substitute.ReceivedCalls().Should().BeEquivalentTo(dummy.ReceivedCalls()!);
+        substitute.ReceivedCalls().ShouldBeEquivalentTo(dummy.ReceivedCalls());
     }
 
     public static void ShouldReceiveNoCalls<T>(this T substitute) where T : class =>
-        substitute.ReceivedCalls().Should().BeEmpty();
+        substitute.ReceivedCalls().ShouldBeEmpty();
+
+
+    public static void ShouldReceiveCallCount<T>(this T substitute, int count) where T : class =>
+        substitute.ReceivedCalls().Count().ShouldBe(count);
 
     public static string PrintReceivedCalls<T>(this T substitute) where T : class {
         var sb = new StringBuilder();
         sb.Append("substitute.").AppendLine("ShouldReceiveOnly(o => {");
-        foreach (var call in substitute.ReceivedCalls()!) {
+        foreach (var call in substitute.ReceivedCalls()) {
             PrintCall(call);
         }
 

@@ -1,7 +1,7 @@
 ﻿using System;
-using FluentAssertions;
 using Newtonsoft.Json;
 using Serilog.Events;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests;
 
@@ -24,12 +24,12 @@ public sealed class TestsModDefinition
         var sut = JsonConvert.DeserializeObject<ModDefinition>(json);
 
         // Assert
-        sut.Should().NotBeNull();
-        sut.Identifier.Should().Be("dummy");
-        sut.Name.Should().Be("Dummy name");
-        sut.Version.Should().Be(new Version(1, 2, 3));
-        sut.LogLevel.Should().Be(LogEventLevel.Debug);
-        sut.IsValid.Should().BeTrue();
+        sut.ShouldNotBeNull();
+        sut.Identifier.ShouldBe("dummy");
+        sut.Name.ShouldBe("Dummy name");
+        sut.Version.ShouldBe(new Version(1, 2, 3));
+        sut.LogLevel.ShouldBe(LogEventLevel.Debug);
+        sut.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -48,8 +48,8 @@ public sealed class TestsModDefinition
         var sut = JsonConvert.DeserializeObject<ModDefinition>(json);
 
         // Assert
-        sut.Should().NotBeNull();
-        sut.IsValid.Should().BeFalse();
+        sut.ShouldNotBeNull();
+        sut.IsValid.ShouldBeFalse();
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public sealed class TestsModDefinition
         var sut = JsonConvert.DeserializeObject<ModDefinition>(json);
 
         // Assert
-        sut.Should().NotBeNull();
-        sut.IsValid.Should().BeFalse();
+        sut.ShouldNotBeNull();
+        sut.IsValid.ShouldBeFalse();
     }
 }

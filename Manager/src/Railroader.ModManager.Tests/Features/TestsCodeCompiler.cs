@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using FluentAssertions;
 using MemoryFileSystem;
 using MemoryFileSystem.Types;
 using NSubstitute;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Tests.TestExtensions;
 using Serilog;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests.Features;
 
@@ -42,16 +43,18 @@ public sealed class TestsCodeCompiler
         // Arrange
         var logger          = Substitute.For<ILogger>();
         var compileAssembly = Substitute.For<CompileAssemblyDelegate>();
-        var fileSystem      = new MemoryFs();
+        var fileSystem = new MemoryFs {
+            @"C:\Current\Mods\DummyMod"
+        };
         var compileMod      = CompileModFactory(logger, compileAssembly, fileSystem);
 
         // Act
         var actual = compileMod(_ModDefinition);
 
         // Assert
-        actual.Should().Be(CompileModResult.None);
+        actual.ShouldBe(CompileModResult.None);
 
-        logger.ReceivedCalls().Should().BeEmpty();
+        logger.ShouldReceiveNoCalls();
     }
 
     [Theory]
@@ -72,10 +75,10 @@ public sealed class TestsCodeCompiler
         var actual = compileMod(_ModDefinition);
 
         // Assert
-        actual.Should().Be(CompileModResult.Skipped);
+        actual.ShouldBe(CompileModResult.Skipped);
 
         logger.Received().Information("Using existing mod {ModId} DLL at {Path}", _ModDefinition.Identifier, AssemblyPath);
-        logger.ReceivedCalls().Should().HaveCount(1);
+        logger.ShouldReceiveCallCount(1);
     }
 
     [Fact]
@@ -105,7 +108,7 @@ public sealed class TestsCodeCompiler
         var actual = compileMod(_ModDefinition);
 
         // Assert
-        actual.Should().Be(CompileModResult.Error);
+        actual.ShouldBe(CompileModResult.Error);
 
         logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
         logger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
@@ -117,7 +120,7 @@ public sealed class TestsCodeCompiler
         );
 
         logger.Received().Error("Compilation failed for mod {ModId} ...", _ModDefinition.Identifier);
-        logger.ReceivedCalls().Should().HaveCount(3);
+        logger.ShouldReceiveCallCount(3);
 
         fileSystem.File.Delete.Received().Invoke(AssemblyPath);
     }
@@ -163,7 +166,7 @@ public sealed class TestsCodeCompiler
         var actual = compileMod(modDefinition);
 
         // Assert
-        actual.Should().Be(CompileModResult.Success);
+        actual.ShouldBe(CompileModResult.Success);
 
         logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", _ModDefinition.Identifier, AssemblyPath);
         logger.Received().Information("Compiling mod {ModId} ...", _ModDefinition.Identifier);
@@ -175,11 +178,10 @@ public sealed class TestsCodeCompiler
         );
 
         logger.Received().Information("Compilation complete for mod {ModId}", _ModDefinition.Identifier);
-        logger.ReceivedCalls().Should().HaveCount(3);
+        logger.ShouldReceiveCallCount(3);
 
         fileSystem.File.Delete.Received().Invoke(AssemblyPath);
-        fileSystem.Items.Should().ContainKey(AssemblyPath).WhoseValue
-                  .Should().BeEquivalentTo(new MemoryEntry(AssemblyPath, Encoding.UTF8.GetBytes("Compiled DLL")));
+        fileSystem.Items.ShouldContainKeyWhereValue(AssemblyPath, o => o.ShouldBeEquivalentTo(new MemoryEntry(AssemblyPath, Encoding.UTF8.GetBytes("Compiled DLL"))));
     }
 
     [Fact]
@@ -229,13 +231,13 @@ public sealed class TestsCodeCompiler
         var actual = compileMod(modDefinition);
 
         // Assert
-        actual.Should().Be(CompileModResult.Success);
+        actual.ShouldBe(CompileModResult.Success);
 
         logger.Received().Information("Deleting mod {ModId} DLL at {Path} because it is outdated", modDefinition.Identifier, AssemblyPath);
         logger.Received().Information("Compiling mod {ModId} ...", modDefinition.Identifier);
         logger.Received().Information("Adding references to {Mods} ...", Arg.Is<ICollection<string>>(o => o.SequenceEqual(expectedRequiredMods)));
         logger.Received().Information("Compilation complete for mod {ModId}", modDefinition.Identifier);
-        logger.ReceivedCalls().Should().HaveCount(4);
+        logger.ShouldReceiveCallCount(4);
 
         compileAssembly.Received().Invoke(AssemblyPath,
             Arg.Is<string[]>(o => o.SequenceEqual(sources)),
@@ -245,7 +247,6 @@ public sealed class TestsCodeCompiler
 
         fileSystem.File.Delete.Received().Invoke(AssemblyPath);
 
-        fileSystem.Items.Should().ContainKey(AssemblyPath).WhoseValue
-                  .Should().BeEquivalentTo(new MemoryEntry(AssemblyPath, Encoding.UTF8.GetBytes("Compiled DLL")));
+        fileSystem.Items.ShouldContainKeyWhereValue(AssemblyPath, o=>o.ShouldBeEquivalentTo(new MemoryEntry(AssemblyPath, Encoding.UTF8.GetBytes("Compiled DLL"))));
     }
 }

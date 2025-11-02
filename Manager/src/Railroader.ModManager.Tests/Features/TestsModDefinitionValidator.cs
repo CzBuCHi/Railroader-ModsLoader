@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using FluentAssertions;
 using NSubstitute;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Interfaces;
 using Railroader.ModManager.JsonConverters;
+using Railroader.ModManager.Tests.TestExtensions;
 using Serilog;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests.Features;
 
@@ -35,8 +36,8 @@ public sealed class TestsModDefinitionValidator
         var result = ModDefinitionValidator.Execute(logger, modDefinitions);
 
         // Assert
-        result.Select(mod => mod.Identifier).Should().Equal("C", "B", "A");
-        logger.ReceivedCalls().Should().BeEmpty();
+        result.Select(mod => mod.Identifier).ToArray().ShouldBeEquivalentTo(new[] { "C", "B", "A" });
+        logger.ShouldReceiveNoCalls();
     }
 
     [Fact]
@@ -54,7 +55,7 @@ public sealed class TestsModDefinitionValidator
         var result = ModDefinitionValidator.Execute(logger, modDefinitions);
 
         // Assert
-        result.Should().BeEmpty();
+        result.ShouldBeEmpty();
         logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
     }
 
@@ -87,10 +88,10 @@ public sealed class TestsModDefinitionValidator
 
         // Assert
         if (isValid) {
-            result.Select(mod => mod.Identifier).Should().Equal("B", "A");
+            result.Select(mod => mod.Identifier).ToArray().ShouldBeEquivalentTo(new[] { "B", "A" });
         } else {
             string[] expected = [$"Mod 'A' requires mod 'B' with version constraint '{fluentVersion}', but found version '{version}'."];
-            result.Should().BeEmpty();
+            result.ShouldBeEmpty();
             logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
         }
     }
@@ -109,7 +110,7 @@ public sealed class TestsModDefinitionValidator
         var result = ModDefinitionValidator.Execute(logger, modDefinitions);
 
         // Assert
-        result.Should().BeEmpty();
+        result.ShouldBeEmpty();
         logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
     }
 
@@ -127,7 +128,7 @@ public sealed class TestsModDefinitionValidator
         var result = ModDefinitionValidator.Execute(logger, modDefinitions);
 
         // Assert
-        result.Should().BeEmpty();
+        result.ShouldBeEmpty();
         logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
     }
 
@@ -151,7 +152,7 @@ public sealed class TestsModDefinitionValidator
         var result = ModDefinitionValidator.Execute(logger, modDefinitions);
 
         // Assert
-        result.Should().BeEmpty();
+        result.ShouldBeEmpty();
         logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
     }
 
@@ -169,7 +170,7 @@ public sealed class TestsModDefinitionValidator
         var result = ModDefinitionValidator.Execute(logger, modDefinitions);
 
         // Assert
-        result.Should().BeEmpty();
+        result.ShouldBeEmpty();
         logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
     }
 
@@ -193,7 +194,7 @@ public sealed class TestsModDefinitionValidator
         var result = ModDefinitionValidator.Execute(logger, modDefinitions);
 
         // Assert
-        result.Should().BeEmpty();
+        result.ShouldBeEmpty();
         logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
     }
 
@@ -205,13 +206,10 @@ public sealed class TestsModDefinitionValidator
             CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", new FluentVersion(new Version(1, 0, 0), (VersionOperator)999) } }),
             CreateModDefinition("B", "1.0.0")
         };
-        
-        // Act
-        var act = () => ModDefinitionValidator.Execute(logger, modDefinitions);
 
-        // Assert
-        act.Should().Throw<InvalidOperationException>()
-           .WithMessage("Unknown version operator: *");
+        // Act
+        Should.Throw<InvalidOperationException>(() => ModDefinitionValidator.Execute(logger, modDefinitions))
+              .Message.ShouldStartWith("Unknown version operator:");
     }
 
     [Fact]
@@ -228,7 +226,7 @@ public sealed class TestsModDefinitionValidator
         var result = ModDefinitionValidator.Execute(logger, modDefinitions);
 
         // Assert
-        result.Select(mod => mod.Identifier).Should().Contain(["A", "B", "C"]);
+        result.Select(mod => mod.Identifier).ToArray().ShouldBeEquivalentTo(new[] { "A", "B", "C" });
     }
 
     [Fact]
@@ -250,7 +248,7 @@ public sealed class TestsModDefinitionValidator
         var result = ModDefinitionValidator.Execute(logger, modDefinitions);
 
         // Assert
-        result.Should().BeEmpty();
+        result.ShouldBeEmpty();
         logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
     }
 
@@ -269,6 +267,6 @@ public sealed class TestsModDefinitionValidator
         var result = ModDefinitionValidator.Execute(logger, modDefinitions);
 
         // Assert
-        result.Select(mod => mod.Identifier).Should().Equal("D", "B", "C", "A");
+        result.Select(mod => mod.Identifier).ToArray().ShouldBeEquivalentTo(new[] { "D", "B", "C", "A" });
     }
 }

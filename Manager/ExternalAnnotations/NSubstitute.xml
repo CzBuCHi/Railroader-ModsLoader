@@ -33,6 +33,9 @@
   <member name="M:NSubstitute.SubstituteExtensions.Received``1(``0)">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>
+  <member name="M:NSubstitute.SubstituteExtensions.ReceivedCalls``1(``0)">
+    <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
+  </member>
   <member name="M:NSubstitute.SubstituteExtensions.Returns``1(``0,``0,``0[])">
     <attribute ctor="M:JetBrains.Annotations.NotNullAttribute.#ctor" />
   </member>

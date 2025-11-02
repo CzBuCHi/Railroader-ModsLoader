@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using MemoryFileSystem.Types;
 using NSubstitute;
@@ -11,8 +12,9 @@ public sealed class MemoryZipArchiveEntry(MemoryEntry entry) : IZipArchiveEntry
 {
     public string FullName => entry.Path;
     public string Name     => Path.GetFileName(entry.Path);
-    public Stream Open() => new MemoryStream(entry.ExistingContent);
+    public Stream Open() => new MemoryStream(entry.Content!);
 
+    [ExcludeFromCodeCoverage]
     public IZipArchiveEntry Mock() {
         var mock = Substitute.For<IZipArchiveEntry>();
         mock.FullName.Returns(_ => FullName);

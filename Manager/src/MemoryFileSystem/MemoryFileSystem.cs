@@ -6,10 +6,32 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MemoryFileSystem.Types;
+using Railroader.ModManager.Delegates.System.IO;
 
 namespace MemoryFileSystem;
 
-public abstract partial class MemoryFileSystem : IEnumerable<MemoryEntry>
+public interface IMemoryFileSystem : IEnumerable<MemoryEntry>
+{
+    EntryDictionary             Items         { get; }
+    MemoryFileSystem.IDirectory Directory     { get; }
+    MemoryFileSystem.IFile      File          { get; }
+    MemoryFileSystem.IZipFile   ZipFile       { get; }
+    DirectoryInfoFactory        DirectoryInfo { get; }
+
+    string NormalizePath(string path);
+    void LockFile(string path);
+    void UnlockFile(string path);
+    IEnumerable<MemoryEntry> Enumerate(string path, string searchPattern, SearchOption searchOption = SearchOption.TopDirectoryOnly);
+    void Add(string folderPath, DateTime? lastWriteTime = null);
+    void Add(string filePath, byte[] binaryContent, DateTime? lastWriteTime = null);
+    void Add(string filePath, string textContent, DateTime? lastWriteTime = null);
+    void Add(string filePath, MemoryZip zipFile, DateTime? lastWriteTime = null);
+    void Add(string filePath, Exception exception, DateTime? lastWriteTime = null);
+    void Add(MemoryEntry entry);
+    void AddRange(IEnumerable<MemoryEntry> entries);
+}
+
+public abstract partial class MemoryFileSystem : IMemoryFileSystem
 {
     [ExcludeFromCodeCoverage]
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -70,6 +92,10 @@ public abstract partial class MemoryFileSystem : IEnumerable<MemoryEntry>
 
     public IEnumerable<MemoryEntry> Enumerate(string path, string searchPattern, SearchOption searchOption = SearchOption.TopDirectoryOnly) {
         path = NormalizePath(path);
+
+        if (!Items.TryGetValue(path, out var entry) || entry.IsDirectory != true) {
+            throw new DirectoryNotFoundException($"Directory not found: '{path}'.");
+        }
 
         // _Items.Keys = [@"C:\", @"C:\Foo", @"C:\Test", @"C:\Test\Dir1", @"C:\Test\Dir2", @"C:\Test\File1.txt", @"C:\Test\Dir3", @"C:\Test\Dir3\SubDir", @"C:\Test\Dir3\File2.txt" ]
         // path = @"C:\Test"

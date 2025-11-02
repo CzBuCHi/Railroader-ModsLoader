@@ -1,6 +1,7 @@
-﻿using FluentAssertions;
+﻿using System.Linq;
 using NSubstitute;
 using Serilog;
+using Shouldly;
 using LoggerExtensions = Railroader.ModManager.Extensions.LoggerExtensions;
 
 namespace Railroader.ModManager.Tests.Extensions;
@@ -18,9 +19,10 @@ public sealed class TestLoggerExtensions
         var actual = LoggerExtensions.ForSourceContext(logger, scope);
 
         // Assert
-        actual.Should().NotBeNull().And.NotBe(logger);
+        actual.ShouldNotBeNull();
+        actual.ShouldNotBe(logger);
 
         logger.Received(1).ForContext("SourceContext", scope ?? "Railroader.ModManager");
-        logger.ReceivedCalls().Should().HaveCount(1);
+        logger.ReceivedCalls().Count().ShouldBe(1);
     }
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using FluentAssertions;
 using Newtonsoft.Json;
 using Railroader.ModManager.Interfaces;
 using Railroader.ModManager.JsonConverters;
+using Shouldly;
 
 namespace Railroader.ModManager.Tests.JsonConverters;
 
@@ -36,17 +36,18 @@ public sealed class TestsModReferenceJsonConverter
         var actual = JsonConvert.DeserializeObject<TestData>(json);
 
         // Assert
-        actual.Should().NotBeNull();
-        actual.Data.Should().NotBeNull();
-        actual.Data.Count.Should().Be(1);
-        var fluentVersion = actual.Data.Should().ContainKey("foo").WhoseValue;
+        actual.ShouldNotBeNull();
+        actual.Data.ShouldNotBeNull();
+        actual.Data.Count.ShouldBe(1);
+        actual.Data.ShouldContainKey("foo");
+        var fluentVersion = actual.Data["foo"];
 
         if (@operator == null) {
-            fluentVersion.Should().BeNull();
+            fluentVersion.ShouldBeNull();
         } else {
-            fluentVersion.Should().NotBeNull();
-            fluentVersion.Operator.Should().Be(@operator);
-            fluentVersion.Version.Should().Be(new Version(versionString!));
+            fluentVersion.ShouldNotBeNull();
+            fluentVersion.Operator.ShouldBe(@operator.Value);
+            fluentVersion.Version.ShouldBe(new Version(versionString!));
         }
     }
 
@@ -58,12 +59,9 @@ public sealed class TestsModReferenceJsonConverter
     [InlineData("""{"data":{"foo":">="}}""", ">=")]
     [InlineData("""{"data":{"foo":">=invalid"}}""", ">=invalid")]
     public void ReadInvalidJson(string json, string value) {
-        // Act
-        var act = () => JsonConvert.DeserializeObject<TestData>(json);
-
-        // Assert
-        act.Should().Throw<JsonSerializationException>()
-           .WithMessage($"Invalid version constraint '{value}' for mod 'foo'. Expected a valid System.Version or an operator (=, >, >=, <, <=) followed by a version.");
+        // Act & Assert
+        Should.Throw<JsonSerializationException>(() => JsonConvert.DeserializeObject<TestData>(json))
+              .Message.ShouldBe($"Invalid version constraint '{value}' for mod 'foo'. Expected a valid System.Version or an operator (=, >, >=, <, <=) followed by a version.");
     }
 
     [Fact]
@@ -71,12 +69,9 @@ public sealed class TestsModReferenceJsonConverter
         // Arrange
         const string json = """{"data":{"foo":123}}""";
 
-        // Act
-        var act = () => JsonConvert.DeserializeObject<TestData>(json);
-
-        // Assert
-        act.Should().Throw<JsonSerializationException>()
-           .WithMessage("Invalid version constraint for mod 'foo' in *Dictionary*. Expected a string.");
+        // Act & Assert
+        Should.Throw<JsonSerializationException>(() => JsonConvert.DeserializeObject<TestData>(json))
+              .Message.ShouldBe($"Invalid version constraint for mod 'foo' in {typeof(Dictionary<string, FluentVersion>)}. Expected a string.");
     }
 
     [Fact]
@@ -88,9 +83,9 @@ public sealed class TestsModReferenceJsonConverter
         var actual = JsonConvert.DeserializeObject<TestData>(json);
 
         // Assert
-        actual.Should().NotBeNull();
-        actual.Data.Should().NotBeNull();
-        actual.Data.Should().BeEmpty();
+        actual.ShouldNotBeNull();
+        actual.Data.ShouldNotBeNull();
+        actual.Data.ShouldBeEmpty();
     }
 
     [Fact]
@@ -107,6 +102,6 @@ public sealed class TestsModReferenceJsonConverter
         var actual = JsonConvert.SerializeObject(testData);
 
         // Assert
-        actual.Should().Be("""{"data":{"bar":null,"foo":">=1.2.3"}}""");
+        actual.ShouldBe("""{"data":{"bar":null,"foo":">=1.2.3"}}""");
     }
 }

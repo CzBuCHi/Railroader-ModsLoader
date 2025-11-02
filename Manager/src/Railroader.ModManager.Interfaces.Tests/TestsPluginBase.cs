@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
-using FluentAssertions;
 using NSubstitute;
+using Shouldly;
 
 namespace Railroader.ModManager.Interfaces.Tests;
 
@@ -35,8 +35,8 @@ public sealed class TestsPluginBase : IAsyncLifetime
         _Sut.IsEnabled = true;
 
         // Assert
-        _Sut.IsEnabled.Should().BeTrue();
-        _Sut.IsEnabledChanges.Should().BeEquivalentTo([true]);
+        _Sut.IsEnabled.ShouldBeTrue();
+        _Sut.IsEnabledChanges.ShouldBeEquivalentTo(new List<bool> { true });
     }
 
     [Fact]
@@ -49,17 +49,15 @@ public sealed class TestsPluginBase : IAsyncLifetime
         _Sut.IsEnabled = false;
 
         // Assert
-        _Sut.IsEnabled.Should().BeFalse();
-        _Sut.IsEnabledChanges.Should().BeEquivalentTo([false]);
+        _Sut.IsEnabled.ShouldBeFalse();
+        _Sut.IsEnabledChanges.ShouldBeEquivalentTo(new List<bool> { false });
     }
 
     [Fact]
     public void EnsureSingleton() {
-        // Act
-        var act = () => new TestPlugin(_ModdingContext, _Mod);
-
-        // Assert
-        act.Should().Throw<InvalidOperationException>().WithMessage($"Cannot create plugin '{typeof(TestPlugin)}' twice.");
+        // Act & Assert
+        Should.Throw<InvalidOperationException>(() => new TestPlugin(_ModdingContext, _Mod))
+              .Message.ShouldBe($"Cannot create plugin '{typeof(TestPlugin)}' twice.");
     }
 
     [Fact]
@@ -68,10 +66,8 @@ public sealed class TestsPluginBase : IAsyncLifetime
         TestPlugin.Cleanup();
 
         // Act
-        var act = () => TestPlugin.Instance;
-
-        // Assert
-        act.Should().Throw<InvalidOperationException>().WithMessage($"{typeof(TestPlugin)} was not created.");
+        Should.Throw<InvalidOperationException>(() => TestPlugin.Instance)
+              .Message.ShouldBe($"{typeof(TestPlugin)} was not created.");
     }
 
     public sealed class TestPlugin(IModdingContext moddingContext, IMod mod) : PluginBase<TestPlugin>(moddingContext, mod)
