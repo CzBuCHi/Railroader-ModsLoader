@@ -153,6 +153,7 @@ public sealed class TestsModDefinitionValidator
 
         // Assert
         result.ShouldBeEmpty();
+
         logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
     }
 

@@ -14,9 +14,15 @@ public sealed class VersionJsonConverter : JsonConverter<Version>
     }
 
     /// <inheritdoc />
-    public override Version ReadJson(JsonReader reader, Type objectType, Version? existingValue, bool hasExistingValue, JsonSerializer serializer) {
+    public override Version ReadJson(
+        JsonReader reader,
+        Type objectType,
+        Version? existingValue,
+        bool hasExistingValue,
+        JsonSerializer serializer
+    ) {
         if (reader.TokenType == JsonToken.String) {
-            var value   = Convert.ToString(reader.Value!);
+            var value = Convert.ToString(reader.Value!);
 
             var version = ParseString(value);
             if (version == null) {

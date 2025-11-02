@@ -23,15 +23,16 @@ public static class Bootstrapper
         var memoryLogger = new MemoryLogger();
         Log.Logger = memoryLogger;
 
-        Execute(
-            ModExtractor.ExtractMods(memoryLogger),
-            ModDefinitionLoader.Factory(memoryLogger),
-            Harmony.Factory("Railroader.ModManager"),
-            CreateManagerBehaviour
-        );
+        Execute(ModExtractor.ExtractMods(memoryLogger), ModDefinitionLoader.Factory(memoryLogger),
+            Harmony.Factory("Railroader.ModManager"), CreateManagerBehaviour);
     }
 
-    public static void Execute(ExtractModsDelegate extractMods, ModDefinitionLoaderDelegate modDefinitionLoader, IHarmony factory, Action createManagerBehaviour) {
+    public static void Execute(
+        ExtractModsDelegate extractMods,
+        ModDefinitionLoaderDelegate modDefinitionLoader,
+        IHarmony factory,
+        Action createManagerBehaviour
+    ) {
         extractMods();
         ModDefinitions = modDefinitionLoader();
 
@@ -50,25 +51,18 @@ public static class Bootstrapper
 
     [ExcludeFromCodeCoverage]
     public static void LoadMods() =>
-        LoadMods(
-            Log.Logger.ForSourceContext(),
-            ModDefinitions,
-            ModDefinitionValidator.Factory,
-            CodeCompiler.Factory(),
-            CodePatcher.Factory(),
-            PluginManager.Factory,
-            Harmony.Factory("Railroader.ModManager")
-        );
+        LoadMods(Log.Logger.ForSourceContext(), ModDefinitions, ModDefinitionValidator.Factory, CodeCompiler.Factory(),
+            CodePatcher.Factory(), PluginManager.Factory, Harmony.Factory("Railroader.ModManager"));
 
     public static void LoadMods(
-        ILogger logger, 
-        IReadOnlyList<ModDefinition> modDefinitions, 
+        ILogger logger,
+        IReadOnlyList<ModDefinition> modDefinitions,
         ModDefinitionValidatorDelegate modDefinitionValidator,
         CompileModDelegate codeCompiler,
         ApplyPatchesDelegate codePatcher,
         CreatePluginsDelegateFactory createPluginsDelegateFactory,
         IHarmony harmony
-        ) {
+    ) {
         if (modDefinitions.Count == 0) {
             logger.Information("No mods where found.");
             return;
@@ -81,22 +75,23 @@ public static class Bootstrapper
             logger.Error("Validation error detected. Canceling mod loading.");
             return;
         }
-        
+
         var mods = new Mod[modDefinitions.Count];
 
         for (var i = 0; i < modDefinitions.Count; i++) {
-            var definition    = modDefinitions[i]!;
-            var result = codeCompiler(definition);
+            var definition = modDefinitions[i]!;
+            var result     = codeCompiler(definition);
             if (result == CompileModResult.Success) {
-                if (codePatcher(definition) == false) {
+                if (codePatcher(definition, CodePatcher.DefaultPluginPatchers) == false) {
                     result = CompileModResult.Error;
                 }
             }
 
             var assemblyPath = result switch {
-                CompileModResult.None or CompileModResult.Error      => null,
-                CompileModResult.Success or CompileModResult.Skipped => Path.Combine(definition.BasePath, definition.Identifier + ".dll"),
-                _                                                    => throw new ArgumentOutOfRangeException()
+                CompileModResult.None or CompileModResult.Error => null,
+                CompileModResult.Success or CompileModResult.Skipped => Path.Combine(definition.BasePath,
+                    definition.Identifier + ".dll"),
+                _ => throw new ArgumentOutOfRangeException()
             };
 
             mods[i] = new Mod(logger, definition) {

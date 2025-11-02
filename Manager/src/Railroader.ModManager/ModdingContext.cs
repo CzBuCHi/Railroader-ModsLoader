@@ -13,10 +13,11 @@ namespace Railroader.ModManager;
 
 /// <summary> Implementation of <see cref="IModdingContext"/> providing basic modding services. </summary>
 [method: EditorBrowsable(EditorBrowsableState.Never)]
-public sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logger, HarmonyFactory harmonyFactory) : IModdingContext
+public sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logger, HarmonyFactory harmonyFactory)
+    : IModdingContext
 {
     [ExcludeFromCodeCoverage]
-    public ModdingContext(IReadOnlyCollection<IMod> mods) 
+    public ModdingContext(IReadOnlyCollection<IMod> mods)
         : this(mods, Log.Logger.ForSourceContext(), Harmony.Factory) {
     }
 
@@ -37,7 +38,8 @@ public sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logge
 
     /// <inheritdoc />
     [ExcludeFromCodeCoverage]
-    public Window CreateWindow(string identifier, int width, int height, Window.Position position) => throw new NotImplementedException();
+    public Window CreateWindow(string identifier, int width, int height, Window.Position position) =>
+        throw new NotImplementedException();
 
     /// <inheritdoc />
     [ExcludeFromCodeCoverage]

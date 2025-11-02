@@ -28,18 +28,9 @@ public static class CodeCompiler
 {
     [ExcludeFromCodeCoverage]
     public static CompileModDelegate Factory() =>
-        (definition, names) =>
-            CompileMod(
-                Log.Logger.ForSourceContext(),
-                CompileAssembly.Execute,
-                DirectoryInfoWrapper.Create,
-                Directory.GetCurrentDirectory,
-                File.Exists,
-                File.GetLastWriteTime,
-                File.Delete,
-                definition,
-                names ?? DefaultReferenceNames
-            );
+        (definition, names) => CompileMod(Log.Logger.ForSourceContext(), CompileAssembly.Execute,
+            DirectoryInfoWrapper.Create, Directory.GetCurrentDirectory, File.Exists, File.GetLastWriteTime, File.Delete,
+            definition, names ?? DefaultReferenceNames);
 
     public static string[] DefaultReferenceNames => [
         "Assembly-CSharp",
@@ -49,6 +40,23 @@ public static class CodeCompiler
         "UnityEngine.CoreModule"
     ];
 
+    private sealed record CompilerContext(
+        ILogger Logger,
+        CompileAssemblyDelegate CompileAssembly,
+        DirectoryInfoFactory DirectoryInfo,
+        GetCurrentDirectory GetCurrentDirectory,
+        Exists Exists,
+        GetLastWriteTime GetLastWriteTime,
+        Delete Delete,
+        ModDefinition Definition,
+        string[] ReferenceNames
+    )
+    {
+        public string AssemblyPath => Path.Combine(Definition.BasePath, $"{Definition.Identifier}.dll");
+        public string ManagedPath  => Path.Combine(GetCurrentDirectory(), "Railroader_Data", "Managed");
+        public string ModsPath     => Path.Combine(GetCurrentDirectory(), "Mods");
+    }
+
     public static CompileModResult CompileMod(
         ILogger logger,
         CompileAssemblyDelegate compileAssembly,
@@ -57,50 +65,74 @@ public static class CodeCompiler
         Exists exists,
         GetLastWriteTime getLastWriteTime,
         Delete delete,
-        ModDefinition definition, 
+        ModDefinition definition,
         string[] referenceNames
-        ) {
+    ) =>
+        new CompilerContext(logger, compileAssembly, directoryInfo, getCurrentDirectory, exists, getLastWriteTime,
+            delete, definition, referenceNames).Compile();
 
-        var csFiles = directoryInfo(definition.BasePath)
-                      .EnumerateFiles("*.cs", SearchOption.AllDirectories)
-                      .OrderByDescending(o => o.LastWriteTime)
-                      .ToArray();
+    private static CompileModResult Compile(this CompilerContext ctx) {
+        var csFiles = ctx.DirectoryInfo(ctx.Definition.BasePath)
+                         .EnumerateFiles("*.cs", SearchOption.AllDirectories)
+                         .OrderByDescending(f => f.LastWriteTime)
+                         .ToArray();
+
         if (csFiles.Length == 0) {
             return CompileModResult.None;
         }
 
-        var assemblyPath = Path.Combine(definition.BasePath, definition.Identifier + ".dll");
-        if (exists(assemblyPath)) {
-            var newestFile = csFiles[0];
-            if (getLastWriteTime(assemblyPath) >= newestFile.LastWriteTime) {
-                logger.Information("Using existing mod {ModId} DLL at {Path}", definition.Identifier, assemblyPath);
-                return CompileModResult.Skipped;
-            }
-
-            logger.Information("Deleting mod {ModId} DLL at {Path} because it is outdated", definition.Identifier, assemblyPath);
-            delete(assemblyPath);
+        if (ctx.TrySkipCompilation(csFiles, out var result)) {
+            return result;
         }
 
-        logger.Information("Compiling mod {ModId} ...", definition.Identifier);
+        ctx.Logger.Information("Compiling mod {ModId} ...", ctx.Definition.Identifier);
 
-        var sources = csFiles.Select(o => o.FullName).ToArray();
+        var sources    = csFiles.Select(f => f.FullName).ToArray();
+        var references = ctx.BuildReferences();
 
-        var managedPath = Path.Combine(getCurrentDirectory(), "Railroader_Data", "Managed");
-        var references  = referenceNames.Select(o => Path.Combine(managedPath, o + ".dll")).ToList();
-
-        if (definition.Requires?.Count > 0) {
-            logger.Information("Adding references to {Mods} ...", definition.Requires.Keys);
-            var modsPath      = Path.Combine(getCurrentDirectory(), "Mods");
-            var modReferences = definition.Requires.Keys.Select(o => Path.Combine(modsPath, o, o + ".dll"));
-            references.AddRange(modReferences);
-        }
-
-        if (!compileAssembly(assemblyPath, sources, references.ToArray(), out _)) {
-            logger.Error("Compilation failed for mod {ModId} ...", definition.Identifier);
+        if (!ctx.CompileAssembly(ctx.AssemblyPath, sources, references, out _)) {
+            ctx.Logger.Error("Compilation failed for mod {ModId} ...", ctx.Definition.Identifier);
             return CompileModResult.Error;
         }
 
-        logger.Information("Compilation complete for mod {ModId}", definition.Identifier);
+        ctx.Logger.Information("Compilation complete for mod {ModId}", ctx.Definition.Identifier);
         return CompileModResult.Success;
+    }
+
+    private static bool TrySkipCompilation(this CompilerContext ctx, IFileInfo[] csFiles, out CompileModResult result) {
+        result = CompileModResult.None;
+
+        if (!ctx.Exists(ctx.AssemblyPath)) {
+            return false;
+        }
+
+        var assemblyTime     = ctx.GetLastWriteTime(ctx.AssemblyPath);
+        var newestSourceTime = csFiles[0].LastWriteTime;
+
+        if (assemblyTime >= newestSourceTime) {
+            ctx.Logger.Information("Using existing mod {ModId} DLL at {Path}", ctx.Definition.Identifier,
+                ctx.AssemblyPath);
+            result = CompileModResult.Skipped;
+            return true;
+        }
+
+        ctx.Logger.Information("Deleting mod {ModId} DLL at {Path} because it is outdated", ctx.Definition.Identifier,
+            ctx.AssemblyPath);
+        ctx.Delete(ctx.AssemblyPath);
+        return false;
+    }
+
+    private static string[] BuildReferences(this CompilerContext ctx) {
+        var references = ctx.ReferenceNames.Select(name => Path.Combine(ctx.ManagedPath, $"{name}.dll")).ToList();
+
+        if (ctx.Definition.Requires?.Count > 0) {
+            var requiredMods = ctx.Definition.Requires.Keys.ToArray();
+            ctx.Logger.Information("Adding references to {Mods} ...", requiredMods);
+
+            var modRefs = requiredMods.Select(mod => Path.Combine(ctx.ModsPath, mod, $"{mod}.dll"));
+            references.AddRange(modRefs);
+        }
+
+        return references.ToArray();
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Railroader.ModManager.Delegates.System.IO.Directory;
@@ -16,39 +16,68 @@ public delegate ModDefinition[] ModDefinitionLoaderDelegate();
 
 public static class ModDefinitionLoader
 {
+    private sealed record LoaderContext(
+        IMemoryLogger Logger,
+        EnumerateDirectories EnumerateDirectories,
+        Exists Exists,
+        ReadAllText ReadAllText,
+        string BaseDirectory
+    )
+    {
+        public List<ModDefinition>               Mods   { get; } = [];
+        public Dictionary<string, ModDefinition> ModMap { get; } = new(StringComparer.OrdinalIgnoreCase);
+    }
+
     [ExcludeFromCodeCoverage]
     public static ModDefinitionLoaderDelegate Factory(IMemoryLogger logger) =>
-        () => LoadDefinitions(logger, Directory.GetCurrentDirectory, Directory.EnumerateDirectories, File.Exists, File.ReadAllText);
+        () => LoadDefinitions(logger, Directory.GetCurrentDirectory, Directory.EnumerateDirectories, File.Exists,
+            File.ReadAllText);
 
-    public static ModDefinition[] LoadDefinitions(IMemoryLogger logger, GetCurrentDirectory getCurrentDirectory, EnumerateDirectories enumerateDirectories, Exists exists, ReadAllText readAllText) {
-        var modDefinitions = new Dictionary<string, ModDefinition>(StringComparer.OrdinalIgnoreCase);
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static ModDefinition[] LoadDefinitions(
+        IMemoryLogger logger,
+        GetCurrentDirectory getCurrentDirectory,
+        EnumerateDirectories enumerateDirectories,
+        Exists exists,
+        ReadAllText readAllText
+    ) =>
+        new LoaderContext(logger, enumerateDirectories, exists, readAllText,
+                Path.Combine(getCurrentDirectory(), "Mods")).ScanModDirectories()
+                                                            .Mods.ToArray();
 
-        var baseDirectory = Path.Combine(getCurrentDirectory(), "Mods");
-        foreach (var directory in enumerateDirectories(baseDirectory)) {
-            var path = Path.Combine(directory, "Definition.json");
-            if (!exists(path)) {
-                logger.Warning("Not loading directory {directory}: Missing Definition.json.", directory);
+    private static LoaderContext ScanModDirectories(this LoaderContext ctx) {
+        foreach (var dir in ctx.EnumerateDirectories(ctx.BaseDirectory)) {
+            var defPath = Path.Combine(dir, "Definition.json");
+            if (!ctx.Exists(defPath)) {
+                ctx.Logger.Warning("Not loading directory {directory}: Missing Definition.json.", dir);
                 continue;
             }
 
-            logger.Information("Loading definition from {directory} ...", directory);
-            try {
-                var jObject       = JObject.Parse(readAllText(path));
-                var modDefinition = jObject.ToObject<ModDefinition>()!;
-
-                if (modDefinitions.TryGetValue(modDefinition.Identifier, out var conflict)) {
-                    logger.Error("Another mod with the same Identifier has been found in '{directory}'", conflict.BasePath);
-                } else {
-                    modDefinition.BasePath = directory;
-                    modDefinitions.Add(modDefinition.Identifier, modDefinition);
-                }
-            } catch (JsonException exc) {
-                logger.Error("Failed to parse definition JSON, json error: {exception}", exc);
-            } catch (Exception exc) {
-                logger.Error("Failed to parse definition JSON, generic error: {exception}", exc);
-            }
+            ctx.Logger.Information("Loading definition from {directory} ...", dir);
+            ctx = ctx.TryLoadMod(dir, defPath);
         }
 
-        return modDefinitions.Values.ToArray();
+        return ctx;
+    }
+
+    private static LoaderContext TryLoadMod(this LoaderContext ctx, string dir, string defPath) {
+        try {
+            var mod = JObject.Parse(ctx.ReadAllText(defPath)).ToObject<ModDefinition>()!;
+            if (ctx.ModMap.TryGetValue(mod.Identifier, out var existing)) {
+                ctx.Logger.Error("Another mod with the same Identifier has been found in '{directory}'",
+                    existing.BasePath);
+                return ctx;
+            }
+
+            mod.BasePath = dir;
+            ctx.ModMap[mod.Identifier] = mod;
+            ctx.Mods.Add(mod);
+        } catch (JsonException ex) {
+            ctx.Logger.Error("Failed to parse definition JSON, json error: {exception}", ex);
+        } catch (Exception ex) {
+            ctx.Logger.Error("Failed to parse definition JSON, generic error: {exception}", ex);
+        }
+
+        return ctx;
     }
 }

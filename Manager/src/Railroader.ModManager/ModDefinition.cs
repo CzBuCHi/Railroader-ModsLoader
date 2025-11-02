@@ -24,7 +24,7 @@ public sealed class ModDefinition : IModDefinition
     [JsonProperty("version", Required = Required.DisallowNull)]
     [JsonConverter(typeof(VersionJsonConverter))]
     public Version Version { get; set; } = null!;
-    
+
     /// <inheritdoc />
     [JsonProperty("logLevel")]
     [JsonConverter(typeof(LogEventLevelJsonConverter))]

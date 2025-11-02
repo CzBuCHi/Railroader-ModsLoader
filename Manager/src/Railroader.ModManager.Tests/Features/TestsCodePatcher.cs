@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -29,15 +30,18 @@ public sealed class TestsCodePatcher
         BasePath = @"C:\Current\Mods\DummyMod"
     };
 
+    [DebuggerStepThrough]
     private static ApplyPatchesDelegate Factory(ILogger logger, MemoryFs fileSystem, ReadAssemblyDefinition readAssemblyDefinition, WriteAssemblyDefinition writeAssemblyDefinition) =>
-        CodePatcher.Factory(logger,
-            readAssemblyDefinition,
-            writeAssemblyDefinition,
-            fileSystem.Directory.GetCurrentDirectory,
-            fileSystem.Directory.EnumerateDirectories,
-            fileSystem.File.Delete,
-            fileSystem.File.Move
-        );
+        (definition, patchers) =>
+            CodePatcher.ApplyPatches(logger,
+                readAssemblyDefinition,
+                writeAssemblyDefinition,
+                fileSystem.Directory.GetCurrentDirectory,
+                fileSystem.Directory.EnumerateDirectories,
+                fileSystem.File.Delete,
+                fileSystem.File.Move,
+                definition, patchers
+            );
 
     [Fact]
     public void NoPatches_DoNothing() {
@@ -62,7 +66,7 @@ public sealed class TestsCodePatcher
     }
 
     [Fact]
-    public void CompileMod_Compilation_WithPatches_AssemblyLoadFail() {
+    public void AssemblyLoadFail() {
         // Arrange
         var fileSystem = new MemoryFs(@"\Current") {
             { AssemblyPath, "", _OldDate },
@@ -87,7 +91,7 @@ public sealed class TestsCodePatcher
     }
 
     [Fact]
-    public void CompileMod_Compilation_WithPatches_ReturnValidInstances()
+    public void Success()
     {
         // Arrange
         const string source = """
@@ -162,7 +166,7 @@ public sealed class TestsCodePatcher
     }
 
     [Fact]
-    public void CompileMod_Compilation_WithPatches_ExtraInterface()
+    public void NoMarkerInterfaces()
     {
         // Arrange
         const string source = """
@@ -210,7 +214,7 @@ public sealed class TestsCodePatcher
         // Assert
         actual.ShouldBeTrue();
         logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
+        logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} were applied", AssemblyPath, _ModDefinition.Identifier);
         logger.Received().Information("Patching complete for mod {ModId}", _ModDefinition.Identifier);
         logger.ShouldReceiveCallCount(3);
 
@@ -224,7 +228,7 @@ public sealed class TestsCodePatcher
     }
 
     [Fact]
-    public void CompileMod_Compilation_WithPatches_HandleThrowingPatcher1()
+    public void HandleThrowingPatcher_Single()
     {
         // Arrange
         const string source = """
@@ -269,10 +273,10 @@ public sealed class TestsCodePatcher
 
         // Assert
         actual.ShouldBeFalse();
-        logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Error(Arg.Is<Exception>(o => o.Message == "ThrowingPatcher"), "Failed to patch type {TypeName} for mod {ModId}", "Foo.Bar.FirstPlugin", _ModDefinition.Identifier);
-        logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
-        logger.ShouldReceiveCallCount(4);
+        logger.Received().Information("Patching mod {ModId} ...", "DummyMod");
+        logger.Received().Error(Arg.Is<Exception>(o => o.Message == "ThrowingPatcher"), "Failed to patch type {TypeName} for mod {ModId}", "Foo.Bar.FirstPlugin",  _ModDefinition.Identifier);
+        logger.Received().Error("Failed to apply patches to assembly {AssemblyPath} for mod {ModId}", AssemblyPath,  _ModDefinition.Identifier);
+        logger.ShouldReceiveCallCount(3);
 
         readAssemblyDefinition.Received(1).Invoke(AssemblyPath,
             Arg.Is<ReaderParameters>(o =>
@@ -284,7 +288,7 @@ public sealed class TestsCodePatcher
     }
 
     [Fact]
-    public void CompileMod_Compilation_WithPatches_HandleThrowingPatcher2()
+    public void HandleThrowingPatcher_ManyPatchers()
     {
         // Arrange
         const string source = """
@@ -334,11 +338,10 @@ public sealed class TestsCodePatcher
 
         // Assert
         actual.ShouldBeFalse();
-        logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Error(Arg.Any<Exception>(), "Failed to patch type {TypeName} for mod {ModId}", "Foo.Bar.FirstPlugin", _ModDefinition.Identifier);
-        logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
-        logger.Received().Error("Failed to apply patches to assembly {AssemblyPath} for mod {ModId}", AssemblyPath, _ModDefinition.Identifier);
-        logger.ShouldReceiveCallCount(4);
+        logger.Received().Information("Patching mod {ModId} ...", "DummyMod");
+        logger.Received().Error(Arg.Is<Exception>(o => o.Message == "ThrowingPatcher"), "Failed to patch type {TypeName} for mod {ModId}", "Foo.Bar.FirstPlugin", "DummyMod");
+        logger.Received().Error("Failed to apply patches to assembly {AssemblyPath} for mod {ModId}", @"C:\Current\Mods\DummyMod\DummyMod.dll", "DummyMod");
+        logger.ShouldReceiveCallCount(3);
 
         readAssemblyDefinition.Received(1).Invoke(AssemblyPath,
             Arg.Is<ReaderParameters>(o =>

@@ -9,7 +9,7 @@ using Shouldly;
 
 namespace Railroader.ModManager.Tests.Features;
 
-public sealed class TestsCompileAssemblyCore
+public sealed class TestsCompileAssembly
 {
     [Fact]
     public void CompileAssemblyWhenSuccessful() {

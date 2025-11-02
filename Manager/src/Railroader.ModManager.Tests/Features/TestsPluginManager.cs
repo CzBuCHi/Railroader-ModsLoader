@@ -20,7 +20,7 @@ public sealed class TestsPluginManager
         var mod            = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.CreatePlugins(moddingContext, mod, logger, loadFrom);
 
         // Assert
         plugins.ShouldBeEmpty();
@@ -51,7 +51,7 @@ public sealed class TestsPluginManager
         var mod = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.CreatePlugins(moddingContext, mod, logger, loadFrom);
 
         // Assert
         plugins.ShouldBeEmpty();
@@ -75,7 +75,7 @@ public sealed class TestsPluginManager
         var mod = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.CreatePlugins(moddingContext, mod, logger, loadFrom);
 
         // Assert
         plugins.ShouldBeEmpty();
@@ -107,7 +107,7 @@ public sealed class TestsPluginManager
         var mod = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.CreatePlugins(moddingContext, mod, logger, loadFrom);
 
         // Assert
         plugins.ShouldBeEmpty();
@@ -149,7 +149,7 @@ public sealed class TestsPluginManager
         var mod = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.CreatePlugins(moddingContext, mod, logger, loadFrom);
 
         // Assert
         plugins.ShouldBeEmpty();
@@ -192,7 +192,7 @@ public sealed class TestsPluginManager
         var mod = new Mod(logger, Substitute.For<IModDefinition>());
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.CreatePlugins(moddingContext, mod, logger, loadFrom);
 
         // Assert
         plugins.Select(o => o.GetType().FullName).ToArray().ShouldBeEquivalentTo(new[] { "Foo.Bar.FirstPlugin", "Foo.Bar.SecondPlugin" });

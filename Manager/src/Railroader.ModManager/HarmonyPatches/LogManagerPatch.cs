@@ -39,7 +39,8 @@ public static class LogManagerPatch
     public static void MakeConfigurationPostfix(ref LoggerConfiguration __result) {
         var logger = Log.Logger!;
         try {
-            foreach (var pair in Bootstrapper.ModDefinitions.Where(o => o.LogLevel != null && o.LogLevel != LogEventLevel.Information)) {
+            foreach (var pair in Bootstrapper.ModDefinitions.Where(o =>
+                         o.LogLevel != null && o.LogLevel != LogEventLevel.Information)) {
                 var identifier = pair.Identifier;
                 if (identifier == "") {
                     identifier = "Railroader.ModManager";
@@ -52,9 +53,11 @@ public static class LogManagerPatch
             RemoveUnitySinks(__result);
 
             // Configure modded sinks
-            __result.WriteTo.Conditional(o => o.Properties.ContainsKey("SourceContext"), o => o.UnityConsole("[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"));
-            __result.WriteTo.Conditional(o => !o.Properties.ContainsKey("SourceContext"), o => o.UnityConsole("[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"));
-
+            __result.WriteTo.Conditional(o => o.Properties.ContainsKey("SourceContext"),
+                o => o.UnityConsole(
+                    "[{Timestamp:HH:mm:ss} {Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"));
+            __result.WriteTo.Conditional(o => !o.Properties.ContainsKey("SourceContext"),
+                o => o.UnityConsole("[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"));
         } catch (Exception exc) {
             logger.Error(exc, "Failed to configure serilog");
         }
@@ -63,7 +66,8 @@ public static class LogManagerPatch
     /// <summary> Removes vanilla Unity console sinks from the configuration. </summary>
     /// <param name="configuration">The logger configuration to modify.</param>
     private static void RemoveUnitySinks(LoggerConfiguration configuration) {
-        var field = typeof(LoggerConfiguration).GetField("_logEventSinks", BindingFlags.NonPublic | BindingFlags.Instance);
+        var field = typeof(LoggerConfiguration).GetField("_logEventSinks",
+            BindingFlags.NonPublic | BindingFlags.Instance);
         if (field == null) {
             throw new InvalidOperationException($"Unable to get field {typeof(LoggerConfiguration)}::_logEventSinks");
         }

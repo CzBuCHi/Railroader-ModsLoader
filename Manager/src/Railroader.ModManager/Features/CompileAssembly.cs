@@ -12,57 +12,103 @@ using Serilog;
 
 namespace Railroader.ModManager.Features;
 
-public delegate bool CompileAssemblyDelegate(string outputPath, ICollection<string> sources, ICollection<string> references, out string messages);
+public delegate bool CompileAssemblyDelegate(
+    string outputPath,
+    ICollection<string> sources,
+    ICollection<string> references,
+    out string messages
+);
 
 [PublicAPI]
 public static class CompileAssembly
 {
-    [ExcludeFromCodeCoverage]
-    public static bool Execute(string outputPath, ICollection<string> sources, ICollection<string> references, out string messages) => 
-        Execute(CompilerCallableEntryPoint.InvokeCompiler, Log.Logger.ForSourceContext(), outputPath, sources, references, out messages);
-
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static bool Execute(InvokeCompiler invokeCompiler, ILogger logger, string outputPath, ICollection<string> sources, ICollection<string> references, out string messages) {
-        var args = CompilerArguments(outputPath, sources, references).ToArray();
-
-        logger.Information("Compiling assembly {outputPath} ...", outputPath);
-        foreach (var reference in references) {
-            logger.Debug("reference: {source}", reference);
-        }
-
-        foreach (var source in sources) {
-            logger.Debug("source: {source}", source);
-        }
-
-        bool result;
-        var  sb = new StringBuilder();
-        using (var error = new StringWriter(sb)) {
-            result = invokeCompiler(args, error);
-        }
-
-        messages = sb.ToString();
-        if (!string.IsNullOrEmpty(messages)) {
-            logger.Information("Compilation messages:\r\n{messages}", messages);
-        }
-
-        if (result) {
-            logger.Information("Assembly {outputPath} compiled successfully", outputPath);
-            return true;
-        }
-
-        logger.Error("Compilation of assembly {outputPath} failed", outputPath);
-        return false;
+    private sealed record CompileContext(
+        InvokeCompiler InvokeCompiler,
+        ILogger Logger,
+        string OutputPath,
+        ICollection<string> Sources,
+        ICollection<string> References
+    )
+    {
+        public string[] Args     { get; init; } = [];
+        public string   Messages { get; init; } = "";
+        public bool     Success  { get; init; }
     }
 
-    /// <summary> Generates the command-line arguments for the Mono C# compiler. </summary>
-    /// <param name="assemblyPath">The output path for the compiled assembly.</param>
-    /// <param name="sources">The source file paths to compile.</param>
-    /// <param name="references">The paths to reference assemblies.</param>
-    /// <returns>An enumeration of compiler arguments.</returns>
+    [ExcludeFromCodeCoverage]
+    public static bool Execute(
+        string outputPath,
+        ICollection<string> sources,
+        ICollection<string> references,
+        out string messages
+    ) =>
+        Execute(CompilerCallableEntryPoint.InvokeCompiler, Log.Logger.ForSourceContext(), outputPath, sources,
+            references, out messages);
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static bool Execute(
+        InvokeCompiler invokeCompiler,
+        ILogger logger,
+        string outputPath,
+        ICollection<string> sources,
+        ICollection<string> references,
+        out string messages
+    ) {
+        var result = new CompileContext(invokeCompiler, logger, outputPath, sources, references).BuildArguments()
+            .LogInputs()
+            .Compile()
+            .LogOutput();
+
+        messages = result.Messages;
+        return result.Success;
+    }
+
+    private static CompileContext BuildArguments(this CompileContext ctx) =>
+        ctx with { Args = CompilerArguments(ctx.OutputPath, ctx.Sources, ctx.References).ToArray() };
+
+    private static CompileContext LogInputs(this CompileContext ctx) {
+        ctx.Logger.Information("Compiling assembly {outputPath} ...", ctx.OutputPath);
+
+        foreach (var reference in ctx.References) {
+            ctx.Logger.Debug("reference: {source}", reference);
+        }
+
+        foreach (var source in ctx.Sources) {
+            ctx.Logger.Debug("source: {source}", source);
+        }
+
+        return ctx;
+    }
+
+    private static CompileContext Compile(this CompileContext ctx) {
+        var       sb      = new StringBuilder();
+        using var writer  = new StringWriter(sb);
+        var       success = ctx.InvokeCompiler(ctx.Args, writer);
+        return ctx with { Success = success, Messages = sb.ToString() };
+    }
+
+    private static CompileContext LogOutput(this CompileContext ctx) {
+        if (!string.IsNullOrEmpty(ctx.Messages)) {
+            ctx.Logger.Information("Compilation messages:\r\n{messages}", ctx.Messages);
+        }
+
+        if (ctx.Success) {
+            ctx.Logger.Information("Assembly {outputPath} compiled successfully", ctx.OutputPath);
+        } else {
+            ctx.Logger.Error("Compilation of assembly {outputPath} failed", ctx.OutputPath);
+        }
+
+        return ctx;
+    }
+
     [SuppressMessage("ReSharper", "GrammarMistakeInComment")]
     [SuppressMessage("ReSharper", "CommentTypo")]
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
-    private static IEnumerable<string> CompilerArguments(string assemblyPath, ICollection<string> sources, ICollection<string> references) {
+    private static IEnumerable<string> CompilerArguments(
+        string assemblyPath,
+        ICollection<string> sources,
+        ICollection<string> references
+    ) {
         foreach (var source in sources) {
             yield return source;
         }

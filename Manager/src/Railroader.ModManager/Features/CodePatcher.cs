@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -20,99 +20,156 @@ public static class CodePatcher
 {
     [ExcludeFromCodeCoverage]
     public static ApplyPatchesDelegate Factory() =>
-        Factory(
-            Log.Logger.ForSourceContext(),
-            AssemblyDefinitionWrapper.ReadAssembly,
-            AssemblyDefinitionWrapper.Write,
-            Directory.GetCurrentDirectory,
-            Directory.EnumerateDirectories,
-            File.Delete,
-            File.Move
-        );
+        (definition, pluginPatchers) => ApplyPatches(Log.Logger.ForSourceContext(),
+            AssemblyDefinitionWrapper.ReadAssembly, AssemblyDefinitionWrapper.Write, Directory.GetCurrentDirectory,
+            Directory.EnumerateDirectories, File.Delete, File.Move, definition, pluginPatchers);
 
-    public static ApplyPatchesDelegate Factory(ILogger logger, ReadAssemblyDefinition readAssemblyDefinition, WriteAssemblyDefinition writeAssemblyDefinition, GetCurrentDirectory getCurrentDirectory, EnumerateDirectories enumerateDirectories, Delete delete, Move move) =>
-        (definition, pluginPatchers) => ApplyPatches(logger, readAssemblyDefinition, writeAssemblyDefinition, getCurrentDirectory, enumerateDirectories, delete, move, definition, pluginPatchers);
-
-    public static readonly List<TypePatcherInfo> PluginPatchers = [
+    public static readonly TypePatcherInfo[] DefaultPluginPatchers = [
         new(typeof(ITopRightButtonPlugin), TopRightButtonPluginPatcher.Factory),
         new(typeof(IHarmonyPlugin), HarmonyPluginPatcher.Factory)
     ];
 
-    private static bool ApplyPatches(ILogger logger, ReadAssemblyDefinition readAssemblyDefinition, WriteAssemblyDefinition writeAssemblyDefinition, GetCurrentDirectory getCurrentDirectory, EnumerateDirectories enumerateDirectories, Delete delete, Move move, ModDefinition definition, TypePatcherInfo[] pluginPatchers) {
+    private sealed record PatcherContext(
+        ILogger Logger,
+        ReadAssemblyDefinition ReadAssembly,
+        WriteAssemblyDefinition WriteAssembly,
+        GetCurrentDirectory GetCurrentDirectory,
+        EnumerateDirectories EnumerateDirectories,
+        Delete DeleteFile,
+        Move MoveFile,
+        string AssemblyPath,
+        string ModId,
+        TypePatcherInfo[] PluginPatchers
+    )
+    {
+        public string TempPath => Path.ChangeExtension(AssemblyPath, ".patched.dll");
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static bool ApplyPatches(
+        ILogger logger,
+        ReadAssemblyDefinition readAssemblyDefinition,
+        WriteAssemblyDefinition writeAssemblyDefinition,
+        GetCurrentDirectory getCurrentDirectory,
+        EnumerateDirectories enumerateDirectories,
+        Delete delete,
+        Move move,
+        ModDefinition definition,
+        TypePatcherInfo[] pluginPatchers
+    ) {
         if (pluginPatchers.Length == 0) {
             return true;
         }
 
         logger.Information("Patching mod {ModId} ...", definition.Identifier);
 
-        var assemblyPath = Path.Combine(definition.BasePath, definition.Identifier + ".dll");
-        if (!ApplyPatches(logger, readAssemblyDefinition, writeAssemblyDefinition, getCurrentDirectory, enumerateDirectories, delete, move, assemblyPath, definition.Identifier, pluginPatchers)) {
-            logger.Error("Failed to apply patches to assembly {AssemblyPath} for mod {ModId}", assemblyPath, definition.Identifier);
+        var assemblyPath = Path.Combine(definition.BasePath, $"{definition.Identifier}.dll");
+
+        var context = new PatcherContext(logger, readAssemblyDefinition, writeAssemblyDefinition, getCurrentDirectory,
+            enumerateDirectories, delete, move, assemblyPath, definition.Identifier, pluginPatchers);
+
+        var patched = context.ApplyPatchesToAssembly();
+
+        if (patched) {
+            logger.Information("Patching complete for mod {ModId}", definition.Identifier);
+            return true;
+        }
+
+        logger.Error("Failed to apply patches to assembly {AssemblyPath} for mod {ModId}", assemblyPath,
+            definition.Identifier);
+        return false;
+    }
+
+    private static bool ApplyPatchesToAssembly(this PatcherContext ctx) {
+        using var resolver = ctx.CreateAssemblyResolver();
+        using var assembly = ctx.LoadAssembly(resolver);
+        if (assembly == null) {
             return false;
         }
 
-        logger.Information("Patching complete for mod {ModId}", definition.Identifier);
+        var result = ctx.ApplyPatchersToTypes(assembly);
+        if (!result.AnyPatched) {
+            return true;
+        }
+
+        if (result.HasError) {
+            return false;
+        }
+
+        ctx.WritePatchedAssembly(assembly);
+        ctx.ReplaceOriginalAssembly();
         return true;
     }
 
-    private static bool ApplyPatches(ILogger logger, ReadAssemblyDefinition readAssemblyDefinition, WriteAssemblyDefinition writeAssemblyDefinition, GetCurrentDirectory getCurrentDirectory, EnumerateDirectories enumerateDirectories, Delete delete, Move move, string assemblyPath, string modId, TypePatcherInfo[] pluginPatchers) {
-        var tempFilePath = Path.ChangeExtension(assemblyPath, ".patched.dll");
-        var success      = false;
+    private static DefaultAssemblyResolver CreateAssemblyResolver(this PatcherContext ctx) {
+        var resolver = new DefaultAssemblyResolver();
+        resolver.AddSearchDirectory(Path.Combine(ctx.GetCurrentDirectory(), "Railroader_Data", "Managed"));
 
-        AssemblyDefinition? assemblyDefinition = null;
-        try {
-            var resolver = new DefaultAssemblyResolver();
+        var thisModDir = Path.GetDirectoryName(ctx.AssemblyPath)!;
+        var modsRoot   = Path.Combine(ctx.GetCurrentDirectory(), "Mods");
+        foreach (var modDir in ctx.EnumerateDirectories(modsRoot).Where(d => d != thisModDir)) {
+            resolver.AddSearchDirectory(modDir);
+        }
 
-            // game DLLs
-            resolver.AddSearchDirectory(Path.Combine(getCurrentDirectory(), "Railroader_Data", "Managed"));
+        return resolver;
+    }
 
-            // other mods DLLs
-            var thisModDir = Path.GetDirectoryName(assemblyPath);
-            var modDirs    = enumerateDirectories(Path.Combine(getCurrentDirectory(), "Mods")).Where(o => o != thisModDir);
-            foreach (var modDir in modDirs) {
-                resolver.AddSearchDirectory(modDir);
+    private static AssemblyDefinition? LoadAssembly(this PatcherContext ctx, DefaultAssemblyResolver resolver) {
+        var parameters = new ReaderParameters { AssemblyResolver = resolver };
+        var assembly   = ctx.ReadAssembly(ctx.AssemblyPath, parameters);
+
+        if (assembly == null) {
+            ctx.Logger.Error("Failed to load definition for assembly {AssemblyPath} for mod {ModId}", ctx.AssemblyPath,
+                ctx.ModId);
+        }
+
+        return assembly;
+    }
+
+    private sealed record PatchResult(bool AnyPatched, bool HasError);
+
+    private static PatchResult ApplyPatchersToTypes(this PatcherContext ctx, AssemblyDefinition assembly) {
+        var anyPatched = false;
+        var hasError   = false;
+
+        foreach (var type in assembly.MainModule.Types) {
+            var interfaces = type.Interfaces.Select(i => i.InterfaceType?.FullName).Where(n => n != null).ToHashSet();
+
+            var patchers = ctx.PluginPatchers.Where(p => interfaces.Contains(p.MarkerType.FullName))
+                              .Select(p => p.Factory())
+                              .ToList();
+
+            if (!patchers.Any()) {
+                continue;
             }
 
-            var readParameters = new ReaderParameters { AssemblyResolver = resolver };
-            assemblyDefinition = readAssemblyDefinition(assemblyPath, readParameters);
-            if (assemblyDefinition == null) {
-                logger.Error("Failed to load definition for assembly {AssemblyPath} for mod {ModId}", assemblyPath, modId);
-                return false;
-            }
-
-            var hasPatch = false;
-            var hasError = false;
-            foreach (var type in assemblyDefinition.MainModule.Types) {
+            anyPatched = true;
+            foreach (var patcher in patchers) {
                 try {
-                    var interfaces = type.Interfaces.Select(i => i.InterfaceType?.FullName).ToList();
-                    var patchers = pluginPatchers.Where(pair => interfaces.Contains(pair.MarkerType.FullName))
-                                                 .Select(o => o.Factory());
-
-                    foreach (var patcher in patchers) {
-                        hasPatch = true;
-                        patcher!(assemblyDefinition, type);
-                    }
+                    patcher!(assembly, type);
                 } catch (Exception ex) {
-                    logger.Error(ex, "Failed to patch type {TypeName} for mod {ModId}", type.FullName, modId);
+                    ctx.Logger.Error(ex, "Failed to patch type {TypeName} for mod {ModId}", type.FullName, ctx.ModId);
                     hasError = true;
                 }
             }
-
-            success = hasPatch && !hasError;
-            if (success) {
-                writeAssemblyDefinition(assemblyDefinition, tempFilePath);
-                logger.Debug("Wrote patched assembly to temporary file {TempPath} for mod {ModId}", tempFilePath, modId);
-            } else {
-                logger.Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", assemblyPath, modId);
-            }
-
-            return !hasPatch || !hasError;
-        } finally {
-            assemblyDefinition?.Dispose();
-            if (success) {
-                delete(assemblyPath);
-                move(tempFilePath, assemblyPath);
-            }
         }
+
+        if (!anyPatched) {
+            ctx.Logger.Information("No patches to assembly {AssemblyPath} for mod {ModId} were applied",
+                ctx.AssemblyPath, ctx.ModId);
+        }
+
+        return new PatchResult(anyPatched, hasError);
+    }
+
+    private static void WritePatchedAssembly(this PatcherContext ctx, AssemblyDefinition assembly) {
+        ctx.WriteAssembly(assembly, ctx.TempPath);
+        ctx.Logger.Debug("Wrote patched assembly to temporary file {TempPath} for mod {ModId}", ctx.TempPath,
+            ctx.ModId);
+    }
+
+    private static void ReplaceOriginalAssembly(this PatcherContext ctx) {
+        ctx.DeleteFile(ctx.AssemblyPath);
+        ctx.MoveFile(ctx.TempPath, ctx.AssemblyPath);
     }
 }

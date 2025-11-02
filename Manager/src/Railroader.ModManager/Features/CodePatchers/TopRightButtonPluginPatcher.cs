@@ -29,7 +29,8 @@ public static class TopRightButtonPluginPatcher
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static TypePatcherDelegate Factory(ILogger logger) {
-        var method = MethodPatcher.Factory<ITopRightButtonPlugin>(logger, typeof(TopRightButtonPluginPatcher), typeof(PluginBase<>), "OnIsEnabledChanged");
+        var method = MethodPatcher.Factory<ITopRightButtonPlugin>(logger, typeof(TopRightButtonPluginPatcher),
+            typeof(PluginBase<>), "OnIsEnabledChanged");
         return (assemblyDefinition, typeDefinition) => method(assemblyDefinition, typeDefinition);
     }
 
@@ -79,7 +80,7 @@ public static class TopRightButtonPluginPatcher
         var texture = LoadButtonTexture(plugin);
 
         var componentInChildren = topRightArea.transform.Find("Strip").gameObject.GetComponentInChildren<Button>();
-        var gameObject          = Object.Instantiate(componentInChildren.gameObject, componentInChildren.transform.parent);
+        var gameObject = Object.Instantiate(componentInChildren.gameObject, componentInChildren.transform.parent);
         gameObject.transform.SetSiblingIndex(plugin.Index);
 
         gameObject.GetComponent<UITooltipProvider>().TooltipInfo = new TooltipInfo(plugin.Tooltip, string.Empty);
