@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿// ReSharper disable All
+
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace System.Runtime.CompilerServices;

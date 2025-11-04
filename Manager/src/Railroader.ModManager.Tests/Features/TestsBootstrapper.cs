@@ -183,7 +183,7 @@ public sealed class TestsBootstrapper
 
         // Assert
         compiler.Received().Invoke(_ModDefinition);
-        patcher.Received().Invoke(_ModDefinition);
+        patcher.Received().Invoke(_ModDefinition, CodePatcher.DefaultPluginPatchers);
 
         logger.Received().Debug("mods: {mods}", """[{"Definition":{"id":"Identifier","name":"Name","version":"1.0","logLevel":"Debug","requires":null,"conflictsWith":null},"AssemblyPath":null,"IsEnabled":false,"IsValid":false,"IsLoaded":false,"Plugins":null}]""");
     }

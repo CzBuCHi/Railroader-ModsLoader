@@ -18,11 +18,9 @@ public sealed class Mod(ILogger logger, IModDefinition modDefinition) : IMod
     private bool _IsEnabled;
 
     /// <inheritdoc />
-    public bool IsEnabled
-    {
+    public bool IsEnabled {
         get => _IsEnabled;
-        internal set
-        {
+        internal set {
             if (_IsEnabled == value) {
                 return;
             }
@@ -51,6 +49,6 @@ public sealed class Mod(ILogger logger, IModDefinition modDefinition) : IMod
     public string[]? PluginNames => Plugins?.Select(o => o.GetType().FullName).ToArray();
 
     /// <inheritdoc />
-    public ILogger CreateLogger(string? scope = null)
-        => logger.ForSourceContext(scope == null ? Definition.Identifier : $"{Definition.Identifier}.{scope}");
+    public ILogger CreateLogger(string? scope = null) =>
+        logger.ForSourceContext(scope == null ? Definition.Identifier : $"{Definition.Identifier}.{scope}");
 }

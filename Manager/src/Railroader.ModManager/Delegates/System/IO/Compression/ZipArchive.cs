@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using _ZipArchive = System.IO.Compression.ZipArchive;
-namespace Railroader.ModManager.Delegates.System.IO.Compression;
 
+namespace Railroader.ModManager.Delegates.System.IO.Compression;
 
 /// <summary> Wrapper for <see cref="_ZipArchive"/>. </summary>
 public interface IZipArchive : IDisposable
@@ -20,10 +20,12 @@ public interface IZipArchive : IDisposable
 public sealed class ZipArchiveWrapper(_ZipArchive archive) : IZipArchive
 {
     /// <inheritdoc />
-    public IReadOnlyCollection<IZipArchiveEntry> Entries => archive.Entries.Select(e => new ZipArchiveEntryWrapper(e)).ToList().AsReadOnly();
+    public IReadOnlyCollection<IZipArchiveEntry> Entries =>
+        archive.Entries.Select(e => new ZipArchiveEntryWrapper(e)).ToList().AsReadOnly();
 
     /// <inheritdoc />
-    public IZipArchiveEntry? GetEntry(string entryName) => archive.GetEntry(entryName) is { } entry ? new ZipArchiveEntryWrapper(entry) : null;
+    public IZipArchiveEntry? GetEntry(string entryName) =>
+        archive.GetEntry(entryName) is { } entry ? new ZipArchiveEntryWrapper(entry) : null;
 
     /// <inheritdoc />
     public void Dispose() => archive.Dispose();
