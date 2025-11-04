@@ -3,14 +3,32 @@ using System.Linq;
 using NSubstitute;
 using Railroader.ModManager.Delegates.Mono.CSharp.CompilerCallableEntryPoint;
 using Railroader.ModManager.Features;
-using Railroader.ModManager.Tests.TestExtensions;
 using Serilog;
+using Serilog.Events;
 using Shouldly;
 
 namespace Railroader.ModManager.Tests.Features;
 
-public sealed class TestsCompileAssemblyCore
-{
+public sealed class TestAssemblyCompiler {
+    [Fact]
+    public void CompileAssemblyWhenNoSourcesProvided() {
+        // Arrange
+        var invokeCompiler = Substitute.For<InvokeCompiler>();
+        var logger         = Substitute.For<ILogger>();
+
+        // Act
+        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", [], [], out var messages);
+
+        // Assert
+        actual.ShouldBeFalse();
+
+        messages.ShouldBe("No source files provided.");
+
+        logger.Received().Error("No source files provided for assembly compilation at {outputPath}.", "outputPath");
+
+        invokeCompiler.DidNotReceive().Invoke(Arg.Any<string[]>(), Arg.Any<TextWriter>());
+    }
+
     [Fact]
     public void CompileAssemblyWhenSuccessful() {
         // Arrange
@@ -23,7 +41,7 @@ public sealed class TestsCompileAssemblyCore
         var logger = Substitute.For<ILogger>();
 
         // Act
-        var actual = CompileAssembly.Execute(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"], out var messages);
+        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"], out var messages);
 
         // Assert
         actual.ShouldBeTrue();
@@ -31,13 +49,10 @@ public sealed class TestsCompileAssemblyCore
         messages.ShouldBe("Warning1\r\nWarning2");
 
         logger.Received().Information("Compiling assembly {outputPath} ...", "outputPath");
-        logger.Received().Debug("reference: {source}", "reference1.dll");
-        logger.Received().Debug("reference: {source}", "reference2.dll");
-        logger.Received().Debug("source: {source}", "source1.cs");
-        logger.Received().Debug("source: {source}", "source2.cs");
-        logger.Received().Information("Compilation messages:\r\n{messages}", "Warning1\r\nWarning2");
+        logger.Received().Debug("References:\n{references}", "reference1.dll\nreference2.dll");
+        logger.Received().Debug("Sources:\n{sources}", "source1.cs\nsource2.cs");
+        logger.Received().Write(Arg.Any<LogEventLevel>(), "Compilation messages:\r\n{messages}", "Warning1\r\nWarning2");
         logger.Received().Information("Assembly {outputPath} compiled successfully", "outputPath");
-        logger.ShouldReceiveCallCount(7);
 
         invokeCompiler.Received().Invoke(Arg.Is<string[]>(o => o.SequenceEqual(new[] {
             "source1.cs",
@@ -64,7 +79,7 @@ public sealed class TestsCompileAssemblyCore
         var logger = Substitute.For<ILogger>();
 
         // Act
-        var actual = CompileAssembly.Execute(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"], out var messages);
+        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"], out var messages);
 
         // Assert
         actual.ShouldBeFalse();
@@ -72,13 +87,11 @@ public sealed class TestsCompileAssemblyCore
         messages.ShouldBe("Error1\r\nError2");
 
         logger.Received().Information("Compiling assembly {outputPath} ...", "outputPath");
-        logger.Received().Debug("reference: {source}", "reference1.dll");
-        logger.Received().Debug("reference: {source}", "reference2.dll");
-        logger.Received().Debug("source: {source}", "source1.cs");
-        logger.Received().Debug("source: {source}", "source2.cs");
-        logger.Received().Information("Compilation messages:\r\n{messages}", "Error1\r\nError2");
+        logger.Received().Debug("References:\n{references}", "reference1.dll\nreference2.dll");
+        logger.Received().Debug("Sources:\n{sources}", "source1.cs\nsource2.cs");
+        logger.Received().Write(Arg.Any<LogEventLevel>(), "Compilation messages:\r\n{messages}", "Error1\r\nError2");
         logger.Received().Error("Compilation of assembly {outputPath} failed", "outputPath");
-        logger.ShouldReceiveCallCount(7);
+
 
         invokeCompiler.Received().Invoke(Arg.Is<string[]>(o => o.SequenceEqual(new[] {
             "source1.cs",

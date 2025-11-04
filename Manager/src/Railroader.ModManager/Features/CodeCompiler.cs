@@ -31,7 +31,7 @@ public static class CodeCompiler
         (definition, names) =>
             CompileMod(
                 Log.Logger.ForSourceContext(),
-                CompileAssembly.Execute,
+                AssemblyCompiler.Compile,
                 DirectoryInfoWrapper.Create,
                 Directory.GetCurrentDirectory,
                 File.Exists,
@@ -51,10 +51,10 @@ public static class CodeCompiler
 
     public static CompileModResult CompileMod(
         ILogger logger,
-        CompileAssemblyDelegate compileAssembly,
+        AssemblyCompilerDelegate compileAssembly,
         DirectoryInfoFactory directoryInfo,
         GetCurrentDirectory getCurrentDirectory,
-        Exists exists,
+        FileExists exists,
         GetLastWriteTime getLastWriteTime,
         Delete delete,
         ModDefinition definition, 

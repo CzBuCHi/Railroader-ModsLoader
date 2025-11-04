@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -31,6 +32,7 @@ public interface IMemoryFileSystem : IEnumerable<MemoryEntry>
     void AddRange(IEnumerable<MemoryEntry> entries);
 }
 
+[DebuggerStepThrough]
 public abstract partial class MemoryFileSystem : IMemoryFileSystem
 {
     protected MemoryFileSystem() {

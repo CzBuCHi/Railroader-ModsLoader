@@ -30,7 +30,7 @@ public sealed class TestsCodePatcher
     };
 
     private static ApplyPatchesDelegate Factory(ILogger logger, MemoryFs fileSystem, ReadAssemblyDefinition readAssemblyDefinition, WriteAssemblyDefinition writeAssemblyDefinition) =>
-        CodePatcher.Factory(logger,
+        CodePatcher.Create(logger,
             readAssemblyDefinition,
             writeAssemblyDefinition,
             fileSystem.Directory.GetCurrentDirectory,

@@ -13,9 +13,8 @@ namespace MemoryFileSystem;
 
 partial class MemoryFileSystem : MemoryFileSystem.IFile
 {
-    public interface IFile
-    {
-        Exists           Exists           { get; }
+    public interface IFile {
+        FileExists       Exists           { get; }
         ReadAllText      ReadAllText      { get; }
         GetLastWriteTime GetLastWriteTime { get; }
         Delete           Delete           { get; }
@@ -25,14 +24,14 @@ partial class MemoryFileSystem : MemoryFileSystem.IFile
 
     public IFile File => this;
 
-    [MemberNotNull(nameof(_Exists))]
+    [MemberNotNull(nameof(_FileExists))]
     [MemberNotNull(nameof(_ReadAllText))]
     [MemberNotNull(nameof(_GetLastWriteTime))]
     [MemberNotNull(nameof(_Delete))]
     [MemberNotNull(nameof(_Move))]
     [MemberNotNull(nameof(_Create))]
     private void Init_File() {
-        _Exists = CreateExists();
+        _FileExists = CreateExists();
         _ReadAllText = CreateReadAllText();
         _GetLastWriteTime = CreateGetLastWriteTime();
         _Delete = CreateDelete();
@@ -40,22 +39,22 @@ partial class MemoryFileSystem : MemoryFileSystem.IFile
         _Create = CreateCreate();
     }
 
-    private Exists           _Exists;
+    private FileExists           _FileExists;
     private ReadAllText      _ReadAllText;
     private GetLastWriteTime _GetLastWriteTime;
     private Delete           _Delete;
     private Move             _Move;
     private Create           _Create;
 
-    Exists IFile.          Exists           => _Exists;
+    FileExists IFile.          Exists           => _FileExists;
     ReadAllText IFile.     ReadAllText      => _ReadAllText;
     GetLastWriteTime IFile.GetLastWriteTime => _GetLastWriteTime;
     Delete IFile.          Delete           => _Delete; 
     Move IFile.            Move             => _Move;
     Create IFile.          Create           => _Create;
 
-    private Exists CreateExists() {
-        var mock = Substitute.For<Exists>();
+    private FileExists CreateExists() {
+        var mock = Substitute.For<FileExists>();
         mock.Invoke(Arg.Any<string>())
             .Returns([DebuggerStepThrough](o) => Items.TryGetValue(NormalizePath(o.Arg<string>()), out var entry) && entry is { IsDirectory: false });
         return mock;

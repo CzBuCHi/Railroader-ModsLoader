@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Railroader.ModManager.Interfaces;
 using Railroader.ModManager.JsonConverters;
@@ -46,5 +47,9 @@ public sealed class ModDefinition : IModDefinition
 
     /// <summary> Gets a value indicating whether this mod definition is valid. </summary>
     [JsonIgnore]
-    public bool IsValid => !string.IsNullOrEmpty(Identifier) && !string.IsNullOrEmpty(Name);
+    public bool IsValid => !string.IsNullOrEmpty(Identifier) && !string.IsNullOrEmpty(Name) &&
+                           _IdentifierPattern.IsMatch(Identifier);
+    
+    private static readonly Regex _IdentifierPattern = new("^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
+
 }

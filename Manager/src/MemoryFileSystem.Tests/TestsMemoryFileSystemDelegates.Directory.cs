@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using MemoryFileSystem.Types;
 using Shouldly;
 using Xunit;
 
@@ -7,6 +8,25 @@ namespace MemoryFileSystem.Tests;
 
 public class TestsMemoryFileSystemDelegatesDirectory
 {
+    [Theory]
+    [InlineData(null!)]
+    [InlineData("Folder")]
+    [InlineData("File")]
+    public void Exists(string? type) {
+        // Arrange
+        var fileSystem = new MemoryFs();
+        switch (type) {
+            case "Folder": fileSystem.Add(new MemoryEntry(@"c:\path")); break;
+            case "File":   fileSystem.Add(new MemoryEntry(@"c:\path", [1, 2, 3])); break;
+        }
+
+        // Act
+        var actual = fileSystem.Directory.Exists(@"C:\path");
+
+        // Assert
+        actual.ShouldBe(type == "Folder");
+    }
+    
     [Fact]
     public void EnumerateDirectories() {
         // Arrange

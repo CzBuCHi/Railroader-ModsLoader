@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using MemoryFileSystem;
 using Newtonsoft.Json;
 using NSubstitute;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Services;
-using Railroader.ModManager.Tests.TestExtensions;
 using Serilog.Events;
 using Shouldly;
 
@@ -12,14 +12,30 @@ namespace Railroader.ModManager.Tests.Features;
 
 public sealed class TestsModDefinitionLoader
 {
-    private static ModDefinitionLoaderDelegate Factory(IMemoryLogger logger, MemoryFs fileSystem) =>
-        () => ModDefinitionLoader.LoadDefinitions(logger, fileSystem.Directory.GetCurrentDirectory, fileSystem.Directory.EnumerateDirectories, fileSystem.File.Exists, fileSystem.File.ReadAllText);
+    [DebuggerStepThrough]
+    private static LoadDefinitionsDelegate Factory(IMemoryLogger logger, MemoryFs fileSystem) =>
+        [DebuggerStepThrough]() => ModDefinitionLoader.LoadDefinitions(logger, fileSystem.Directory.GetCurrentDirectory, fileSystem.Directory.Exists, fileSystem.Directory.EnumerateDirectories, fileSystem.File.Exists, fileSystem.File.ReadAllText);
 
+    [Fact]
+    public void ReturnsEmptyArrayWhenModSDirectoryNotFound() {
+        // Arrange
+        var fileSystem = new MemoryFs(@"C:\Current");
+        var logger     = Substitute.For<IMemoryLogger>();
+        var sut        = Factory(logger, fileSystem);
+
+        // Act
+        var actual = sut();
+
+        // Assert
+        actual.ShouldBeEmpty();
+        logger.Received().Warning("Mods directory not found at {baseDirectory}", @"C:\Current\Mods");
+    }
+    
     [Fact]
     public void ReturnsEmptyArrayWhenNoDefinitionsFound() {
         // Arrange
-        var fileSystem = new MemoryFs{
-            "C:\\Mods"
+        var fileSystem = new MemoryFs(@"C:\Current"){
+            @"C:\Current\Mods"
         };
         var logger     = Substitute.For<IMemoryLogger>();
         var sut        = Factory(logger, fileSystem);
@@ -76,7 +92,9 @@ public sealed class TestsModDefinitionLoader
 
         logger.Received().Information("Loading definition from {directory} ...", @"C:\Current\Mods\FirstMod");
         logger.Received().Information("Loading definition from {directory} ...", @"C:\Current\Mods\SecondMod");
-        logger.Received().Error("Another mod with the same Identifier has been found in '{directory}'", @"C:\Current\Mods\FirstMod");
+        logger.Received().Error("Duplicate mod identifier '{identifier}' found in '{newDirectory}'. Already defined in '{existingDirectory}'.", 
+                                "Identifier", @"C:\Current\Mods\SecondMod", @"C:\Current\Mods\FirstMod");
+
     }
 
     [Fact]
@@ -93,9 +111,9 @@ public sealed class TestsModDefinitionLoader
 
         // Assert
         definitions.Length.ShouldBe(0);
-
+        
         logger.Received().Information("Loading definition from {directory} ...", @"C:\Current\Mods\FirstMod");
-        logger.Received().Error("Failed to parse definition JSON, json error: {exception}", Arg.Is<JsonException>(o => true));
+        logger.Received().Error("Failed to parse definition JSON: {exception}", Arg.Any<JsonReaderException>());
     }
 
     [Fact]
@@ -112,9 +130,8 @@ public sealed class TestsModDefinitionLoader
 
         // Assert
         definitions.Length.ShouldBe(0);
-
         logger.Received().Information("Loading definition from {directory} ...", @"C:\Current\Mods\FirstMod");
-        logger.Received().Error("Failed to parse definition JSON, generic error: {exception}", Arg.Any<InvalidOperationException>());
+        logger.Received().Error("Failed to parse definition JSON: {exception}", Arg.Any<InvalidOperationException>());
     }
 
     [Fact]

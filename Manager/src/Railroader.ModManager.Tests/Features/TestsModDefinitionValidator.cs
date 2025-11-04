@@ -5,20 +5,18 @@ using NSubstitute;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Interfaces;
 using Railroader.ModManager.JsonConverters;
-using Railroader.ModManager.Tests.TestExtensions;
 using Serilog;
 using Shouldly;
 
 namespace Railroader.ModManager.Tests.Features;
 
-public sealed class TestsModDefinitionValidator
-{
+public sealed class TestsModDefinitionValidator {
     private static ModDefinition CreateModDefinition(string id, string version, Dictionary<string, FluentVersion?>? requires = null, Dictionary<string, FluentVersion?>? conflicts = null) =>
         new() {
-            Identifier = id,
-            Name = $"{id} Mod",
-            Version = VersionJsonConverter.ParseString(version)!,
-            Requires = requires,
+            Identifier    = id,
+            Name          = $"{id} Mod",
+            Version       = VersionJsonConverter.ParseString(version)!,
+            Requires      = requires,
             ConflictsWith = conflicts
         };
 
@@ -27,13 +25,13 @@ public sealed class TestsModDefinitionValidator
         // Arrange
         var logger = Substitute.For<ILogger>();
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", null }, { "C", null } }),
-            CreateModDefinition("B", "1.0.0", new Dictionary<string, FluentVersion?> { { "C", null } }),
+            CreateModDefinition("A", "1.0.0", new() { { "B", null }, { "C", null } }),
+            CreateModDefinition("B", "1.0.0", new() { { "C", null } }),
             CreateModDefinition("C", "1.0.0")
         };
 
         // Act
-        var result = ModDefinitionValidator.Execute(logger, modDefinitions);
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
 
         // Assert
         result.Select(mod => mod.Identifier).ToArray().ShouldBeEquivalentTo(new[] { "C", "B", "A" });
@@ -45,18 +43,16 @@ public sealed class TestsModDefinitionValidator
         // Arrange
         var logger = Substitute.For<ILogger>();
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", null } }),
+            CreateModDefinition("A", "1.0.0", new() { { "B", null } }),
             CreateModDefinition("C", "1.0.0")
         };
 
-        string[] expected = ["Mod 'A' requires mod 'B', but it is not present."];
-
         // Act
-        var result = ModDefinitionValidator.Execute(logger, modDefinitions);
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
 
         // Assert
         result.ShouldBeEmpty();
-        logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
+        logger.Received().Error("Mod '{identifier}' requires mod '{requiredId}', but it is not present.", "A", "B");
     }
 
     [Theory]
@@ -79,20 +75,19 @@ public sealed class TestsModDefinitionValidator
         var logger        = Substitute.For<ILogger>();
         var fluentVersion = new FluentVersion(Version.Parse(requiredVersion), @operator);
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", fluentVersion } }),
+            CreateModDefinition("A", "1.0.0", new() { { "B", fluentVersion } }),
             CreateModDefinition("B", version)
         };
 
         // Act
-        var result = ModDefinitionValidator.Execute(logger, modDefinitions);
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
 
         // Assert
         if (isValid) {
             result.Select(mod => mod.Identifier).ToArray().ShouldBeEquivalentTo(new[] { "B", "A" });
         } else {
-            string[] expected = [$"Mod 'A' requires mod 'B' with version constraint '{fluentVersion}', but found version '{version}'."];
             result.ShouldBeEmpty();
-            logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
+            logger.Received().Error("Mod '{identifier}' requires mod '{requiredId}' with version constraint '{fluentVersion}', but found version '{version}'.", "A", "B", Arg.Any<FluentVersion>(), Arg.Any<Version>());
         }
     }
 
@@ -101,17 +96,16 @@ public sealed class TestsModDefinitionValidator
         // Arrange
         var logger = Substitute.For<ILogger>();
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", conflicts: new Dictionary<string, FluentVersion?> { { "B", new FluentVersion(new Version(1, 0, 0), VersionOperator.GreaterOrEqual) } }),
+            CreateModDefinition("A", "1.0.0", conflicts: new() { { "B", new(new(1, 0, 0), VersionOperator.GreaterOrEqual) } }),
             CreateModDefinition("B", "1.0.0")
         };
-        string[] expected = ["Mod 'A' conflicts with mod 'B' (version: '1.0.0', constraint: '>=1.0.0')."];
 
         // Act
-        var result = ModDefinitionValidator.Execute(logger, modDefinitions);
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
 
         // Assert
         result.ShouldBeEmpty();
-        logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
+        logger.Received().Error("Mod '{identifier}' conflicts with mod '{conflictId}' (version: '{version}', constraint: '{fluentVersion}').", "A", "B", Arg.Any<Version>(), Arg.Any<FluentVersion>());
     }
 
     [Fact]
@@ -119,17 +113,16 @@ public sealed class TestsModDefinitionValidator
         // Arrange
         var logger = Substitute.For<ILogger>();
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", conflicts: new Dictionary<string, FluentVersion?> { { "B", null } }),
+            CreateModDefinition("A", "1.0.0", conflicts: new() { { "B", null } }),
             CreateModDefinition("B", "1.0.0")
         };
-        string[] expected = ["Mod 'A' conflicts with mod 'B' (version: '1.0.0')."];
 
         // Act
-        var result = ModDefinitionValidator.Execute(logger, modDefinitions);
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
 
         // Assert
         result.ShouldBeEmpty();
-        logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
+        logger.Received().Error("Mod '{identifier}' conflicts with mod '{conflictId}' (version: '{version}').", "A", "B", Arg.Any<Version>());
     }
 
     [Fact]
@@ -137,23 +130,20 @@ public sealed class TestsModDefinitionValidator
         // Arrange
         var logger = Substitute.For<ILogger>();
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", null } }),
-            CreateModDefinition("B", "1.0.0", new Dictionary<string, FluentVersion?> { { "C", null } }),
-            CreateModDefinition("C", "1.0.0", new Dictionary<string, FluentVersion?> { { "A", null } }),
-            CreateModDefinition("D", "1.0.0", new Dictionary<string, FluentVersion?> { { "E", null } }),
-            CreateModDefinition("E", "1.0.0", new Dictionary<string, FluentVersion?> { { "D", null } })
+            CreateModDefinition("A", "1.0.0", new() { { "B", null } }),
+            CreateModDefinition("B", "1.0.0", new() { { "C", null } }),
+            CreateModDefinition("C", "1.0.0", new() { { "A", null } }),
+            CreateModDefinition("D", "1.0.0", new() { { "E", null } }),
+            CreateModDefinition("E", "1.0.0", new() { { "D", null } })
         };
-        string[] expected = [
-            "Cyclic dependency detected: A -> B -> C -> A",
-            "Cyclic dependency detected: D -> E -> D"
-        ];
 
         // Act
-        var result = ModDefinitionValidator.Execute(logger, modDefinitions);
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
 
         // Assert
         result.ShouldBeEmpty();
-        logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
+        logger.Received().Error("Cyclic dependency detected: {dependencyLoop}", "A -> B -> C -> A");
+        logger.Received().Error("Cyclic dependency detected: {dependencyLoop}", "D -> E -> D");
     }
 
     [Fact]
@@ -161,17 +151,16 @@ public sealed class TestsModDefinitionValidator
         // Arrange
         var logger = Substitute.For<ILogger>();
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", null } }),
+            CreateModDefinition("A", "1.0.0", new() { { "B", null } }),
             CreateModDefinition("C", "1.0.0")
         };
-        string[] expected = ["Mod 'A' requires mod 'B', but it is not present."];
 
         // Act
-        var result = ModDefinitionValidator.Execute(logger, modDefinitions);
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
 
         // Assert
         result.ShouldBeEmpty();
-        logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
+        logger.Received().Error("Mod '{identifier}' requires mod '{requiredId}', but it is not present.", "A", "B");
     }
 
     [Fact]
@@ -179,23 +168,20 @@ public sealed class TestsModDefinitionValidator
         // Arrange
         var logger = Substitute.For<ILogger>();
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", null }, { "C", new FluentVersion(new Version(2, 0, 0), VersionOperator.GreaterOrEqual) } }),
-            CreateModDefinition("C", "1.0.0", conflicts: new Dictionary<string, FluentVersion?> { { "A", new FluentVersion(new Version(1, 0, 0)) } }),
-            CreateModDefinition("D", "1.0.0", new Dictionary<string, FluentVersion?> { { "E", null } })
+            CreateModDefinition("A", "1.0.0", new() { { "B", null }, { "C", new(new(2, 0, 0), VersionOperator.GreaterOrEqual) } }),
+            CreateModDefinition("C", "1.0.0", conflicts: new() { { "A", new(new(1, 0, 0)) } }),
+            CreateModDefinition("D", "1.0.0", new() { { "E", null } })
         };
-        string[] expected = [
-            "Mod 'A' requires mod 'B', but it is not present.",
-            "Mod 'A' requires mod 'C' with version constraint '>=2.0.0', but found version '1.0.0'.",
-            "Mod 'C' conflicts with mod 'A' (version: '1.0.0', constraint: '1.0.0').",
-            "Mod 'D' requires mod 'E', but it is not present."
-        ];
 
         // Act
-        var result = ModDefinitionValidator.Execute(logger, modDefinitions);
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
 
         // Assert
         result.ShouldBeEmpty();
-        logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
+        logger.Received().Error("Mod '{identifier}' requires mod '{requiredId}', but it is not present.", "A", "B");
+        logger.Received().Error("Mod '{identifier}' requires mod '{requiredId}' with version constraint '{fluentVersion}', but found version '{version}'.", "A", "C", Arg.Any<FluentVersion>(), Arg.Any<Version>());
+        logger.Received().Error("Mod '{identifier}' conflicts with mod '{conflictId}' (version: '{version}', constraint: '{fluentVersion}').", "C", "A", Arg.Any<Version>(), Arg.Any<FluentVersion>());
+        logger.Received().Error("Mod '{identifier}' requires mod '{requiredId}', but it is not present.", "D", "E");
     }
 
     [Fact]
@@ -203,12 +189,12 @@ public sealed class TestsModDefinitionValidator
         // Arrange
         var logger = Substitute.For<ILogger>();
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", new FluentVersion(new Version(1, 0, 0), (VersionOperator)999) } }),
+            CreateModDefinition("A", "1.0.0", new() { { "B", new(new(1, 0, 0), (VersionOperator)999) } }),
             CreateModDefinition("B", "1.0.0")
         };
 
         // Act
-        Should.Throw<InvalidOperationException>(() => ModDefinitionValidator.Execute(logger, modDefinitions))
+        Should.Throw<InvalidOperationException>(() => ModDefinitionValidator.ValidateAndSort(logger, modDefinitions))
               .Message.ShouldStartWith("Unknown version operator:");
     }
 
@@ -221,9 +207,9 @@ public sealed class TestsModDefinitionValidator
             CreateModDefinition("B", "1.0.0"),
             CreateModDefinition("C", "1.0.0")
         };
-        
+
         // Act
-        var result = ModDefinitionValidator.Execute(logger, modDefinitions);
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
 
         // Assert
         result.Select(mod => mod.Identifier).ToArray().ShouldBeEquivalentTo(new[] { "A", "B", "C" });
@@ -234,22 +220,19 @@ public sealed class TestsModDefinitionValidator
         // Arrange
         var logger = Substitute.For<ILogger>();
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", null } }),
-            CreateModDefinition("B", "1.0.0", new Dictionary<string, FluentVersion?> { { "C", null } }),
-            CreateModDefinition("C", "1.0.0", new Dictionary<string, FluentVersion?> { { "A", null } }),
-            CreateModDefinition("D", "1.0.0", new Dictionary<string, FluentVersion?> { { "C", null } })
+            CreateModDefinition("A", "1.0.0", new() { { "B", null } }),
+            CreateModDefinition("B", "1.0.0", new() { { "C", null } }),
+            CreateModDefinition("C", "1.0.0", new() { { "A", null } }),
+            CreateModDefinition("D", "1.0.0", new() { { "C", null } })
         };
-        string[] expected = [
-            "Cyclic dependency detected: A -> B -> C -> A",
-            "Mod 'D' cannot resolve mod 'C' because mod 'C' is part of a cyclic dependency."
-        ];
 
         // Act
-        var result = ModDefinitionValidator.Execute(logger, modDefinitions);
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
 
         // Assert
         result.ShouldBeEmpty();
-        logger.Received().Error("Mod preprocessing failed with error(s): {errors}", Arg.Is<string[]>(o => o.SequenceEqual(expected)));
+        logger.Received().Error("Cyclic dependency detected: {dependencyLoop}", "A -> B -> C -> A");
+        logger.Received().Error("Mod '{identifier}' cannot resolve mod '{requiredId}' because mod '{requiredId}' is part of a cyclic dependency.", "D", "C", "C");
     }
 
     [Fact]
@@ -257,14 +240,14 @@ public sealed class TestsModDefinitionValidator
         // Arrange
         var logger = Substitute.For<ILogger>();
         var modDefinitions = new[] {
-            CreateModDefinition("A", "1.0.0", new Dictionary<string, FluentVersion?> { { "B", null }, { "C", null } }),
-            CreateModDefinition("B", "1.0.0", new Dictionary<string, FluentVersion?> { { "D", null } }),
-            CreateModDefinition("C", "1.0.0", new Dictionary<string, FluentVersion?> { { "D", null } }),
+            CreateModDefinition("A", "1.0.0", new() { { "B", null }, { "C", null } }),
+            CreateModDefinition("B", "1.0.0", new() { { "D", null } }),
+            CreateModDefinition("C", "1.0.0", new() { { "D", null } }),
             CreateModDefinition("D", "1.0.0")
         };
-        
+
         // Act
-        var result = ModDefinitionValidator.Execute(logger, modDefinitions);
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
 
         // Assert
         result.Select(mod => mod.Identifier).ToArray().ShouldBeEquivalentTo(new[] { "D", "B", "C", "A" });

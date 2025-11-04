@@ -26,7 +26,7 @@ public sealed class TestsCodeCompiler
         BasePath = @"C:\Current\Mods\DummyMod"
     };
 
-    private static CompileModDelegate CompileModFactory(ILogger logger, CompileAssemblyDelegate compileAssembly, MemoryFs fileSystem) =>
+    private static CompileModDelegate CompileModFactory(ILogger logger, AssemblyCompilerDelegate compileAssembly, MemoryFs fileSystem) =>
         (definition, names) => CodeCompiler.CompileMod(logger,
             compileAssembly,
             fileSystem.DirectoryInfo,
@@ -42,7 +42,7 @@ public sealed class TestsCodeCompiler
     public void CompileMod_WhenNoSources() {
         // Arrange
         var logger          = Substitute.For<ILogger>();
-        var compileAssembly = Substitute.For<CompileAssemblyDelegate>();
+        var compileAssembly = Substitute.For<AssemblyCompilerDelegate>();
         var fileSystem = new MemoryFs {
             @"C:\Current\Mods\DummyMod"
         };
@@ -63,7 +63,7 @@ public sealed class TestsCodeCompiler
     public void CompileMod_AssemblyUpToDate(int day) {
         // Arrange.
         var logger          = Substitute.For<ILogger>();
-        var compileAssembly = Substitute.For<CompileAssemblyDelegate>();
+        var compileAssembly = Substitute.For<AssemblyCompilerDelegate>();
         var fileSystem = new MemoryFs {
             { AssemblyPath, "DLL", new DateTime(2000, 1, 2) },
             { @"C:\Current\Mods\DummyMod\source.cs", "", new DateTime(2000, 1, day) }
@@ -85,7 +85,7 @@ public sealed class TestsCodeCompiler
     public void CompileMod_Compilation_Failed() {
         // Arrange
         var logger          = Substitute.For<ILogger>();
-        var compileAssembly = Substitute.For<CompileAssemblyDelegate>();
+        var compileAssembly = Substitute.For<AssemblyCompilerDelegate>();
         compileAssembly.Invoke(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>(), out _).Returns(_ => false);
 
         var fileSystem = new MemoryFs(@"C:\Current") {
@@ -132,7 +132,7 @@ public sealed class TestsCodeCompiler
     {
         // Arrange
         var logger          = Substitute.For<ILogger>();
-        var compileAssembly = Substitute.For<CompileAssemblyDelegate>();
+        var compileAssembly = Substitute.For<AssemblyCompilerDelegate>();
         
         var fileSystem = new MemoryFs(@"C:\Current") {
             { AssemblyPath, "DLL", _OldDate },
@@ -189,7 +189,7 @@ public sealed class TestsCodeCompiler
     {
         // Arrange
         var logger          = Substitute.For<ILogger>();
-        var compileAssembly = Substitute.For<CompileAssemblyDelegate>();
+        var compileAssembly = Substitute.For<AssemblyCompilerDelegate>();
         
         var fileSystem = new MemoryFs(@"C:\Current") {
             { AssemblyPath, "DLL", _OldDate },

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using Analytics;
 using Newtonsoft.Json;
 using Railroader.ModManager.Behaviors;
 using Railroader.ModManager.Delegates.HarmonyLib;
@@ -20,20 +22,25 @@ public static class Bootstrapper
 
     [ExcludeFromCodeCoverage]
     public static void Execute() {
+        var gameObject = new GameObject("ModManagerBootstrapper");
+        gameObject.AddComponent<ManagerBootstrapperBehaviour>();
+    }
+
+    internal static void ExecuteCore() {
         var memoryLogger = new MemoryLogger();
         Log.Logger = memoryLogger;
-
+       
         Execute(
-            ModExtractor.ExtractMods(memoryLogger),
-            ModDefinitionLoader.Factory(memoryLogger),
+            ModExtractor.GetExtractor(memoryLogger),
+            ModDefinitionLoader.Create(memoryLogger),
             Harmony.Factory("Railroader.ModManager"),
             CreateManagerBehaviour
         );
     }
 
-    public static void Execute(ExtractModsDelegate extractMods, ModDefinitionLoaderDelegate modDefinitionLoader, IHarmony factory, Action createManagerBehaviour) {
+    public static void Execute(ModExtractionAction extractMods, LoadDefinitionsDelegate loadDefinitions, IHarmony factory, Action createManagerBehaviour) {
         extractMods();
-        ModDefinitions = modDefinitionLoader();
+        ModDefinitions = loadDefinitions();
 
         factory.PatchCategory(typeof(ModManager).Assembly, "LogManager");
 
@@ -53,20 +60,20 @@ public static class Bootstrapper
         LoadMods(
             Log.Logger.ForSourceContext(),
             ModDefinitions,
-            ModDefinitionValidator.Factory,
+            ModDefinitionValidator.Create,
             CodeCompiler.Factory(),
-            CodePatcher.Factory(),
-            PluginManager.Factory,
+            CodePatcher.Create(),
+            PluginManager.CreateLoader,
             Harmony.Factory("Railroader.ModManager")
         );
 
-    public static void LoadMods(
+    internal static void LoadMods(
         ILogger logger, 
         IReadOnlyList<ModDefinition> modDefinitions, 
-        ModDefinitionValidatorDelegate modDefinitionValidator,
+        ValidateMods modDefinitionValidator,
         CompileModDelegate codeCompiler,
         ApplyPatchesDelegate codePatcher,
-        CreatePluginsDelegateFactory createPluginsDelegateFactory,
+        PluginLoaderFactory createPluginsDelegateFactory,
         IHarmony harmony
         ) {
         if (modDefinitions.Count == 0) {

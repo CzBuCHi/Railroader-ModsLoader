@@ -7,6 +7,10 @@
     <ItemGroup>
         <Reference Include="System.Core" />
         <GameAssembly Include="0Harmony" />
+        
+        <GameAssembly Include="Heathen.Steamworks" />
+        <GameAssembly Include="com.rlabrecque.steamworks.net" />
+        
         <GameAssembly Include="Mono.Cecil" />
         <GameAssembly Include="Mono.CSharp" />
         <GameAssembly Include="Assembly-CSharp" />

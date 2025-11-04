@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using NSubstitute;
 using Railroader.ModManager.Delegates.System.Reflection.Assembly;
 using Railroader.ModManager.Features;
@@ -9,21 +8,29 @@ using Shouldly;
 
 namespace Railroader.ModManager.Tests.Features;
 
-public sealed class TestsPluginManager
-{
+public sealed class TestsPluginManager {
+    private const string AssemblyPath = @"Mod\Dummy\Dummy.dll";
+
+    private static Mod CreateMod(ILogger logger) {
+        var modDefinition = Substitute.For<IModDefinition>();
+        modDefinition.Identifier.Returns("Identifier");
+        return new(logger, modDefinition) { AssemblyPath = AssemblyPath };
+    }
+
     [Fact]
     public void CreatePlugins_WhenAssemblyFailsToLoad() {
         // Arrange
         var logger         = Substitute.For<ILogger>();
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
-        var mod            = new Mod(logger, Substitute.For<IModDefinition>());
+        var mod            = CreateMod(logger);
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.LoadPlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
         plugins.ShouldBeEmpty();
+        logger.Received().Warning("Failed to load assembly from path: {AssemblyPath} for mod {ModId}", @"Mod\Dummy\Dummy.dll", "Identifier");
     }
 
     [Fact]
@@ -48,10 +55,10 @@ public sealed class TestsPluginManager
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, Substitute.For<IModDefinition>());
+        var mod = CreateMod(logger);
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.LoadPlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
         plugins.ShouldBeEmpty();
@@ -72,10 +79,12 @@ public sealed class TestsPluginManager
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, Substitute.For<IModDefinition>());
+        var mod = new Mod(logger, Substitute.For<IModDefinition>()) {
+            AssemblyPath = AssemblyPath
+        };
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.LoadPlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
         plugins.ShouldBeEmpty();
@@ -104,40 +113,39 @@ public sealed class TestsPluginManager
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, Substitute.For<IModDefinition>());
+        var mod = CreateMod(logger);
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.LoadPlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
         plugins.ShouldBeEmpty();
-
-        logger.Received().Warning("Type {type} inherits IPluginBase but not PluginBase<> in mod {ModId}", Arg.Is<Type>(o => o.Name == "Foo"), mod.Definition.Identifier);
+        logger.Received().Warning("Type {Type} implements IPlugin but does not inherit from PluginBase<> in mod {ModId}", "Foo", "Identifier");
     }
 
     [Theory]
     [InlineData("""
-                using Railroader.ModManager.Interfaces;
-                using Serilog;
+        using Railroader.ModManager.Interfaces;
+        using Serilog;
 
-                public sealed class TestPlugin : PluginBase<TestPlugin>
-                {
-                    public TestPlugin() 
-                        : base(null, null) {
-                    }
-                }
-                """)]
+        public sealed class TestPlugin : PluginBase<TestPlugin>
+        {
+            public TestPlugin() 
+                : base(null, null) {
+            }
+        }
+        """)]
     [InlineData("""
-                using Railroader.ModManager.Interfaces;
-                using Serilog;
+        using Railroader.ModManager.Interfaces;
+        using Serilog;
 
-                public sealed class TestPlugin : PluginBase<TestPlugin>
-                {
-                    public TestPlugin(IModdingContext moddingContext, IMod mod, int extra) 
-                        : base(moddingContext, mod) {
-                    }
-                }
-                """)]
+        public sealed class TestPlugin : PluginBase<TestPlugin>
+        {
+            public TestPlugin(IModdingContext moddingContext, IMod mod, int extra) 
+                : base(moddingContext, mod) {
+            }
+        }
+        """)]
     public void CreatePlugins_IgnorePluginsWithInvalidConstructor(string source) {
         // Arrange
         var assembly = TestUtils.BuildAssembly(source, [typeof(TestsPluginManager).Assembly.GetName().Name]);
@@ -146,15 +154,14 @@ public sealed class TestsPluginManager
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, Substitute.For<IModDefinition>());
+        var mod = CreateMod(logger);
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.LoadPlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
         plugins.ShouldBeEmpty();
-
-        logger.Received().Warning("Cannot find constructor that accepts IModdingContext, IMod parameters on plugin {plugin} in mod {ModId}", Arg.Is<Type>(o => o.Name == "TestPlugin"), mod.Definition.Identifier);
+        logger.Received().Warning("Cannot find constructor (IModdingContext, IMod) on plugin {Plugin} in mod {ModId}", "TestPlugin", "Identifier");
     }
 
     [Fact]
@@ -189,10 +196,10 @@ public sealed class TestsPluginManager
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, Substitute.For<IModDefinition>());
+        var mod = CreateMod(logger);
 
         // Act
-        var plugins = PluginManager.CreatePlugins(moddingContext, logger, loadFrom, mod);
+        var plugins = PluginManager.LoadPlugins(moddingContext, logger, loadFrom, mod);
 
         // Assert
         plugins.Select(o => o.GetType().FullName).ToArray().ShouldBeEquivalentTo(new[] { "Foo.Bar.FirstPlugin", "Foo.Bar.SecondPlugin" });

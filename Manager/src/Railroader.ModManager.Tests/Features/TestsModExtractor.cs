@@ -34,12 +34,12 @@ public sealed class TestsModExtractor
         };
 
         // Act
-        ModExtractor.ExtractMods(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
+        ModExtractor.ExtractAll(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
 
         // Assert
         memoryFs.ShouldBeEquivalentTo(expected);
-        logger.Received().Information("Processing mod archive '{ZipPath}' for extraction.", @"C:\Mods\Mod1.zip");
-        logger.Received().Information("Successfully extracted mod '{ModId}' from '{ZipPath}' to '{ExtractPath}'.", "MyMod", @"C:\Mods\Mod1.zip", @"C:\Mods\MyMod");
+        logger.Received().Information("Processing mod archive {ZipPath} for extraction.", @"C:\Mods\Mod1.zip");
+        logger.Received().Information("Successfully extracted mod {ModId} from {ZipPath} to {ExtractPath}.", "MyMod", @"C:\Mods\Mod1.zip", @"C:\Mods\MyMod");
     }
 
     [Fact]
@@ -61,12 +61,12 @@ public sealed class TestsModExtractor
         };
 
         // Act
-        ModExtractor.ExtractMods(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
+        ModExtractor.ExtractAll(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
 
         // Assert
         memoryFs.ShouldBeEquivalentTo(expected);
-        logger.Received().Information("Processing mod archive '{ZipPath}' for extraction.", @"C:\Mods\Mod1.zip");
-        logger.Received().Error("Skipping archive '{ZipPath}': Missing 'Definition.json'.", @"C:\Mods\Mod1.zip");
+        logger.Received().Information("Processing mod archive {ZipPath} for extraction.", @"C:\Mods\Mod1.zip");
+        logger.Received().Error("Skipping archive {ZipPath}: Missing 'Definition.json'.", @"C:\Mods\Mod1.zip");
     }
 
     [Fact]
@@ -88,11 +88,12 @@ public sealed class TestsModExtractor
         };
 
         // Act
-        ModExtractor.ExtractMods(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
+        ModExtractor.ExtractAll(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
 
         // Assert
         memoryFs.ShouldBeEquivalentTo(expected);
-        logger.Received(1).Error(Arg.Any<JsonException>(), "Skipping archive '{ZipPath}': Failed to parse Definition.json.", @"C:\Mods\Mod1.zip");
+        logger.Received().Information("Processing mod archive {ZipPath} for extraction.", @"C:\Mods\Mod1.zip");
+        logger.Received().Error(Arg.Any<JsonReaderException>(), "Skipping archive {ZipPath}: Failed to parse Definition.json.", @"C:\Mods\Mod1.zip");
     }
 
     [Fact]
@@ -114,13 +115,12 @@ public sealed class TestsModExtractor
         };
 
         // Act
-        ModExtractor.ExtractMods(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
+        ModExtractor.ExtractAll(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
 
         // Assert
         memoryFs.ShouldBeEquivalentTo(expected);
-        logger.Received().Information("Processing mod archive '{ZipPath}' for extraction.", @"C:\Mods\Mod1.zip");
-        logger.Received().Error("Skipping archive '{ZipPath}': Invalid 'Definition.json'.", @"C:\Mods\Mod1.zip");
-        logger.ShouldReceiveCallCount(2);
+        logger.Received().Information("Processing mod archive {ZipPath} for extraction.", @"C:\Mods\Mod1.zip");
+        logger.Received().Error("Skipping archive {ZipPath}: Invalid mod definition.", @"C:\Mods\Mod1.zip");
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public sealed class TestsModExtractor
         };
 
         // Act
-        ModExtractor.ExtractMods(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
+        ModExtractor.ExtractAll(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
 
         // Assert
         memoryFs.ShouldBeEquivalentTo(expected);
@@ -171,7 +171,7 @@ public sealed class TestsModExtractor
         };
 
         // Act
-        ModExtractor.ExtractMods(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
+        ModExtractor.ExtractAll(logger, memoryFs.DirectoryInfo, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory);
 
         // Assert
         memoryFs.ShouldBeEquivalentTo(expected);

@@ -3,6 +3,10 @@ using _Directory = System.IO.Directory;
 
 namespace Railroader.ModManager.Delegates.System.IO.Directory;
 
+/// <inheritdoc cref="_Directory.Exists(string)"/>
+/// <remarks> Wraps <see cref="_Directory.Exists(string)"/> for testability. </remarks>
+public delegate bool DirectoryExists(string path);
+
 /// <inheritdoc cref="_Directory.EnumerateDirectories(string)"/>
 /// <remarks> Wraps <see cref="_Directory.EnumerateDirectories(string)"/> for testability. </remarks>
 public delegate IEnumerable<string> EnumerateDirectories(string path);

@@ -18,11 +18,11 @@ namespace Railroader.ModManager.Tests.Features;
 public sealed class TestsBootstrapper
 {
     [DebuggerStepThrough]
-    private static ExtractModsDelegate ExtractMods() => Substitute.For<ExtractModsDelegate>();
+    private static ModExtractionAction ExtractMods() => Substitute.For<ModExtractionAction>();
 
     [DebuggerStepThrough]
-    private static ModDefinitionLoaderDelegate ModDefinitionLoader(ModDefinition[]? modDefinitions = null) {
-        var mock = Substitute.For<ModDefinitionLoaderDelegate>();
+    private static LoadDefinitionsDelegate ModDefinitionLoader(ModDefinition[]? modDefinitions = null) {
+        var mock = Substitute.For<LoadDefinitionsDelegate>();
         mock.Invoke().Returns(_ => modDefinitions ?? []);
         return mock;
     }
@@ -37,8 +37,8 @@ public sealed class TestsBootstrapper
     private static ILogger Logger() => Substitute.For<ILogger>();
 
     [DebuggerStepThrough]
-    private static ModDefinitionValidatorDelegate Processor(ModDefinition[]? modDefinitions = null) {
-        var mock = Substitute.For<ModDefinitionValidatorDelegate>();
+    private static ValidateMods Processor(ModDefinition[]? modDefinitions = null) {
+        var mock = Substitute.For<ValidateMods>();
         mock.Invoke(Arg.Any<IReadOnlyList<ModDefinition>>()).Returns(_ => modDefinitions);
         return mock;
     }
@@ -58,15 +58,15 @@ public sealed class TestsBootstrapper
     }
 
     [DebuggerStepThrough]
-    private static CreatePluginsDelegateFactory PluginFactory(CreatePluginsDelegate? createPluginsDelegate = null) {
-        var mock = Substitute.For<CreatePluginsDelegateFactory>();
+    private static PluginLoaderFactory PluginFactory(PluginLoader? createPluginsDelegate = null) {
+        var mock = Substitute.For<PluginLoaderFactory>();
         mock.Invoke(Arg.Any<IModdingContext>()).Returns(_ => createPluginsDelegate ?? CreatePlugins());
         return mock;
     }
 
     [DebuggerStepThrough]
-    private static CreatePluginsDelegate CreatePlugins() {
-        var mock = Substitute.For<CreatePluginsDelegate>();
+    private static PluginLoader CreatePlugins() {
+        var mock = Substitute.For<PluginLoader>();
         mock.Invoke(Arg.Any<Mod>()).Returns([]);
         return mock;
     }
@@ -230,7 +230,7 @@ public sealed class TestsBootstrapper
     public void LoadMods_Calls_TryInstantiatePlugins() {
         // Arrange
         var  logger                = Logger();
-        var  createPluginsDelegate = Substitute.For<CreatePluginsDelegate>();
+        var  createPluginsDelegate = Substitute.For<PluginLoader>();
         var  plugin                = Substitute.For<IPlugin>();
         Mod? mod                   = null;
         createPluginsDelegate.Invoke(Arg.Any<Mod>()).Returns([plugin]).AndDoes(o => mod = o.Arg<Mod>());

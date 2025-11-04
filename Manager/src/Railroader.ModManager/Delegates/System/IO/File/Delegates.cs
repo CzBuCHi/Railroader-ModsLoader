@@ -6,7 +6,7 @@ namespace Railroader.ModManager.Delegates.System.IO.File;
 
 /// <inheritdoc cref="_File.Exists(string)"/>
 /// <remarks> Wraps <see cref="_File.Exists(string)"/> for testability. </remarks>
-public delegate bool Exists(string path);
+public delegate bool FileExists(string path);
 
 /// <inheritdoc cref="_File.ReadAllText(string)"/>
 /// <remarks> Wraps <see cref="_File.ReadAllText(string)"/> for testability. </remarks>
