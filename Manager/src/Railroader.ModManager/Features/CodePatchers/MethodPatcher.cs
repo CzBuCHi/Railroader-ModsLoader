@@ -19,14 +19,6 @@ public delegate bool MethodPatcherDelegate(AssemblyDefinition assemblyDefinition
 [PublicAPI]
 public static class MethodPatcher
 {
-    private sealed record PatcherContext(
-        ILogger Logger,
-        Type MarkerType,
-        Type TargetBaseType,
-        string TargetMethod,
-        MethodInfo InjectedMethod
-    );
-
     [ExcludeFromCodeCoverage]
     public static MethodPatcherDelegate Factory<TMarker>(
         Type patcherType,
@@ -92,7 +84,7 @@ public static class MethodPatcher
 
         if (il.HasCallTo(injectedRef)) {
             ctx.Logger.Information("Skipping patch of {TypeName} as it already contain code for {PluginInterface}",
-                type.FullName, ctx.MarkerType);
+                                   type.FullName, ctx.MarkerType);
             return false;
         }
 
@@ -143,12 +135,12 @@ public static class MethodPatcher
         ModuleDefinition module
     ) {
         ctx.Logger.Debug("{MethodName} method not found in {TypeName}, creating override", ctx.TargetMethod,
-            type.FullName);
+                         type.FullName);
 
         var baseMethod = ctx.FindVirtualBaseMethod(type.BaseType);
         if (baseMethod == null) {
             ctx.Logger.Error("Virtual method '{MethodName}' not found in {TypeName} hierarchy!", ctx.TargetMethod,
-                type.FullName);
+                             type.FullName);
             return null;
         }
 
@@ -160,7 +152,7 @@ public static class MethodPatcher
 
         foreach (var p in baseMethod.Parameters) {
             method.Parameters.Add(
-                new ParameterDefinition(p.Name, p.Attributes, module.ImportReference(p.ParameterType)));
+                new(p.Name, p.Attributes, module.ImportReference(p.ParameterType)));
         }
 
         var il = method.Body.GetILProcessor();
@@ -201,6 +193,13 @@ public static class MethodPatcher
 
     private static bool HasCallTo(this ILProcessor il, MethodReference target) =>
         il.Body!.Instructions.Any(i =>
-            i.OpCode == OpCodes.Call && i.Operand is MethodReference mr && mr.FullName == target.FullName);
+                                      i.OpCode == OpCodes.Call && i.Operand is MethodReference mr && mr.FullName == target.FullName);
 
+    private sealed record PatcherContext(
+        ILogger Logger,
+        Type MarkerType,
+        Type TargetBaseType,
+        string TargetMethod,
+        MethodInfo InjectedMethod
+    );
 }

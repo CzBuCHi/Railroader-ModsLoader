@@ -16,11 +16,12 @@ using Object = UnityEngine.Object;
 
 namespace Railroader.ModManager.Features.CodePatchers;
 
-/// <summary> Patches types implementing <see cref="ITopRightButtonPlugin"/> to add UI button in the top-right area. </summary>
+/// <summary> Patches types implementing <see cref="ITopRightButtonPlugin" /> to add UI button in the top-right area. </summary>
 [PublicAPI]
 [ExcludeFromCodeCoverage]
 public static class TopRightButtonPluginPatcher
 {
+    private static readonly ConcurrentDictionary<IPlugin, PatcherState> _States = new();
     // NOTE: This class is not tested, because code calls Unity engine methods -  if called from outside Unity they all throw this exception:
     // System.Security.SecurityException("ECall methods must be packaged into a system module.")
 
@@ -30,15 +31,14 @@ public static class TopRightButtonPluginPatcher
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static TypePatcherDelegate Factory(ILogger logger) {
         var method = MethodPatcher.Factory<ITopRightButtonPlugin>(logger, typeof(TopRightButtonPluginPatcher),
-            typeof(PluginBase<>), "OnIsEnabledChanged");
+                                                                  typeof(PluginBase<>), "OnIsEnabledChanged");
         return (assemblyDefinition, typeDefinition) => method(assemblyDefinition, typeDefinition);
     }
 
-    private sealed record PatcherState(bool IsEnabled, GameObject? GameObject);
-
-    private static readonly ConcurrentDictionary<IPlugin, PatcherState> _States = new();
-
-    /// <summary> Handles the <c>OnIsEnabledChanged</c> event for the plugin, performing patcher-specific logic when the plugin is enabled or disabled. </summary>
+    /// <summary>
+    ///     Handles the <c>OnIsEnabledChanged</c> event for the plugin, performing patcher-specific logic when the plugin
+    ///     is enabled or disabled.
+    /// </summary>
     /// <param name="plugin">The plugin instance. Must not be null.</param>
     /// <remarks>Method called from plugin.</remarks>
     [UsedImplicitly]
@@ -48,7 +48,7 @@ public static class TopRightButtonPluginPatcher
             return;
         }
 
-        var state = _States.GetOrAdd(plugin, o => new PatcherState(!o.IsEnabled, null))!;
+        var state = _States.GetOrAdd(plugin, o => new(!o.IsEnabled, null))!;
         if (state.IsEnabled == plugin.IsEnabled) {
             return;
         }
@@ -59,7 +59,7 @@ public static class TopRightButtonPluginPatcher
 
             try {
                 var gameObject = AddButton(plugin, topRightArea);
-                _States[plugin] = new PatcherState(true, gameObject);
+                _States[plugin] = new(true, gameObject);
             } catch (Exception exc) {
                 logger.Error(exc, "Failed to add button to top right area.");
                 throw;
@@ -69,7 +69,7 @@ public static class TopRightButtonPluginPatcher
 
             if (state.GameObject != null) {
                 Object.Destroy(state.GameObject);
-                _States[plugin] = new PatcherState(false, null);
+                _States[plugin] = new(false, null);
             }
         }
     }
@@ -80,17 +80,17 @@ public static class TopRightButtonPluginPatcher
         var texture = LoadButtonTexture(plugin);
 
         var componentInChildren = topRightArea.transform.Find("Strip").gameObject.GetComponentInChildren<Button>();
-        var gameObject = Object.Instantiate(componentInChildren.gameObject, componentInChildren.transform.parent);
+        var gameObject          = Object.Instantiate(componentInChildren.gameObject, componentInChildren.transform.parent);
         gameObject.transform.SetSiblingIndex(plugin.Index);
 
-        gameObject.GetComponent<UITooltipProvider>().TooltipInfo = new TooltipInfo(plugin.Tooltip, string.Empty);
+        gameObject.GetComponent<UITooltipProvider>().TooltipInfo = new(plugin.Tooltip, string.Empty);
 
         var button = gameObject.GetComponent<Button>();
-        button.onClick = new Button.ButtonClickedEvent();
+        button.onClick = new();
         button.onClick.AddListener(() => plugin.OnClick());
 
         var image = gameObject.GetComponent<Image>();
-        image.sprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, 128, 128), new Vector2(0.5f, 0.5f));
+        image.sprite = Sprite.Create(texture, new(0.0f, 0.0f, 128, 128), new(0.5f, 0.5f));
 
         return gameObject;
     }
@@ -111,4 +111,6 @@ public static class TopRightButtonPluginPatcher
         texture.LoadImage(bytes);
         return texture;
     }
+
+    private sealed record PatcherState(bool IsEnabled, GameObject? GameObject);
 }

@@ -17,12 +17,10 @@ public sealed class TestAssemblyCompiler {
         var logger         = Substitute.For<ILogger>();
 
         // Act
-        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", [], [], out var messages);
+        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", [], []);
 
         // Assert
         actual.ShouldBeFalse();
-
-        messages.ShouldBe("No source files provided.");
 
         logger.Received().Error("No source files provided for assembly compilation at {outputPath}.", "outputPath");
 
@@ -41,12 +39,10 @@ public sealed class TestAssemblyCompiler {
         var logger = Substitute.For<ILogger>();
 
         // Act
-        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"], out var messages);
+        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"]);
 
         // Assert
         actual.ShouldBeTrue();
-
-        messages.ShouldBe("Warning1\r\nWarning2");
 
         logger.Received().Information("Compiling assembly {outputPath} ...", "outputPath");
         logger.Received().Debug("References:\n{references}", "reference1.dll\nreference2.dll");
@@ -79,12 +75,10 @@ public sealed class TestAssemblyCompiler {
         var logger = Substitute.For<ILogger>();
 
         // Act
-        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"], out var messages);
+        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"]);
 
         // Assert
         actual.ShouldBeFalse();
-
-        messages.ShouldBe("Error1\r\nError2");
 
         logger.Received().Information("Compiling assembly {outputPath} ...", "outputPath");
         logger.Received().Debug("References:\n{references}", "reference1.dll\nreference2.dll");

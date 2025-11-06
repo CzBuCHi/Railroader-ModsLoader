@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Serilog.Events;
 using Shouldly;
@@ -50,6 +51,33 @@ public sealed class TestsModDefinition
         // Assert
         sut.ShouldNotBeNull();
         sut.IsValid.ShouldBeFalse();
+    }
+
+    [Theory]
+    [InlineData("abc-ABC_012", true)]
+    [InlineData("!", false)]
+    public void LoadFrom_Identifier(string value, bool isValid)
+    {
+        // Arrange
+        var json = $$"""
+            {
+                "id": "{{value}}",
+                "name": "name",
+                "version": "1.2.3"
+            }
+            """;
+    
+        // Act
+        var sut = JsonConvert.DeserializeObject<ModDefinition>(json);
+
+        // Assert
+        sut.ShouldNotBeNull();
+        sut.IsValid.ShouldBe(isValid);
+
+        
+
+    
+
     }
 
     [Fact]

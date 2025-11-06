@@ -126,6 +126,39 @@ public sealed class TestsModDefinitionValidator {
     }
 
     [Fact]
+    public void ConflictWithNotInstalledMod() {
+        // Arrange
+        var logger = Substitute.For<ILogger>();
+        var modDefinitions = new[] {
+            CreateModDefinition("A", "1.0.0", conflicts: new() { { "B", null } })
+        };
+
+        // Act
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
+
+        // Assert
+        result.Select(mod => mod.Identifier).ToArray().ShouldBeEquivalentTo(new[] { "A" });
+        logger.ShouldReceiveNoCalls();
+    }
+
+    [Fact]
+    public void ConflictWithInstalledModWithValidVersion() {
+        // Arrange
+        var logger = Substitute.For<ILogger>();
+        var modDefinitions = new[] {
+            CreateModDefinition("A", "1.0.0", conflicts: new() { { "B", new(new(1, 0, 0), VersionOperator.LessThan) } }),
+            CreateModDefinition("B", "1.0.0")
+        };
+
+        // Act
+        var result = ModDefinitionValidator.ValidateAndSort(logger, modDefinitions);
+
+        // Assert
+        result.Select(mod => mod.Identifier).ToArray().ShouldBeEquivalentTo(new[] { "A", "B" });
+        logger.ShouldReceiveNoCalls();
+    }
+
+    [Fact]
     public void CyclicDependency() {
         // Arrange
         var logger = Substitute.For<ILogger>();
@@ -232,7 +265,7 @@ public sealed class TestsModDefinitionValidator {
         // Assert
         result.ShouldBeEmpty();
         logger.Received().Error("Cyclic dependency detected: {dependencyLoop}", "A -> B -> C -> A");
-        logger.Received().Error("Mod '{identifier}' cannot resolve mod '{requiredId}' because mod '{requiredId}' is part of a cyclic dependency.", "D", "C", "C");
+        logger.Received().Error("Mod '{identifier}' cannot resolve mod '{requiredId}' because mod is part of a cyclic dependency.", "D", "C");
     }
 
     [Fact]
@@ -251,5 +284,41 @@ public sealed class TestsModDefinitionValidator {
 
         // Assert
         result.Select(mod => mod.Identifier).ToArray().ShouldBeEquivalentTo(new[] { "D", "B", "C", "A" });
+    }
+
+    [Fact]
+    public void TwoConflicts_OriginalAccumulates_MutantWouldReset()
+    {
+        // Arrange
+        var logger = Substitute.For<ILogger>();
+        var mods = new[] {
+            CreateModDefinition("A", "1.0", conflicts: new() { { "B", null }, { "C", null } }),
+            CreateModDefinition("B", "1.0"),
+            CreateModDefinition("C", "1.0")
+        };
+
+        // Act
+        var result = ModDefinitionValidator.ValidateAndSort(logger, mods);
+
+        // Assert
+        result.ShouldBeEmpty();
+        logger.Received().Error("Mod '{identifier}' conflicts with mod '{conflictId}' (version: '{version}').", "A", "B", Arg.Any<Version>());
+        logger.Received().Error("Mod '{identifier}' conflicts with mod '{conflictId}' (version: '{version}').", "A", "C", Arg.Any<Version>());
+    }
+
+    [Fact]
+    public void TwoSeparateCycles_OriginalDetectsBoth_MutantMissesSecond()
+    {
+        var logger = Substitute.For<ILogger>();
+        var mods = new[] {
+            CreateModDefinition("A", "1.0", new() { { "B", null } }),
+            CreateModDefinition("B", "1.0", new() { { "A", null } }),
+            CreateModDefinition("C", "1.0", new() { { "D", null } }),
+            CreateModDefinition("D", "1.0", new() { { "C", null } })
+        };
+
+        var result = ModDefinitionValidator.ValidateAndSort(logger, mods);
+        result.ShouldBeEmpty();
+        logger.Received(2).Error("Cyclic dependency detected: {dependencyLoop}", Arg.Any<string>());
     }
 }

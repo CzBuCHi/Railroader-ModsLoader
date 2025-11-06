@@ -50,6 +50,6 @@ public sealed class ModDefinition : IModDefinition
     public bool IsValid => !string.IsNullOrEmpty(Identifier) && !string.IsNullOrEmpty(Name) &&
                            _IdentifierPattern.IsMatch(Identifier);
     
-    private static readonly Regex _IdentifierPattern = new("^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
+    private static readonly Regex _IdentifierPattern = new(@"^[a-zA-Z0-9_\-]+$", RegexOptions.Compiled);
 
 }

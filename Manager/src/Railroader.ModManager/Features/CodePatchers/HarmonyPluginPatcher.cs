@@ -9,25 +9,29 @@ using Serilog;
 
 namespace Railroader.ModManager.Features.CodePatchers;
 
-/// <summary> Patches types implementing <see cref="IHarmonyPlugin"/> to apply or remove Harmony patches when <c>OnIsEnabledChanged</c> is called. </summary>
+/// <summary>
+///     Patches types implementing <see cref="IHarmonyPlugin" /> to apply or remove Harmony patches when
+///     <c>OnIsEnabledChanged</c> is called.
+/// </summary>
 [PublicAPI]
 public sealed class HarmonyPluginPatcher
 {
+    private static readonly ConcurrentDictionary<IPlugin, PatcherState> _States = new();
+
     [ExcludeFromCodeCoverage]
     public static TypePatcherDelegate Factory() => Factory(Log.Logger.ForSourceContext());
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static TypePatcherDelegate Factory(ILogger logger) {
         var method = MethodPatcher.Factory<IHarmonyPlugin>(logger, typeof(HarmonyPluginPatcher), typeof(PluginBase<>),
-            "OnIsEnabledChanged");
+                                                           "OnIsEnabledChanged");
         return (assemblyDefinition, typeDefinition) => method(assemblyDefinition, typeDefinition);
     }
 
-    private sealed record PatcherState(bool IsEnabled, IHarmony Harmony);
-
-    private static readonly ConcurrentDictionary<IPlugin, PatcherState> _States = new();
-
-    /// <summary> Handles the <c>OnIsEnabledChanged</c> event for the plugin, performing patcher-specific logic when the plugin is enabled or disabled. </summary>
+    /// <summary>
+    ///     Handles the <c>OnIsEnabledChanged</c> event for the plugin, performing patcher-specific logic when the plugin
+    ///     is enabled or disabled.
+    /// </summary>
     /// <param name="plugin">The plugin instance. Must not be null.</param>
     /// <remarks>Method called from plugin.</remarks>
     [UsedImplicitly]
@@ -35,7 +39,7 @@ public sealed class HarmonyPluginPatcher
         var context = (ModdingContext)plugin.ModdingContext;
 
         var state = _States.GetOrAdd(plugin,
-            _ => new PatcherState(!plugin.IsEnabled, context.HarmonyFactory(plugin.Mod.Definition.Identifier)))!;
+                                     _ => new(!plugin.IsEnabled, context.HarmonyFactory(plugin.Mod.Definition.Identifier)))!;
 
         if (state.IsEnabled == plugin.IsEnabled) {
             return;
@@ -51,4 +55,6 @@ public sealed class HarmonyPluginPatcher
             state.Harmony.UnpatchAll(plugin.Mod.Definition.Identifier);
         }
     }
+
+    private sealed record PatcherState(bool IsEnabled, IHarmony Harmony);
 }

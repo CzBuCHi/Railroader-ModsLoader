@@ -67,6 +67,26 @@ public sealed class TestsModDefinitionLoader
     }
 
     [Fact]
+    public void SkipsModsWithInvalidDefinition() {
+        // Arrange
+        var fileSystem = new MemoryFs(@"C:\Current") {
+            { @"C:\Current\Mods\FirstMod\Definition.json", """{  "name": "Dummy mod" }""" },
+        };
+        var logger = Substitute.For<IMemoryLogger>();
+        var sut    = Factory(logger, fileSystem);
+
+        // Act
+        var definitions = sut();
+
+        // Assert
+        definitions.ShouldBeEmpty();
+
+        logger.Received().Information("Loading definition from {directory} ...", @"C:\Current\Mods\FirstMod");
+        logger.Received().Error("Skipping mod at {definitionPath}: Invalid mod definition.", @"C:\Current\Mods\FirstMod\Definition.json");
+        logger.DidNotReceive().Error("Failed to parse definition JSON: {exception}", Arg.Any<Exception>());
+    }
+
+    [Fact]
     public void DetectDuplicateMods() {
         // Arrange
         var fileSystem = new MemoryFs(@"C:\Current") {
@@ -94,6 +114,7 @@ public sealed class TestsModDefinitionLoader
         logger.Received().Information("Loading definition from {directory} ...", @"C:\Current\Mods\SecondMod");
         logger.Received().Error("Duplicate mod identifier '{identifier}' found in '{newDirectory}'. Already defined in '{existingDirectory}'.", 
                                 "Identifier", @"C:\Current\Mods\SecondMod", @"C:\Current\Mods\FirstMod");
+        logger.DidNotReceive().Error("Failed to parse definition JSON: {exception}", Arg.Any<Exception>());
 
     }
 
@@ -167,5 +188,38 @@ public sealed class TestsModDefinitionLoader
 
         logger.Received().Information("Loading definition from {directory} ...", @"C:\Current\Mods\DummyMod");
         logger.Received().Information("Loading definition from {directory} ...", @"C:\Current\Mods\SecondMod");
+    }
+
+    [Fact]
+    public void SkipsModWithMissingDefinition_AndLogsWarning()
+    {
+        var fileSystem = new MemoryFs(@"C:\Current") {
+            @"C:\Current\Mods\BadMod\"
+        };
+        var logger = Substitute.For<IMemoryLogger>();
+        var sut    = Factory(logger, fileSystem);
+
+        sut().ShouldBeEmpty();
+
+        logger.Received().Warning("Not loading directory {directory}: Missing Definition.json.", @"C:\Current\Mods\BadMod");
+        fileSystem.File.ReadAllText.Received(0).Invoke(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void DuplicateIdentifier_SkipsSecondAndLogsError()
+    {
+        var fs = new MemoryFs(@"C:\Current") {
+            { @"C:\Current\Mods\First\Definition.json",  "{ \"id\": \"Dup\", \"name\": \"A\", \"version\": \"1.0\" }" },
+            { @"C:\Current\Mods\Second\Definition.json", "{ \"id\": \"Dup\", \"name\": \"B\", \"version\": \"1.0\" }" }
+        };
+        var logger = Substitute.For<IMemoryLogger>();
+        var sut    = Factory(logger, fs);
+
+        var result = sut();
+        result.Length.ShouldBe(1);
+        result[0].BasePath.ShouldBe(@"C:\Current\Mods\First");
+
+        logger.Received().Error("Duplicate mod identifier '{identifier}' found in '{newDirectory}'. Already defined in '{existingDirectory}'.",
+                                "Dup", @"C:\Current\Mods\Second", @"C:\Current\Mods\First");
     }
 }

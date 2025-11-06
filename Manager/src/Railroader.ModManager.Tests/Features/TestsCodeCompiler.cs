@@ -26,7 +26,7 @@ public sealed class TestsCodeCompiler
         BasePath = @"C:\Current\Mods\DummyMod"
     };
 
-    private static CompileModDelegate CompileModFactory(ILogger logger, AssemblyCompilerDelegate compileAssembly, MemoryFs fileSystem) =>
+    private static CompileModAction CompileModFactory(ILogger logger, AssemblyCompilerDelegate compileAssembly, MemoryFs fileSystem) =>
         (definition, names) => CodeCompiler.CompileMod(logger,
             compileAssembly,
             fileSystem.DirectoryInfo,
@@ -86,7 +86,7 @@ public sealed class TestsCodeCompiler
         // Arrange
         var logger          = Substitute.For<ILogger>();
         var compileAssembly = Substitute.For<AssemblyCompilerDelegate>();
-        compileAssembly.Invoke(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>(), out _).Returns(_ => false);
+        compileAssembly.Invoke(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>()).Returns(_ => false);
 
         var fileSystem = new MemoryFs(@"C:\Current") {
             { AssemblyPath, "DLL", _OldDate },
@@ -115,8 +115,7 @@ public sealed class TestsCodeCompiler
 
         compileAssembly.Received().Invoke(AssemblyPath,
             Arg.Is<string[]>(o => o.SequenceEqual(sources)),
-            Arg.Is<string[]>(o => o.SequenceEqual(references)),
-            out Arg.Any<string>()
+            Arg.Is<string[]>(o => o.SequenceEqual(references))
         );
 
         logger.Received().Error("Compilation failed for mod {ModId} ...", _ModDefinition.Identifier);
@@ -141,7 +140,7 @@ public sealed class TestsCodeCompiler
         };
         var compileMod = CompileModFactory(logger, compileAssembly, fileSystem);
 
-        compileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>(), out _)
+        compileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>())
             .Returns(_ => true)
             .AndDoes(o => fileSystem.Add(o.ArgAt<string>(0), "Compiled DLL"));
 
@@ -173,8 +172,7 @@ public sealed class TestsCodeCompiler
 
         compileAssembly.Received().Invoke(AssemblyPath,
             Arg.Is<string[]>(o => o.SequenceEqual(sources)),
-            Arg.Is<string[]>(o => o.SequenceEqual(references)),
-            out Arg.Any<string>()
+            Arg.Is<string[]>(o => o.SequenceEqual(references))
         );
 
         logger.Received().Information("Compilation complete for mod {ModId}", _ModDefinition.Identifier);
@@ -199,7 +197,7 @@ public sealed class TestsCodeCompiler
         };
         var compileMod = CompileModFactory(logger, compileAssembly, fileSystem);
 
-        compileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>(), out _)
+        compileAssembly(Arg.Any<string>(), Arg.Any<string[]>(), Arg.Any<string[]>())
             .Returns(_ => true)
             .AndDoes(o => fileSystem.Add(o.ArgAt<string>(0), "Compiled DLL"));
 
@@ -241,8 +239,7 @@ public sealed class TestsCodeCompiler
 
         compileAssembly.Received().Invoke(AssemblyPath,
             Arg.Is<string[]>(o => o.SequenceEqual(sources)),
-            Arg.Is<string[]>(o => o.SequenceEqual(expectedReferences)),
-            out Arg.Any<string>()
+            Arg.Is<string[]>(o => o.SequenceEqual(expectedReferences))
         );
 
         fileSystem.File.Delete.Received().Invoke(AssemblyPath);

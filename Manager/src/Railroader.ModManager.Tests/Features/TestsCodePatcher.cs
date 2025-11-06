@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,7 +10,6 @@ using Railroader.ModManager.Delegates.Mono.Cecil;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Features.CodePatchers;
 using Railroader.ModManager.Interfaces;
-using Railroader.ModManager.Tests.TestExtensions;
 using Serilog;
 using Shouldly;
 
@@ -17,26 +17,24 @@ namespace Railroader.ModManager.Tests.Features;
 
 public sealed class TestsCodePatcher
 {
-    private static readonly DateTime _OldDate = new(2000, 1, 2);
-    private static readonly DateTime _NewDate = new(2000, 1, 4);
+    private const           string   AssemblyPath = @"C:\Current\Mods\DummyMod\DummyMod.dll";
+    private static readonly DateTime _OldDate     = new(2000, 1, 2);
+    private static readonly DateTime _NewDate     = new(2000, 1, 4);
 
-    private const string AssemblyPath = @"C:\Current\Mods\DummyMod\DummyMod.dll";
-
-    private static readonly ModDefinition _ModDefinition = new()
-    {
+    private static readonly ModDefinition _ModDefinition = new() {
         Identifier = "DummyMod",
-        Name = "Dummy Mod Name",
-        BasePath = @"C:\Current\Mods\DummyMod"
+        Name       = "Dummy Mod Name",
+        BasePath   = @"C:\Current\Mods\DummyMod",
+        Requires = new() {
+            { "SecondMod", new(new(1, 0)) }
+        }
     };
 
-    private static ApplyPatchesDelegate Factory(ILogger logger, MemoryFs fileSystem, ReadAssemblyDefinition readAssemblyDefinition, WriteAssemblyDefinition writeAssemblyDefinition) =>
-        CodePatcher.Create(logger,
-            readAssemblyDefinition,
-            writeAssemblyDefinition,
-            fileSystem.Directory.GetCurrentDirectory,
-            fileSystem.Directory.EnumerateDirectories,
-            fileSystem.File.Delete,
-            fileSystem.File.Move
+    private static PatchModAction Factory(ILogger logger, MemoryFs fileSystem, ReadAssemblyDefinition readAssemblyDefinition, WriteAssemblyDefinition writeAssemblyDefinition) =>
+        (definition, pluginPatchers) => CodePatcher.ApplyPatches(
+            logger, readAssemblyDefinition, writeAssemblyDefinition,
+            fileSystem.Directory.GetCurrentDirectory, fileSystem.Directory.EnumerateDirectories, fileSystem.File.Delete, fileSystem.File.Move,
+            definition, pluginPatchers ?? CodePatcher.DefaultPluginPatchers
         );
 
     [Fact]
@@ -54,7 +52,7 @@ public sealed class TestsCodePatcher
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         // Act
-        var actual = applyPatches(_ModDefinition);
+        var actual = applyPatches(_ModDefinition, []);
 
         // Assert
         actual.ShouldBeTrue();
@@ -62,13 +60,13 @@ public sealed class TestsCodePatcher
     }
 
     [Fact]
-    public void CompileMod_Compilation_WithPatches_AssemblyLoadFail() {
+    public void AssemblyLoadFail() {
         // Arrange
         var fileSystem = new MemoryFs(@"\Current") {
             { AssemblyPath, "", _OldDate },
             { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate }
         };
-        
+
         var logger                  = Substitute.For<ILogger>();
         var readAssemblyDefinition  = Substitute.For<ReadAssemblyDefinition>();
         var writeAssemblyDefinition = Substitute.For<WriteAssemblyDefinition>();
@@ -76,7 +74,7 @@ public sealed class TestsCodePatcher
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         // Act
-        var actual = applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), TestPluginPatcher.Factory));
+        var actual = applyPatches(_ModDefinition, [new(typeof(IHarmonyPlugin), TestPluginPatcher.Factory)]);
 
         // Assert
         actual.ShouldBeFalse();
@@ -87,23 +85,22 @@ public sealed class TestsCodePatcher
     }
 
     [Fact]
-    public void CompileMod_Compilation_WithPatches_ReturnValidInstances()
-    {
+    public void ReturnValidInstances() {
         // Arrange
         const string source = """
-                              using Railroader.ModManager.Interfaces;
-                              using Serilog;
+            using Railroader.ModManager.Interfaces;
+            using Serilog;
 
-                              namespace Foo.Bar
-                              {
-                                  public sealed class FirstPlugin : PluginBase<FirstPlugin>, IHarmonyPlugin
-                                  {
-                                      public FirstPlugin(IModdingContext moddingContext, IMod mod) 
-                                          : base(moddingContext, mod) {
-                                      }
-                                  }
-                              }
-                              """;
+            namespace Foo.Bar
+            {
+                public sealed class FirstPlugin : PluginBase<FirstPlugin>, IHarmonyPlugin
+                {
+                    public FirstPlugin(IModdingContext moddingContext, IMod mod) 
+                        : base(moddingContext, mod) {
+                    }
+                }
+            }
+            """;
 
         var (assemblyDefinition, _) = TestUtils.BuildAssemblyDefinition(source);
 
@@ -112,14 +109,14 @@ public sealed class TestsCodePatcher
             { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate },
             { @"C:\Current\Mods\SecondMod\SecondMod.dll", "", _OldDate }
         };
-        
-        var logger                  = Substitute.For<ILogger>();
-        var readAssemblyDefinition  = Substitute.For<ReadAssemblyDefinition>();
+
+        var logger                 = Substitute.For<ILogger>();
+        var readAssemblyDefinition = Substitute.For<ReadAssemblyDefinition>();
         readAssemblyDefinition.Invoke(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => assemblyDefinition);
         var writeAssemblyDefinition = Substitute.For<WriteAssemblyDefinition>();
         writeAssemblyDefinition.When(o => o.Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>()))
                                .Do(o => fileSystem.Add(o.Arg<string>(), "Patched DLL"));
-                               
+
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         string[] expectedDirectories = [
@@ -130,7 +127,7 @@ public sealed class TestsCodePatcher
         ];
 
         // Act
-        var actual = applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), TestPluginPatcher.Factory));
+        var actual = applyPatches(_ModDefinition, [new(typeof(IHarmonyPlugin), TestPluginPatcher.Factory)]);
 
         // Assert
         actual.ShouldBeTrue();
@@ -140,10 +137,10 @@ public sealed class TestsCodePatcher
         logger.ShouldReceiveCallCount(3);
 
         readAssemblyDefinition.Received(1).Invoke(AssemblyPath,
-            Arg.Is<ReaderParameters>(o =>
-                o.AssemblyResolver is DefaultAssemblyResolver &&
-                ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
-            )
+                                                  Arg.Is<ReaderParameters>(o =>
+                                                                               o.AssemblyResolver is DefaultAssemblyResolver &&
+                                                                               ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
+                                                  )
         );
         writeAssemblyDefinition.Received(1).Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
 
@@ -151,36 +148,35 @@ public sealed class TestsCodePatcher
         fileSystem.File.Move.Received().Invoke(@"C:\Current\Mods\DummyMod\DummyMod.patched.dll", AssemblyPath);
 
         // verify assemblyDefinition.Dispose as called ...
-        var imageField = typeof(ModuleDefinition).GetField("Image", BindingFlags.Instance | BindingFlags.NonPublic)!;
-        var image = imageField.GetValue(assemblyDefinition.MainModule)!; // Mono.Cecil.PE.Image
+        var imageField  = typeof(ModuleDefinition).GetField("Image", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var image       = imageField.GetValue(assemblyDefinition.MainModule)!; // Mono.Cecil.PE.Image
         var streamField = image.GetType().GetField("Stream", BindingFlags.Instance | BindingFlags.Public)!;
-        var disposable = streamField.GetValue(image)!; // Mono.Disposable<System.IO.Stream>
-        var valueField = disposable.GetType().GetField("value", BindingFlags.Instance | BindingFlags.NonPublic)!;
-        var stream = (Stream)valueField.GetValue(disposable)!;
+        var disposable  = streamField.GetValue(image)!; // Mono.Disposable<System.IO.Stream>
+        var valueField  = disposable.GetType().GetField("value", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var stream      = (Stream)valueField.GetValue(disposable)!;
         stream.CanRead.ShouldBeFalse();
         stream.CanWrite.ShouldBeFalse();
     }
 
     [Fact]
-    public void CompileMod_Compilation_WithPatches_ExtraInterface()
-    {
+    public void ExtraInterface() {
         // Arrange
         const string source = """
-                              using Railroader.ModManager.Interfaces;
-                              using Serilog;
+            using Railroader.ModManager.Interfaces;
+            using Serilog;
 
-                              namespace Foo.Bar
-                              {
-                                  public interface IExtra {}
+            namespace Foo.Bar
+            {
+                public interface IExtra {}
 
-                                  public sealed class FirstPlugin : PluginBase<FirstPlugin>, IExtra
-                                  {
-                                      public FirstPlugin(IModdingContext moddingContext, IMod mod) 
-                                          : base(moddingContext, mod) {
-                                      }
-                                  }
-                              }
-                              """;
+                public sealed class FirstPlugin : PluginBase<FirstPlugin>, IExtra
+                {
+                    public FirstPlugin(IModdingContext moddingContext, IMod mod) 
+                        : base(moddingContext, mod) {
+                    }
+                }
+            }
+            """;
 
         var (assemblyDefinition, _) = TestUtils.BuildAssemblyDefinition(source);
 
@@ -189,12 +185,12 @@ public sealed class TestsCodePatcher
             { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate },
             { @"C:\Current\Mods\SecondMod\SecondMod.dll", "", _OldDate }
         };
-        
+
         var logger                 = Substitute.For<ILogger>();
         var readAssemblyDefinition = Substitute.For<ReadAssemblyDefinition>();
         readAssemblyDefinition.Invoke(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => assemblyDefinition);
         var writeAssemblyDefinition = Substitute.For<WriteAssemblyDefinition>();
-                               
+
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         string[] expectedDirectories = [
@@ -205,42 +201,41 @@ public sealed class TestsCodePatcher
         ];
 
         // Act
-        var actual = applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), TestPluginPatcher.Factory));
+        var actual = applyPatches(_ModDefinition, [new(typeof(IHarmonyPlugin), TestPluginPatcher.Factory)]);
 
         // Assert
         actual.ShouldBeTrue();
         logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
-        logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
+        logger.Received().Information("No patches were applied to assembly {AssemblyPath} for mod {ModId}", AssemblyPath, "DummyMod");
         logger.Received().Information("Patching complete for mod {ModId}", _ModDefinition.Identifier);
         logger.ShouldReceiveCallCount(3);
 
         readAssemblyDefinition.Received(1).Invoke(AssemblyPath,
-            Arg.Is<ReaderParameters>(o =>
-                o.AssemblyResolver is DefaultAssemblyResolver &&
-                ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
-            )
+                                                  Arg.Is<ReaderParameters>(o =>
+                                                                               o.AssemblyResolver is DefaultAssemblyResolver &&
+                                                                               ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
+                                                  )
         );
         writeAssemblyDefinition.Received(0).Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
     }
 
     [Fact]
-    public void CompileMod_Compilation_WithPatches_HandleThrowingPatcher1()
-    {
+    public void HandleThrowingPatcher1() {
         // Arrange
         const string source = """
-                              using Railroader.ModManager.Interfaces;
-                              using Serilog;
+            using Railroader.ModManager.Interfaces;
+            using Serilog;
 
-                              namespace Foo.Bar
-                              {
-                                  public sealed class FirstPlugin : PluginBase<FirstPlugin>, IHarmonyPlugin
-                                  {
-                                      public FirstPlugin(IModdingContext moddingContext, IMod mod) 
-                                          : base(moddingContext, mod) {
-                                      }
-                                  }
-                              }
-                              """;
+            namespace Foo.Bar
+            {
+                public sealed class FirstPlugin : PluginBase<FirstPlugin>, IHarmonyPlugin
+                {
+                    public FirstPlugin(IModdingContext moddingContext, IMod mod) 
+                        : base(moddingContext, mod) {
+                    }
+                }
+            }
+            """;
 
         var (assemblyDefinition, _) = TestUtils.BuildAssemblyDefinition(source);
 
@@ -249,12 +244,12 @@ public sealed class TestsCodePatcher
             { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate },
             { @"C:\Current\Mods\SecondMod\SecondMod.dll", "", _OldDate }
         };
-        
+
         var logger                 = Substitute.For<ILogger>();
         var readAssemblyDefinition = Substitute.For<ReadAssemblyDefinition>();
         readAssemblyDefinition.Invoke(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => assemblyDefinition);
         var writeAssemblyDefinition = Substitute.For<WriteAssemblyDefinition>();
-                               
+
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         string[] expectedDirectories = [
@@ -265,44 +260,43 @@ public sealed class TestsCodePatcher
         ];
 
         // Act
-        var actual = applyPatches(_ModDefinition, new TypePatcherInfo(typeof(IHarmonyPlugin), ThrowingPatcher.Factory));
+        var actual = applyPatches(_ModDefinition, [new(typeof(IHarmonyPlugin), ThrowingPatcher.Factory)]);
 
         // Assert
         actual.ShouldBeFalse();
         logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
         logger.Received().Error(Arg.Is<Exception>(o => o.Message == "ThrowingPatcher"), "Failed to patch type {TypeName} for mod {ModId}", "Foo.Bar.FirstPlugin", _ModDefinition.Identifier);
-        logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
+        logger.Received().Information("No patches were applied to assembly {AssemblyPath} for mod {ModId}", AssemblyPath, "DummyMod");
         logger.ShouldReceiveCallCount(4);
 
         readAssemblyDefinition.Received(1).Invoke(AssemblyPath,
-            Arg.Is<ReaderParameters>(o =>
-                o.AssemblyResolver is DefaultAssemblyResolver &&
-                ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
-            )
+                                                  Arg.Is<ReaderParameters>(o =>
+                                                                               o.AssemblyResolver is DefaultAssemblyResolver &&
+                                                                               ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
+                                                  )
         );
         writeAssemblyDefinition.Received(0).Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
     }
 
     [Fact]
-    public void CompileMod_Compilation_WithPatches_HandleThrowingPatcher2()
-    {
+    public void HandleThrowingPatcher2() {
         // Arrange
         const string source = """
-                              using System;
-                              using Railroader.ModManager.Interfaces;
-                              using Railroader.ModManager.Tests.Features;
-                              using Serilog;
+            using System;
+            using Railroader.ModManager.Interfaces;
+            using Railroader.ModManager.Tests.Features;
+            using Serilog;
 
-                              namespace Foo.Bar
-                              {
-                                  public sealed class FirstPlugin : PluginBase<FirstPlugin>, IHarmonyPlugin
-                                  {
-                                      public FirstPlugin(IModdingContext moddingContext, IMod mod) 
-                                          : base(moddingContext, mod) {
-                                      }
-                                  }
-                              }
-                              """;
+            namespace Foo.Bar
+            {
+                public sealed class FirstPlugin : PluginBase<FirstPlugin>, IHarmonyPlugin
+                {
+                    public FirstPlugin(IModdingContext moddingContext, IMod mod) 
+                        : base(moddingContext, mod) {
+                    }
+                }
+            }
+            """;
 
         var (assemblyDefinition, _) = TestUtils.BuildAssemblyDefinition(source);
 
@@ -311,12 +305,12 @@ public sealed class TestsCodePatcher
             { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate },
             { @"C:\Current\Mods\SecondMod\SecondMod.dll", "", _OldDate }
         };
-        
+
         var logger                 = Substitute.For<ILogger>();
         var readAssemblyDefinition = Substitute.For<ReadAssemblyDefinition>();
         readAssemblyDefinition.Invoke(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => assemblyDefinition);
         var writeAssemblyDefinition = Substitute.For<WriteAssemblyDefinition>();
-                               
+
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         string[] expectedDirectories = [
@@ -328,27 +322,29 @@ public sealed class TestsCodePatcher
 
         // Act
         var actual = applyPatches(_ModDefinition,
-            new TypePatcherInfo(typeof(IHarmonyPlugin), TestPluginPatcher.Factory),
-            new TypePatcherInfo(typeof(IHarmonyPlugin), ThrowingPatcher.Factory)
+            [
+                new(typeof(IHarmonyPlugin), TestPluginPatcher.Factory),
+                new(typeof(IHarmonyPlugin), ThrowingPatcher.Factory)
+            ]
         );
 
         // Assert
         actual.ShouldBeFalse();
         logger.Received().Information("Patching mod {ModId} ...", _ModDefinition.Identifier);
         logger.Received().Error(Arg.Any<Exception>(), "Failed to patch type {TypeName} for mod {ModId}", "Foo.Bar.FirstPlugin", _ModDefinition.Identifier);
-        logger.Received().Information("No patches to assembly {AssemblyPath} for mod {ModId} where applied", AssemblyPath, _ModDefinition.Identifier);
+        logger.Received().Information("No patches were applied to assembly {AssemblyPath} for mod {ModId}", AssemblyPath, "DummyMod");
         logger.Received().Error("Failed to apply patches to assembly {AssemblyPath} for mod {ModId}", AssemblyPath, _ModDefinition.Identifier);
         logger.ShouldReceiveCallCount(4);
 
         readAssemblyDefinition.Received(1).Invoke(AssemblyPath,
-            Arg.Is<ReaderParameters>(o =>
-                o.AssemblyResolver is DefaultAssemblyResolver &&
-                ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
-            )
+                                                  Arg.Is<ReaderParameters>(o =>
+                                                                               o.AssemblyResolver is DefaultAssemblyResolver &&
+                                                                               ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
+                                                  )
         );
         writeAssemblyDefinition.Received(0).Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
     }
-
+    
     private static class TestPluginPatcher
     {
         public static TypePatcherDelegate Factory() => (_, _) => true;
@@ -356,6 +352,6 @@ public sealed class TestsCodePatcher
 
     private static class ThrowingPatcher
     {
-        public static TypePatcherDelegate Factory() => (_, _) => throw new Exception("ThrowingPatcher");
+        public static TypePatcherDelegate Factory() => (_, _) => throw new("ThrowingPatcher");
     }
 }

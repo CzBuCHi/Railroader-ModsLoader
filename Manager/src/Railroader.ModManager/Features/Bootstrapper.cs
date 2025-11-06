@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using Analytics;
 using Newtonsoft.Json;
 using Railroader.ModManager.Behaviors;
 using Railroader.ModManager.Delegates.HarmonyLib;
@@ -26,10 +24,11 @@ public static class Bootstrapper
         gameObject.AddComponent<ManagerBootstrapperBehaviour>();
     }
 
+    [ExcludeFromCodeCoverage]
     internal static void ExecuteCore() {
         var memoryLogger = new MemoryLogger();
         Log.Logger = memoryLogger;
-       
+
         Execute(
             ModExtractor.GetExtractor(memoryLogger),
             ModDefinitionLoader.Create(memoryLogger),
@@ -61,21 +60,21 @@ public static class Bootstrapper
             Log.Logger.ForSourceContext(),
             ModDefinitions,
             ModDefinitionValidator.Create,
-            CodeCompiler.Factory(),
+            CodeCompiler.Create(),
             CodePatcher.Create(),
             PluginManager.CreateLoader,
             Harmony.Factory("Railroader.ModManager")
         );
 
     internal static void LoadMods(
-        ILogger logger, 
-        IReadOnlyList<ModDefinition> modDefinitions, 
+        ILogger logger,
+        IReadOnlyList<ModDefinition> modDefinitions,
         ValidateMods modDefinitionValidator,
-        CompileModDelegate codeCompiler,
-        ApplyPatchesDelegate codePatcher,
+        CompileModAction codeCompiler,
+        PatchModAction codePatcher,
         PluginLoaderFactory createPluginsDelegateFactory,
         IHarmony harmony
-        ) {
+    ) {
         if (modDefinitions.Count == 0) {
             logger.Information("No mods where found.");
             return;
@@ -88,14 +87,14 @@ public static class Bootstrapper
             logger.Error("Validation error detected. Canceling mod loading.");
             return;
         }
-        
+
         var mods = new Mod[modDefinitions.Count];
 
         for (var i = 0; i < modDefinitions.Count; i++) {
-            var definition    = modDefinitions[i]!;
-            var result = codeCompiler(definition);
+            var definition = modDefinitions[i]!;
+            var result     = codeCompiler(definition);
             if (result == CompileModResult.Success) {
-                if (codePatcher(definition) == false) {
+                if (!codePatcher(definition)) {
                     result = CompileModResult.Error;
                 }
             }
@@ -106,9 +105,9 @@ public static class Bootstrapper
                 _                                                    => throw new ArgumentOutOfRangeException()
             };
 
-            mods[i] = new Mod(logger, definition) {
+            mods[i] = new(logger, definition) {
                 AssemblyPath = assemblyPath,
-                IsValid = result != CompileModResult.Error
+                IsValid      = result != CompileModResult.Error
             };
         }
 
@@ -120,7 +119,7 @@ public static class Bootstrapper
 
         logger.Information("Instantiating plugins ...");
         foreach (var mod in mods.Where(o => o.AssemblyPath != null)) {
-            mod.Plugins = pluginManager(mod).ToArray();
+            mod.Plugins  = pluginManager(mod).ToArray();
             mod.IsLoaded = true;
         }
 

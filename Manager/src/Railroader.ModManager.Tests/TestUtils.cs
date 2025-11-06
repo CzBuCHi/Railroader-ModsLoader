@@ -61,9 +61,9 @@ public static class TestUtils
         references.Add(typeof(TestUtils).Assembly.Location);
 
 
-        var result = AssemblyCompiler.Compile(CompilerCallableEntryPoint.InvokeCompiler, logger, assemblyPath, sources, references, out var messages);
+        var result = AssemblyCompiler.Compile(CompilerCallableEntryPoint.InvokeCompiler, logger, assemblyPath, sources, references);
         if (result == false) {
-            throw new InvalidOperationException("Failed to compile source:\r\n" + messages);
+            throw new InvalidOperationException("Failed to compile source");
         }
 
         return (Mono.Cecil.AssemblyDefinition.ReadAssembly(assemblyPath), outputPath);

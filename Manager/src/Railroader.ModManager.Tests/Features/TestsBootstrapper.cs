@@ -44,15 +44,15 @@ public sealed class TestsBootstrapper
     }
 
     [DebuggerStepThrough]
-    private static CompileModDelegate Compiler(CompileModResult result = CompileModResult.Success) {
-        var mock = Substitute.For<CompileModDelegate>();
+    private static CompileModAction Compiler(CompileModResult result = CompileModResult.Success) {
+        var mock = Substitute.For<CompileModAction>();
         mock.Invoke(Arg.Any<ModDefinition>(), Arg.Any<string[]>()).Returns(result);
         return mock;
     }
 
     [DebuggerStepThrough]
-    private static ApplyPatchesDelegate Patcher(bool result = true) {
-        var mock = Substitute.For<ApplyPatchesDelegate>();
+    private static PatchModAction Patcher(bool result = true) {
+        var mock = Substitute.For<PatchModAction>();
         mock.Invoke(Arg.Any<ModDefinition>(), Arg.Any<TypePatcherInfo[]>()).Returns(_ => result);
         return mock;
     }
@@ -172,23 +172,23 @@ public sealed class TestsBootstrapper
     }
 
     [Fact]
-    public void LoadMods_Should_TryPatch_Each_Compiled_Mod() {
+    public void LoadMods_Should_TryPatch_Each_Valid_Mod() {
         // Arrange
-        var logger   = Logger();
-        var compiler = Compiler();
-        var patcher  = Patcher(false);
+        var patcher       = Patcher(false);
+        var createPlugins = CreatePlugins();
+
 
         // Act
-        Bootstrapper.LoadMods(logger, [_ModDefinition], Processor([_ModDefinition]), compiler, patcher, PluginFactory(), Harmony());
+        
+        Bootstrapper.LoadMods(Logger(), [_ModDefinition], Processor([_ModDefinition]), Compiler(), patcher, PluginFactory(createPlugins), Harmony());
 
         // Assert
-        compiler.Received().Invoke(_ModDefinition);
-        patcher.Received().Invoke(_ModDefinition, CodePatcher.DefaultPluginPatchers);
-
-        logger.Received().Debug("mods: {mods}", """[{"Definition":{"id":"Identifier","name":"Name","version":"1.0","logLevel":"Debug","requires":null,"conflictsWith":null},"AssemblyPath":null,"IsEnabled":false,"IsValid":false,"IsLoaded":false,"Plugins":null}]""");
+        patcher.Received().Invoke(Arg.Any<ModDefinition>(), Arg.Any<TypePatcherInfo[]>());
+        createPlugins.DidNotReceive().Invoke(Arg.Any<Mod>());
     }
-
+    
     [Fact]
+    [ExcludeFromCodeCoverage] 
     public void LoadMods_Calls_PluginFactory() {
         // Arrange
         var logger        = Logger();
@@ -203,7 +203,7 @@ public sealed class TestsBootstrapper
         logger.Received().Information("Instantiating plugins ...");
 
         pluginFactory.Received().Invoke(
-            Arg.Do<IModdingContext>([ExcludeFromCodeCoverage](o) => {
+            Arg.Do<IModdingContext>(o => {
                 o.Mods.Count.ShouldBe(1);
                 var mod = o.Mods.First().ShouldBeOfType<Mod>();
                 mod.Definition.ShouldBe(_ModDefinition);

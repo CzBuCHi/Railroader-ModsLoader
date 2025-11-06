@@ -18,32 +18,29 @@ namespace Railroader.ModManager.Features;
 /// <param name="outputPath">The path where the compiled assembly will be written.</param>
 /// <param name="sources">A collection of C# source file paths to compile.</param>
 /// <param name="references">A collection of reference assembly paths to include during compilation.</param>
-/// <param name="messages">
-///     When this method returns, contains the compiler output such as warnings, errors, or diagnostic messages.
-/// </param>
 /// <returns>
 ///     <see langword="true" /> if compilation succeeds; otherwise, <see langword="false" />.
 /// </returns>
-public delegate bool AssemblyCompilerDelegate(string outputPath, ICollection<string> sources, ICollection<string> references, out string messages);
+public delegate bool AssemblyCompilerDelegate(string outputPath, ICollection<string> sources, ICollection<string> references);
 
 /// <summary>
 ///     Provides functionality for compiling C# source files into assemblies using the Mono C# compiler.
 /// </summary>
 [PublicAPI]
-public static class AssemblyCompiler {
+public static class AssemblyCompiler
+{
     /// <summary>
     ///     Compiles a set of C# source files into an assembly using the default compiler invocation and logger.
     /// </summary>
     /// <param name="outputPath">The path to write the compiled assembly to.</param>
     /// <param name="sourceFiles">The collection of source file paths to compile.</param>
     /// <param name="referenceAssemblies">The collection of reference assemblies required for compilation.</param>
-    /// <param name="messages">Outputs compiler messages, including warnings and errors.</param>
     /// <returns>
     ///     <see langword="true" /> if compilation succeeds; otherwise, <see langword="false" />.
     /// </returns>
     [ExcludeFromCodeCoverage]
-    public static bool Compile(string outputPath, ICollection<string> sourceFiles, ICollection<string> referenceAssemblies, out string messages) =>
-        Compile(CompilerCallableEntryPoint.InvokeCompiler, Log.Logger.ForSourceContext(), outputPath, sourceFiles, referenceAssemblies, out messages);
+    public static bool Compile(string outputPath, ICollection<string> sourceFiles, ICollection<string> referenceAssemblies) =>
+        Compile(CompilerCallableEntryPoint.InvokeCompiler, Log.Logger.ForSourceContext(), outputPath, sourceFiles, referenceAssemblies);
 
     /// <summary>
     ///     Compiles C# source files into an assembly using a specified compiler invoker and logger.
@@ -53,15 +50,13 @@ public static class AssemblyCompiler {
     /// <param name="outputPath">The path to write the compiled assembly to.</param>
     /// <param name="sourceFiles">The collection of source file paths to compile.</param>
     /// <param name="referenceAssemblies">The collection of reference assemblies required for compilation.</param>
-    /// <param name="messages">Outputs compiler messages, including warnings and errors.</param>
     /// <returns>
     ///     <see langword="true" /> if compilation succeeds; otherwise, <see langword="false" />.
     /// </returns>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static bool Compile(InvokeCompiler compilerInvoker, ILogger logger, string outputPath, ICollection<string> sourceFiles, ICollection<string> referenceAssemblies, out string messages) {
+    public static bool Compile(InvokeCompiler compilerInvoker, ILogger logger, string outputPath, ICollection<string> sourceFiles, ICollection<string> referenceAssemblies) {
         if (sourceFiles.Count == 0) {
             logger.Error("No source files provided for assembly compilation at {outputPath}.", outputPath);
-            messages = "No source files provided.";
             return false;
         }
 
@@ -77,7 +72,7 @@ public static class AssemblyCompiler {
             result = compilerInvoker(args, error);
         }
 
-        messages = sb.ToString();
+        var messages = sb.ToString();
         if (!string.IsNullOrEmpty(messages)) {
             logger.Write(result ? LogEventLevel.Debug : LogEventLevel.Information, "Compilation messages:\r\n{messages}", messages);
         }

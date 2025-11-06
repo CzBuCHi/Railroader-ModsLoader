@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Railroader.ModManager.Delegates.System.Reflection.Assembly;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Interfaces;
@@ -31,6 +33,20 @@ public sealed class TestsPluginManager {
         // Assert
         plugins.ShouldBeEmpty();
         logger.Received().Warning("Failed to load assembly from path: {AssemblyPath} for mod {ModId}", @"Mod\Dummy\Dummy.dll", "Identifier");
+    }
+
+    [Fact]
+    public void CreatePlugins_WhenAssemblyNull() {
+        // Arrange
+        var logger         = Substitute.For<ILogger>();
+        var moddingContext = Substitute.For<IModdingContext>();
+        var loadFrom       = Substitute.For<LoadFrom>();
+        var mod            = CreateMod(logger);
+        mod.AssemblyPath = null;
+
+        // Act & Assert
+        Should.Throw<InvalidOperationException>(() => PluginManager.LoadPlugins(moddingContext, logger, loadFrom, mod))
+              .Message.ShouldBe("Mod contract violation: AssemblyPath is null.");
     }
 
     [Fact]

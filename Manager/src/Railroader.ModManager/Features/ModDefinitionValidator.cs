@@ -20,7 +20,8 @@ public delegate IReadOnlyList<ModDefinition> ValidateMods(IReadOnlyList<ModDefin
 /// <summary>
 ///     Validates mod dependencies, conflicts, and sorts them in load order.
 /// </summary>
-public static class ModDefinitionValidator {
+public static class ModDefinitionValidator
+{
     /// <summary>
     ///     Creates a <see cref="ValidateMods" /> delegate that uses the global Serilog logger.
     /// </summary>
@@ -135,21 +136,21 @@ public static class ModDefinitionValidator {
     }
 
     /// <summary>
-    /// Performs a topological sort of mods based on <c>Requires</c> dependencies.
-    /// Detects and reports cyclic dependencies.
+    ///     Performs a topological sort of mods based on <c>Requires</c> dependencies.
+    ///     Detects and reports cyclic dependencies.
     /// </summary>
     /// <param name="logger">The logger for cycle detection.</param>
     /// <param name="modDefinitions">The mods to sort.</param>
     /// <returns>
-    /// A sorted list if no cycles exist; otherwise, an empty array (load fails entirely).
+    ///     A sorted list if no cycles exist; otherwise, an empty array (load fails entirely).
     /// </returns>
     /// <remarks>
-    /// Uses depth-first search (DFS) with path tracking to detect cycles.
-    /// <para>
-    /// If a cyclic dependency is detected <strong>anywhere</strong> in the graph,
-    /// <strong>no mods are returned</strong> — the entire load fails.
-    /// This ensures no partial or broken load order.
-    /// </para>
+    ///     Uses depth-first search (DFS) with path tracking to detect cycles.
+    ///     <para>
+    ///         If a cyclic dependency is detected <strong>anywhere</strong> in the graph,
+    ///         <strong>no mods are returned</strong> — the entire load fails.
+    ///         This ensures no partial or broken load order.
+    ///     </para>
     /// </remarks>
     private static IReadOnlyList<ModDefinition> SortByDependencies(ILogger logger, IReadOnlyList<ModDefinition> modDefinitions) {
         var modMap = modDefinitions.ToDictionary(mod => mod.Identifier, mod => mod, StringComparer.OrdinalIgnoreCase);
@@ -161,7 +162,7 @@ public static class ModDefinitionValidator {
         var hasCycle = false;
         foreach (var mod in modDefinitions) {
             if (!visited.Contains(mod.Identifier)) {
-                hasCycle |= !Visit(mod, new());
+                hasCycle = !Visit(mod, new()) || hasCycle;
             }
         }
 
@@ -185,8 +186,8 @@ public static class ModDefinitionValidator {
                 foreach (var requiredId in mod.Requires.Keys) {
                     if (invalidMods.Contains(requiredId)) {
                         logger.Error(
-                            "Mod '{identifier}' cannot resolve mod '{requiredId}' because mod '{requiredId}' is part of a cyclic dependency.",
-                            mod.Identifier, requiredId, requiredId
+                            "Mod '{identifier}' cannot resolve mod '{requiredId}' because mod is part of a cyclic dependency.",
+                            mod.Identifier, requiredId
                         );
                     } else if (!Visit(modMap[requiredId]!, path)) {
                         isValid = false;

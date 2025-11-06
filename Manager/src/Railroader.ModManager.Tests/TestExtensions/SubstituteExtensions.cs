@@ -70,7 +70,7 @@ public static class SubstituteDebugExtensions {
         // 2. String – choose the best literal style
         // --------------------------------------------------------------------
         if (arg is string s) {
-            return $"\"{EscapeNormal(s)}\"";
+            return s.Contains("\\") ? $"@\"{s}\"" : $"\"{EscapeNormal(s)}\"";
         }
 
         // --------------------------------------------------------------------

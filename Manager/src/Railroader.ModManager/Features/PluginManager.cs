@@ -26,7 +26,8 @@ internal delegate IPlugin[] PluginLoader(Mod mod);
 /// <summary>
 ///     Manages discovery and instantiation of mod plugins via reflection.
 /// </summary>
-internal static class PluginManager {
+internal static class PluginManager
+{
     /// <summary>
     ///     Creates a high-performance, reusable plugin loader for the given modding context.
     /// </summary>

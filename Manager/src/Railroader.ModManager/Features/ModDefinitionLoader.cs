@@ -24,7 +24,8 @@ public delegate ModDefinition[] LoadDefinitionsDelegate();
 ///     Provides functionality to locate, read, and parse mod definition files
 ///     from the <c>Mods</c> directory in the current working directory.
 /// </summary>
-public static class ModDefinitionLoader {
+public static class ModDefinitionLoader
+{
     /// <summary>
     ///     Creates a default delegate instance that loads all mod definitions
     ///     using real file system and directory operations.
@@ -53,12 +54,12 @@ public static class ModDefinitionLoader {
     ///     If the <c>Mods</c> directory is missing or no valid definitions are found, an empty array is returned.
     /// </returns>
     public static ModDefinition[] LoadDefinitions(
-        IMemoryLogger        logger,
-        GetCurrentDirectory  getCurrentDirectory,
-        DirectoryExists      directoryExists,
+        IMemoryLogger logger,
+        GetCurrentDirectory getCurrentDirectory,
+        DirectoryExists directoryExists,
         EnumerateDirectories enumerateDirectories,
-        FileExists           fileExists,
-        ReadAllText          readAllText
+        FileExists fileExists,
+        ReadAllText readAllText
     ) {
         var modDefinitions = new Dictionary<string, ModDefinition>(StringComparer.OrdinalIgnoreCase);
 

@@ -31,7 +31,8 @@ try {
     string[] statuses = [
         "Killed",
         "Ignored",
-        "CompileError"
+        "CompileError",
+        "Timeout"
     ];
 
     foreach (var pair in report.Files) {
