@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -82,6 +81,84 @@ public sealed class TestsCodePatcher
         logger.Received().Error("Failed to load definition for assembly {AssemblyPath} for mod {ModId}", AssemblyPath, _ModDefinition.Identifier);
         logger.Received().Error("Failed to apply patches to assembly {AssemblyPath} for mod {ModId}", AssemblyPath, _ModDefinition.Identifier);
         logger.ShouldReceiveCallCount(3);
+    }
+
+    [Fact]
+    public void AssemblyReplaceFail() {
+        // Arrange
+        const string source = """
+            using Railroader.ModManager.Interfaces;
+            using Serilog;
+
+            namespace Foo.Bar
+            {
+                public sealed class FirstPlugin : PluginBase<FirstPlugin>, IHarmonyPlugin
+                {
+                    public FirstPlugin(IModdingContext moddingContext, IMod mod) 
+                        : base(moddingContext, mod) {
+                    }
+                }
+            }
+            """;
+
+        var (assemblyDefinition, _) = TestUtils.BuildAssemblyDefinition(source);
+
+        var fileSystem = new MemoryFs(@"\Current") {
+            { AssemblyPath, "", _OldDate },
+            { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate },
+            { @"C:\Current\Mods\SecondMod\SecondMod.dll", "", _OldDate }
+        };
+
+        var logger                 = Substitute.For<ILogger>();
+        var readAssemblyDefinition = Substitute.For<ReadAssemblyDefinition>();
+        readAssemblyDefinition.Invoke(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => assemblyDefinition);
+        var writeAssemblyDefinition = Substitute.For<WriteAssemblyDefinition>();
+        writeAssemblyDefinition.When(o => o.Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>()))
+                               .Do(o => {
+                                   var tempFilePath = o.Arg<string>();
+                                   fileSystem.Add(tempFilePath, "Patched DLL");
+                                   fileSystem.LockFile(tempFilePath);
+                               });
+
+        var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
+
+        string[] expectedDirectories = [
+            ".",
+            "bin",
+            @"C:\Current\Railroader_Data\Managed",
+            @"C:\Current\Mods\SecondMod"
+        ];
+
+        // Act
+        var actual = applyPatches(_ModDefinition, [new(typeof(IHarmonyPlugin), TestPluginPatcher.Factory)]);
+
+        // Assert
+        actual.ShouldBeFalse();
+        logger.Received().Information("Patching mod {ModId} ...", "DummyMod");
+        logger.Received().Debug("Wrote patched assembly to temporary file {TempPath} for mod {ModId}", @"C:\Current\Mods\DummyMod\DummyMod.patched.dll", "DummyMod");
+        logger.Received().Error(Arg.Any<InvalidOperationException>(), "Failed to replace original assembly for mod {ModId}", "DummyMod");
+        logger.Received().Error("Failed to apply patches to assembly {AssemblyPath} for mod {ModId}", @"C:\Current\Mods\DummyMod\DummyMod.dll", "DummyMod");
+
+        readAssemblyDefinition.Received(1).Invoke(AssemblyPath,
+            Arg.Is<ReaderParameters>(o =>
+                o.AssemblyResolver is DefaultAssemblyResolver &&
+                ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
+            )
+        );
+        writeAssemblyDefinition.Received(1).Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
+
+        fileSystem.File.Delete.Received(1).Invoke(AssemblyPath);
+        fileSystem.File.Move.Received().Invoke(@"C:\Current\Mods\DummyMod\DummyMod.patched.dll", AssemblyPath);
+
+        // verify assemblyDefinition.Dispose as called ...
+        var imageField  = typeof(ModuleDefinition).GetField("Image", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var image       = imageField.GetValue(assemblyDefinition.MainModule)!; // Mono.Cecil.PE.Image
+        var streamField = image.GetType().GetField("Stream", BindingFlags.Instance | BindingFlags.Public)!;
+        var disposable  = streamField.GetValue(image)!; // Mono.Disposable<System.IO.Stream>
+        var valueField  = disposable.GetType().GetField("value", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var stream      = (Stream)valueField.GetValue(disposable)!;
+        stream.CanRead.ShouldBeFalse();
+        stream.CanWrite.ShouldBeFalse();
     }
 
     [Fact]

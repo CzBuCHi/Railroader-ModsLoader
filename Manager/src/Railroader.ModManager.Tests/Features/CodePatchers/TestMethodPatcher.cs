@@ -9,7 +9,6 @@ using Mono.Cecil.Cil;
 using NSubstitute;
 using Railroader.ModManager.Exceptions;
 using Railroader.ModManager.Features.CodePatchers;
-using Railroader.ModManager.Tests.TestExtensions;
 using Serilog;
 using Shouldly;
 using MethodAttributes = Mono.Cecil.MethodAttributes;

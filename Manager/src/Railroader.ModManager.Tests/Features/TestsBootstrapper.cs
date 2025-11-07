@@ -8,7 +8,6 @@ using Railroader.ModManager.Delegates.HarmonyLib;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Features.CodePatchers;
 using Railroader.ModManager.Interfaces;
-using Railroader.ModManager.Tests.TestExtensions;
 using Serilog;
 using Serilog.Events;
 using Shouldly;

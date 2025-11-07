@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Railroader.ModManager.Delegates.System.Reflection.Assembly;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Interfaces;

@@ -55,7 +55,7 @@ public static class Program {
             from o in xElement.Elements("member")
             let name = o.Attribute("name")
             where name != null
-            orderby name.Value
+            orderby name!.Value
             select o;
 
         return new XElement(xElement.Name, xElement.Attributes(), query.ToArray());

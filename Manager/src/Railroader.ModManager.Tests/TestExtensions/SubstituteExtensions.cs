@@ -123,7 +123,7 @@ public static class SubstituteDebugExtensions {
         }
 
         if (type == typeof(double)) {
-            return value.ToString()!;
+            return value.ToString();
         }
 
         if (type == typeof(decimal)) {
@@ -140,7 +140,7 @@ public static class SubstituteDebugExtensions {
         }
 
         // Fallback
-        return value.ToString()!;
+        return value.ToString();
     }
 
     private static string CharToSource(char c) {
@@ -192,7 +192,7 @@ public static class SubstituteDebugExtensions {
                 prefix = $"new {elementType.Name}[]";
             } else {
                 // Multi-dimensional: new int[2,3] { {…}, {…} }
-                var dims = string.Join(",", Enumerable.Range(0, rank).Select(_ => arr.GetLength(_)));
+                var dims = string.Join(",", Enumerable.Range(0, rank).Select(o => arr.GetLength(o)));
                 prefix = $"new {elementType.Name}[{dims}]";
             }
         }

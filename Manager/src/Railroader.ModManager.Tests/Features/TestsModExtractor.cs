@@ -8,7 +8,6 @@ using NSubstitute;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Services;
 using Shouldly;
-using UnityEngine.Rendering;
 
 namespace Railroader.ModManager.Tests.Features;
 

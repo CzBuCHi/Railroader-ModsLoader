@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Serilog.Events;
 using Shouldly;
