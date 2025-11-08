@@ -20,6 +20,7 @@
 
     <ItemGroup>
       <Compile Include="..\SharedCode\JetBrains.Annotations.cs" Link="JetBrains.Annotations.cs" />
+      <Compile Include="..\SharedCode\System.Diagnostics.CodeAnalysis.cs" Link="System.Diagnostics.CodeAnalysis.cs" />
     </ItemGroup>
 
     <ItemGroup>
