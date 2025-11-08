@@ -56,20 +56,15 @@ public static class ModDefinitionValidator
         var modMap = modDefinitions.ToDictionary(mod => mod.Identifier, mod => mod, StringComparer.OrdinalIgnoreCase);
 
         var hasError = false;
-
         foreach (var mod in modDefinitions) {
             // Verify Requirements
-            if (mod.Requires != null) {
-                foreach (var (requiredId, fluentVersion) in mod.Requires) {
-                    hasError |= CheckRequirement(logger, mod, modMap, requiredId, fluentVersion);
-                }
+            foreach (var (requiredId, fluentVersion) in mod.Requires) {
+                hasError = CheckRequirement(logger, mod, modMap, requiredId, fluentVersion) || hasError;
             }
 
             // Verify Conflicts
-            if (mod.ConflictsWith != null) {
-                foreach (var (conflictId, fluentVersion) in mod.ConflictsWith) {
-                    hasError |= CheckConflict(logger, mod, modMap, conflictId, fluentVersion);
-                }
+            foreach (var (conflictId, fluentVersion) in mod.ConflictsWith) {
+                hasError = CheckConflict(logger, mod, modMap, conflictId, fluentVersion) || hasError;
             }
         }
 
@@ -182,18 +177,17 @@ public static class ModDefinitionValidator
             path.Push(mod.Identifier);
 
             var isValid = true;
-            if (mod.Requires != null) {
-                foreach (var requiredId in mod.Requires.Keys) {
-                    if (invalidMods.Contains(requiredId)) {
-                        logger.Error(
-                            "Mod '{identifier}' cannot resolve mod '{requiredId}' because mod is part of a cyclic dependency.",
-                            mod.Identifier, requiredId
-                        );
-                    } else if (!Visit(modMap[requiredId]!, path)) {
-                        isValid = false;
-                    }
+            foreach (var requiredId in mod.Requires.Keys) {
+                if (invalidMods.Contains(requiredId)) {
+                    logger.Error(
+                        "Mod '{identifier}' cannot resolve mod '{requiredId}' because mod is part of a cyclic dependency.",
+                        mod.Identifier, requiredId
+                    );
+                } else if (!Visit(modMap[requiredId]!, path)) {
+                    isValid = false;
                 }
             }
+
 
             path.Pop();
 

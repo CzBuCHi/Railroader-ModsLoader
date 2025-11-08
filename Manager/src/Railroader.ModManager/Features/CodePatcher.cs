@@ -128,10 +128,13 @@ public static class CodePatcher
     /// </summary>
     private static DefaultAssemblyResolver CreateAssemblyResolver(GetCurrentDirectory getCurrentDirectory, EnumerateDirectories enumerateDirectories, ModDefinition definition, string assemblyPath) {
         var resolver = new DefaultAssemblyResolver();
+        resolver.RemoveSearchDirectory(".");
+        resolver.RemoveSearchDirectory("bin");
 
         resolver.AddSearchDirectory(Path.Combine(getCurrentDirectory(), "Railroader_Data", "Managed"));
 
-        if (definition.Requires == null || definition.Requires.Count == 0) {
+        //  stryker disable once block
+        if (definition.Requires.Count == 0) {
             return resolver;
         }
 

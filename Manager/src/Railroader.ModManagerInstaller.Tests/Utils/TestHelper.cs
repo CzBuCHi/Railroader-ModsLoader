@@ -103,9 +103,7 @@ public static class TestHelper
         ConfigureCall(call, methodReferenceOrException);
         return () => moduleDefinition.ImportReference(Arg.Any<MethodReference>());
     }
-
-    public static Action StaticCtorCall(TypeDefinition typeDefinition) => () => _ = typeDefinition.Methods.FirstOrDefault(m => m.Name == ".cctor");
-
+    
     public static IAssembly PrepareExecutingAssembly(string location) {
         var assembly = Substitute.For<IAssembly>();
         assembly.GetName().Returns(new AssemblyName("Installer") {

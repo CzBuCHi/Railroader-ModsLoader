@@ -393,9 +393,7 @@ public sealed class TestsPatcher
         il.Emit(OpCodes.Call, importedBootstrap);
         il.Emit(OpCodes.Ret);
         logManagerType.Methods.Add(logManagerCctor);
-
-        TestHelper.StaticCtorCall(logManagerType);
-
+        
         Action[] calls = [
             TestHelper.GetCurrentDirectoryCall,
             TestHelper.FileExistsCall(ModManagerInterfaces, true),
@@ -590,7 +588,6 @@ public sealed class TestsPatcher
         logManagerType.Methods.Add(cctor);
 
         var importedBootstrap = new MethodReference("Bootstrap", csharpModule.TypeSystem.Void, modManagerType) { HasThis = false };
-        TestHelper.StaticCtorCall(logManagerType);
 
         var assemblyPath = Path.Combine(TestHelper.ManagedPath, AssemblyCsharpDll + ".dll");
         var backupPath = assemblyPath.Replace(".dll", "_original.dll");

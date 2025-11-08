@@ -25,6 +25,7 @@ public sealed class ModReferenceJsonConverter : JsonConverter<Dictionary<string,
                 writer.WriteValue(pair.Value.ToString());
             }
         }
+        writer.WriteEndObject();
     }
 
     /// <inheritdoc />
@@ -36,7 +37,7 @@ public sealed class ModReferenceJsonConverter : JsonConverter<Dictionary<string,
         JsonSerializer serializer
     ) {
         if (reader.TokenType == JsonToken.Null) {
-            return new Dictionary<string, FluentVersion?>();
+            return new();
         }
 
         var jObject = JObject.Load(reader);

@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration.Assemblies;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Xml.Linq;
+using DiffEngine;
+using Newtonsoft.Json;
 using NSubstitute;
 using Railroader.ModManager.Delegates.HarmonyLib;
 using Railroader.ModManager.Features;
@@ -197,7 +201,8 @@ public sealed class TestsBootstrapper
         Bootstrapper.LoadMods(logger, [_ModDefinition], Processor([_ModDefinition]), Compiler(), Patcher(), pluginFactory, Harmony());
 
         // Assert
-        logger.Received().Debug("mods: {mods}", """[{"Definition":{"id":"Identifier","name":"Name","version":"1.0","logLevel":"Debug","requires":null,"conflictsWith":null},"AssemblyPath":"BasePath\\Identifier.dll","IsEnabled":false,"IsValid":true,"IsLoaded":false,"Plugins":null}]"""); 
+        logger.Received().Debug("mods: {mods}", """[{"Definition":{"id":"Identifier","name":"Name","version":"1.0","logLevel":"Debug","requires":{},"conflictsWith":{}},"AssemblyPath":"BasePath\\Identifier.dll","IsEnabled":false,"IsValid":true,"IsLoaded":false,"Plugins":null}]"""); 
+        
         logger.Received().Information("Created modding context ...");
         logger.Received().Information("Instantiating plugins ...");
 

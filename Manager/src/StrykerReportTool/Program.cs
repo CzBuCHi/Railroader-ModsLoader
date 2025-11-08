@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
+
+[assembly: ExcludeFromCodeCoverage]
 
 try {
     var strykerOutput = args.Length == 1
@@ -37,8 +40,8 @@ try {
 
     foreach (var pair in report.Files) {
         var mutants = pair.Value.Mutants
-                          .Where(m => !statuses.Contains(m.Status, StringComparer.OrdinalIgnoreCase))
-                          .ToArray();
+            .Where(m => !statuses.Contains(m.Status, StringComparer.OrdinalIgnoreCase))
+            .ToArray();
 
         report.Files[pair.Key] = pair.Value with { Mutants = mutants };
     }
@@ -46,9 +49,9 @@ try {
     // 3. Remove files with no mutants
     Console.WriteLine("Remove files with no mutants ...");
     var filesToRemove = report.Files
-                              .Where(o => o.Value.Mutants.Length == 0)
-                              .Select(o => o.Key)
-                              .ToArray();
+        .Where(o => o.Value.Mutants.Length == 0)
+        .Select(o => o.Key)
+        .ToArray();
 
     foreach (var fileName in filesToRemove) {
         report.Files.Remove(fileName);
@@ -58,15 +61,15 @@ try {
     // 4. Remove tests not used by any remaining file
     Console.WriteLine("Remove tests not used by any remaining file ...");
     var usedTestIds = report.Files.Values
-                            .SelectMany(f => f.Mutants)
-                            .SelectMany(m => m.CoveredBy.Concat(m.KilledBy))
-                            .Distinct()
-                            .ToHashSet();
+        .SelectMany(f => f.Mutants)
+        .SelectMany(m => m.CoveredBy.Concat(m.KilledBy))
+        .Distinct()
+        .ToHashSet();
 
     foreach (var pair in report.TestFiles) {
         var tests = pair.Value.Tests
-                        .Where(t => usedTestIds.Contains(t.Id))
-                        .ToArray();
+            .Where(t => usedTestIds.Contains(t.Id))
+            .ToArray();
 
         report.TestFiles[pair.Key] = pair.Value with { Tests = tests };
     }
@@ -74,8 +77,8 @@ try {
     // 5. Remove test files with no tests
     Console.WriteLine("Remove test files with no tests ...");
     var testFilesToRemove = report.TestFiles
-                                  .Where(o => o.Value.Tests.Length == 0)
-                                  .Select(o => o.Key);
+        .Where(o => o.Value.Tests.Length == 0)
+        .Select(o => o.Key);
 
     foreach (var testFileName in testFilesToRemove) {
         report.TestFiles.Remove(testFileName);
@@ -88,8 +91,8 @@ try {
     var outputJson = JsonSerializer.Serialize(report, options);
     System.IO.File.WriteAllText(outputPath, outputJson);
 
-    var       reportPath   = Path.ChangeExtension(strykerOutput, ".filtered.html");
-    using var fileStream   = System.IO.File.Create(reportPath);
+    var reportPath = Path.ChangeExtension(strykerOutput, ".filtered.html");
+    using var fileStream = System.IO.File.Create(reportPath);
     using var prefixStream = typeof(Program).Assembly.GetManifestResourceStream("StrykerReportTool.mutation-report_prefix.txt")!;
     prefixStream.CopyTo(fileStream);
 
@@ -112,12 +115,26 @@ Console.ReadKey();
 // ReSharper disable NotAccessedPositionalProperty.Global
 #pragma warning disable CA1050
 
-public sealed record Report(Dictionary<string, File> Files, string ProjectRoot, string SchemaVersion, Dictionary<string, TestFile> TestFiles, Thresholds Thresholds);
+public sealed record Report(
+    Dictionary<string, File> Files,
+    string ProjectRoot,
+    string SchemaVersion,
+    Dictionary<string, TestFile> TestFiles,
+    Thresholds Thresholds);
 
 public sealed record File(string Language, string Source, Mutant[] Mutants);
 
 [DebuggerDisplay("{Status,nq} {MutatorName,nq} at {Location}")]
-public sealed record Mutant(string Id, string MutatorName, string Replacement, Location Location, string Status, string StatusReason, bool Static, Guid[] CoveredBy, Guid[] KilledBy);
+public sealed record Mutant(
+    string Id,
+    string MutatorName,
+    string Replacement,
+    Location Location,
+    string Status,
+    string StatusReason,
+    bool Static,
+    Guid[] CoveredBy,
+    Guid[] KilledBy);
 
 public sealed record TestFile(string Language, string Source, Test[] Tests);
 

@@ -152,7 +152,7 @@ public static class CodeCompiler
         var managedPath = Path.Combine(getCurrentDirectory(), "Railroader_Data", "Managed");
         var references  = referenceNames.Select(o => Path.Combine(managedPath, o + DllExtension)).ToArray();
 
-        if (definition.Requires?.Count > 0) {
+        if (definition.Requires.Count > 0) {
             logger.Information("Adding references to {Mods} ...", definition.Requires.Keys);
             var modsPath      = Path.Combine(getCurrentDirectory(), "Mods");
             var modReferences = definition.Requires.Keys.Select(o => Path.Combine(modsPath, o, o + DllExtension));

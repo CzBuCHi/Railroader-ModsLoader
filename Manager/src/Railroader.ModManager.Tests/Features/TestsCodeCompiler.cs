@@ -124,10 +124,8 @@ public sealed class TestsCodeCompiler
         fileSystem.File.Delete.Received().Invoke(AssemblyPath);
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void CompileMod_Compilation_Successful(bool hasEmptyRequires)
+    [Fact]
+    public void CompileMod_Compilation_Successful()
     {
         // Arrange
         var logger          = Substitute.For<ILogger>();
@@ -149,7 +147,7 @@ public sealed class TestsCodeCompiler
             Identifier = "DummyMod",
             Name = "Dummy Mod Name",
             BasePath = @"C:\Current\Mods\DummyMod",
-            Requires = hasEmptyRequires ? new Dictionary<string, FluentVersion?>() : null
+            Requires = new()
         };
 
         string[] sources = [@"C:\Current\Mods\DummyMod\source1.cs", @"C:\Current\Mods\DummyMod\source2.cs"];

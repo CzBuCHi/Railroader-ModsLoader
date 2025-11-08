@@ -16,8 +16,8 @@ public sealed class TestsModDefinitionValidator {
             Identifier    = id,
             Name          = $"{id} Mod",
             Version       = VersionJsonConverter.ParseString(version)!,
-            Requires      = requires,
-            ConflictsWith = conflicts
+            Requires      = requires ?? new(),
+            ConflictsWith = conflicts?? new()
         };
 
     [Fact]

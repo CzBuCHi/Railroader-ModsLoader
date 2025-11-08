@@ -123,8 +123,6 @@ public sealed class TestsCodePatcher
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         string[] expectedDirectories = [
-            ".",
-            "bin",
             @"C:\Current\Railroader_Data\Managed",
             @"C:\Current\Mods\SecondMod"
         ];
@@ -197,8 +195,6 @@ public sealed class TestsCodePatcher
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         string[] expectedDirectories = [
-            ".",
-            "bin",
             @"C:\Current\Railroader_Data\Managed",
             @"C:\Current\Mods\SecondMod"
         ];
@@ -218,6 +214,83 @@ public sealed class TestsCodePatcher
                                                                                o.AssemblyResolver is DefaultAssemblyResolver &&
                                                                                ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
                                                   )
+        );
+        writeAssemblyDefinition.Received(1).Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
+
+        fileSystem.File.Delete.Received(1).Invoke(AssemblyPath);
+        fileSystem.File.Move.Received().Invoke(@"C:\Current\Mods\DummyMod\DummyMod.patched.dll", AssemblyPath);
+
+        // verify assemblyDefinition.Dispose as called ...
+        var imageField  = typeof(ModuleDefinition).GetField("Image", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var image       = imageField.GetValue(assemblyDefinition.MainModule)!; // Mono.Cecil.PE.Image
+        var streamField = image.GetType().GetField("Stream", BindingFlags.Instance | BindingFlags.Public)!;
+        var disposable  = streamField.GetValue(image)!; // Mono.Disposable<System.IO.Stream>
+        var valueField  = disposable.GetType().GetField("value", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var stream      = (Stream)valueField.GetValue(disposable)!;
+        stream.CanRead.ShouldBeFalse();
+        stream.CanWrite.ShouldBeFalse();
+    }
+    
+    [Fact]
+    public void ReturnValidInstances_NoRequires() {
+        // Arrange
+        const string source = """
+            using Railroader.ModManager.Interfaces;
+            using Serilog;
+
+            namespace Foo.Bar
+            {
+                public sealed class FirstPlugin : PluginBase<FirstPlugin>, IHarmonyPlugin
+                {
+                    public FirstPlugin(IModdingContext moddingContext, IMod mod) 
+                        : base(moddingContext, mod) {
+                    }
+                }
+            }
+            """;
+        
+        ModDefinition modDefinition = new() {
+            Identifier = "DummyMod",
+            Name       = "Dummy Mod Name",
+            BasePath   = @"C:\Current\Mods\DummyMod",
+        };
+
+        var (assemblyDefinition, _) = TestUtils.BuildAssemblyDefinition(source);
+
+        var fileSystem = new MemoryFs(@"\Current") {
+            { AssemblyPath, "", _OldDate },
+            { @"C:\Current\Mods\DummyMod\source.cs", "", _NewDate },
+            { @"C:\Current\Mods\SecondMod\SecondMod.dll", "", _OldDate }
+        };
+
+        var logger                 = Substitute.For<ILogger>();
+        var readAssemblyDefinition = Substitute.For<ReadAssemblyDefinition>();
+        readAssemblyDefinition.Invoke(Arg.Any<string>(), Arg.Any<ReaderParameters>()).Returns(_ => assemblyDefinition);
+        var writeAssemblyDefinition = Substitute.For<WriteAssemblyDefinition>();
+        writeAssemblyDefinition.When(o => o.Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>()))
+                               .Do(o => fileSystem.Add(o.Arg<string>(), "Patched DLL"));
+
+        var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
+
+        string[] expectedDirectories = [
+            @"C:\Current\Railroader_Data\Managed"
+        ];
+
+        // Act
+        var actual = applyPatches(modDefinition, [new(typeof(IHarmonyPlugin), TestPluginPatcher.Factory)]);
+
+        // Assert
+        actual.ShouldBeTrue();
+        logger.Received().Information("Patching mod {ModId} ...", modDefinition.Identifier);
+        logger.Received().Debug("Wrote patched assembly to temporary file {TempPath} for mod {ModId}", Arg.Any<string>(), modDefinition.Identifier);
+        logger.Received().Information("Patching complete for mod {ModId}", modDefinition.Identifier);
+        logger.ShouldReceiveCallCount(3);
+
+        readAssemblyDefinition.Received(1).Invoke(AssemblyPath,
+            Arg.Is<ReaderParameters>(o =>
+                o.AssemblyResolver is DefaultAssemblyResolver &&
+                ((DefaultAssemblyResolver)o.AssemblyResolver).GetSearchDirectories()!.SequenceEqual(expectedDirectories)
+            )
         );
         writeAssemblyDefinition.Received(1).Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
 
@@ -271,8 +344,6 @@ public sealed class TestsCodePatcher
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         string[] expectedDirectories = [
-            ".",
-            "bin",
             @"C:\Current\Railroader_Data\Managed",
             @"C:\Current\Mods\SecondMod"
         ];
@@ -330,8 +401,6 @@ public sealed class TestsCodePatcher
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         string[] expectedDirectories = [
-            ".",
-            "bin",
             @"C:\Current\Railroader_Data\Managed",
             @"C:\Current\Mods\SecondMod"
         ];
@@ -391,8 +460,6 @@ public sealed class TestsCodePatcher
         var applyPatches = Factory(logger, fileSystem, readAssemblyDefinition, writeAssemblyDefinition);
 
         string[] expectedDirectories = [
-            ".",
-            "bin",
             @"C:\Current\Railroader_Data\Managed",
             @"C:\Current\Mods\SecondMod"
         ];
