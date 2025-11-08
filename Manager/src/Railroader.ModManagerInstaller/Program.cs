@@ -1,46 +1,51 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Microsoft.Win32;
+using JetBrains.Annotations;
+using Railroader.ModManagerInstaller.Abstractions;
 
 namespace Railroader.ModManagerInstaller;
 
+[PublicAPI]
 public static class Program
 {
-    private static readonly Assembly _Assembly     = Assembly.GetExecutingAssembly();
-    private static readonly string   _AssemblyName = _Assembly.GetName().Name;
-
     public static void Main() {
         try {
-            Console.Write(_AssemblyName);
-            Console.Write(" ");
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine(_Assembly.GetName().Version);
-            Console.ResetColor();
-            Console.Title = $"{_AssemblyName} {_Assembly.GetName().Version}";
+            RunInstaller();
+        } catch (InstallerException ex) {
+            AppServices.Console.WriteLine(ex.Message!, ConsoleColor.Red);
+        } catch (GamePathException ex) {
+            AppServices.Console.WriteLine(ex.Message!, ConsoleColor.Red);
+            AppServices.Console.WriteLine("Could not determine Railroader directory automatically.", ConsoleColor.Red);
+            AppServices.Console.WriteLine("Move this installer into your game's directory, then run again.");
+        } catch (Exception ex) {
+            AppServices.Console.WriteLine("Unexpected error:", ConsoleColor.Red);
+            AppServices.Console.WriteLine(ex.ToString(), ConsoleColor.Red);
+        } finally {
+            AppServices.Console.WriteLine("Press any key to exit.", ConsoleColor.White);
+            AppServices.Console.ReadKey();
+        }
+    }
+
+    private static void RunInstaller() {
+        try {
+            var assembly = AppServices.Assembly.GetExecutingAssembly();
+            var assemblyName = assembly.GetName().Name;
+            AppServices.Console.Write(assemblyName + " ");
+            AppServices.Console.WriteLine(assembly.GetName().Version, ConsoleColor.DarkGreen);
+            AppServices.Console.SetTitle($"{assemblyName} {assembly.GetName().Version}");
         } catch (PlatformNotSupportedException) {
         }
 
-        AppDomain.CurrentDomain.AssemblyResolve += ResolveInternalAssemblies;
+        AppDomain.CurrentDomain.AssemblyResolve += (sender, args) => ResolveInternalAssemblies(sender, args).Assembly;
 
-        if (!SetCurrentDirectory()) {
-            ConsoleEx.WriteError("Could not determine Railroader directory automatically.");
-            Console.WriteLine($"Move this {_AssemblyName} into your game's directory, then run again.");
-            Environment.Exit(1);
-        }
+        SetCurrentDirectory();
+        ExtractFiles();
+        Patcher.PatchGame();
+        AppServices.Directory.CreateDirectory("Mods");
 
-        try {
-            ExtractFiles();
-            Patcher.PatchGame();
-            Directory.CreateDirectory("Mods");
-        } catch (Exception exc) {
-            ConsoleEx.WriteError("Failed to patch game.");
-            Console.Error.WriteLine(exc);
-        }
-
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.Error.WriteLine("Press any key to exit.");
-        Console.ReadKey();
+        AppServices.Console.WriteLine("Installation complete!", ConsoleColor.Green);
     }
 
     private static void ExtractFiles() {
@@ -54,16 +59,18 @@ public static class Program
             "Railroader.ModManager.Interfaces.dll"
         ];
 
-        Console.WriteLine("Extracting files ...");
+        var executingAssembly = AppServices.Assembly.GetExecutingAssembly();
+
+
+        AppServices.Console.WriteLine("Extracting files ...");
         foreach (var assembly in assemblies) {
             var path = Path.Combine("Railroader_Data", "Managed", assembly);
 
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.Error.WriteLine(path);
-            Console.ResetColor();
+            AppServices.Console.WriteLine(path, ConsoleColor.DarkCyan);
 
-            using var stream     = _Assembly.GetManifestResourceStream($"{prefix}.{assembly}")!;
-            using var fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
+            using var stream = executingAssembly.GetManifestResourceStream($"{prefix}.{assembly}")!;
+
+            using var fileStream = AppServices.File.Open(path, FileMode.OpenOrCreate, FileAccess.Write);
             fileStream.SetLength(0L);
             stream.CopyTo(fileStream);
         }
@@ -71,50 +78,49 @@ public static class Program
 
     private const string Railroader = "Railroader.exe";
 
-    private static bool SetCurrentDirectory() {
-        if (File.Exists(Path.Combine(Environment.CurrentDirectory, Railroader))) {
-            Console.WriteLine("Found Railroader in the current working directory.");
-            return true;
+    private static void SetCurrentDirectory() {
+        if (AppServices.File.Exists(Path.Combine(AppServices.Directory.GetCurrentDirectory(), Railroader))) {
+            AppServices.Console.WriteLine("Found Railroader in the current working directory.");
+            return;
         }
 
-        var path = Path.GetDirectoryName(_Assembly.Location)!;
-        if (File.Exists(Path.Combine(path, Railroader))) {
-            Console.WriteLine($"Found Railroader in the {_AssemblyName} assembly directory.");
-            Environment.CurrentDirectory = path;
-            return true;
+        var executingAssembly = AppServices.Assembly.GetExecutingAssembly();
+        var path = Path.GetDirectoryName(executingAssembly.Location)!;
+        if (AppServices.File.Exists(Path.Combine(path, Railroader))) {
+            AppServices.Console.WriteLine($"Found Railroader in the {executingAssembly.GetName().Name} assembly directory.");
+            AppServices.Directory.SetCurrentDirectory(path);
+            return;
         }
 
         path = FindRailroaderFromRegistry();
         if (path == null) {
-            ConsoleEx.WriteError($"Could not find {Railroader} using Steam's Library.");
-            return false;
+            throw new GamePathException($"Could not find {Railroader} using Steam's Library.");
         }
 
-        if (File.Exists(Path.Combine(path, Railroader))) {
-            Console.WriteLine("Found Railroader using Steam's Library.");
-            Environment.CurrentDirectory = path;
-            return true;
+        if (AppServices.File.Exists(Path.Combine(path, Railroader))) {
+            AppServices.Console.WriteLine("Found Railroader using Steam's Library.");
+            AppServices.Directory.SetCurrentDirectory(path);
+            return;
         }
 
-        ConsoleEx.WriteError($"Could not find {Railroader} (Steam's Library path is invalid).");
-        return false;
+        throw new GamePathException($"Could not find {Railroader} (Steam's Library path is invalid).");
     }
 
-    [SuppressMessage("ReSharper", "StringLiteralTypo")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("ReSharper", "StringLiteralTypo")]
     private static string? FindRailroaderFromRegistry() {
         var steamIdRegex = new Regex("^\\s*\"1683150\"\\s*\"\\d+\"\\s*$", RegexOptions.Compiled);
-        var pathRegex    = new Regex("^\\s*\"path\"\\s*\"(.+?)\"\\s*$", RegexOptions.Compiled);
+        var pathRegex = new Regex("^\\s*\"path\"\\s*\"(.+?)\"\\s*$", RegexOptions.Compiled);
 
-        using var registryKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Valve\Steam");
+        using var registryKey = AppServices.Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Valve\Steam");
         if (registryKey == null) {
             throw new ArgumentException("Cannot find Steam registry");
         }
 
-        if (registryKey.GetValue("SteamPath") is not string text || !Directory.Exists(text)) {
+        if (registryKey.GetValue("SteamPath") is not string text || !AppServices.Directory.Exists(text)) {
             throw new ArgumentException("Steam path not found, or does not exist on file system");
         }
 
-        string[] array = File.ReadAllLines(Path.Combine(text.TrimEnd('/', '\\'), "steamapps", "libraryfolders.vdf"));
+        var array = AppServices.File.ReadAllLines(Path.Combine(text.TrimEnd('/', '\\'), "steamapps", "libraryfolders.vdf"));
         for (var i = 0; i < array.Length; i++) {
             var input = array[i];
             if (!steamIdRegex.IsMatch(input)) {
@@ -133,7 +139,7 @@ public static class Program
                 }
 
                 var path = Path.Combine(match.Groups[1].Value.Replace(@"\\", "\\").TrimEnd('/', '\\'), "steamapps", "common", "Railroader");
-                if (!File.Exists(Path.Combine(path, Railroader))) {
+                if (!AppServices.File.Exists(Path.Combine(path, Railroader))) {
                     throw new ArgumentException($"{Railroader} not found at the specified location");
                 }
 
@@ -144,21 +150,18 @@ public static class Program
         return null;
     }
 
-    private static Assembly? ResolveInternalAssemblies(object sender, ResolveEventArgs args) {
-        var name         = args.Name!;
-        var assemblyName = new AssemblyName(name);
-        if (name.StartsWith("Mono.Cecil") || name.StartsWith("Newtonsoft.Json")) {
-            var manifestResourceStream = typeof(Program).Assembly.GetManifestResourceStream($"Assemblies/{assemblyName.Name}.dll");
-            if (manifestResourceStream != null) {
-                var array = new byte[manifestResourceStream.Length];
-                var size  = manifestResourceStream.Read(array, 0, array.Length);
-                if (size == array.Length) {
-                    return Assembly.Load(array);
-                }
-            }
+    private static IAssembly ResolveInternalAssemblies(object sender, ResolveEventArgs args) {
+        var name = new AssemblyName(args.Name!).Name;
+        if (!name.StartsWith("Mono.Cecil") && !name.StartsWith("Newtonsoft.Json")) {
+            throw new InstallerException($"Could not load missing assembly: {name}");
         }
 
-        ConsoleEx.WriteFatal($"Could not load missing assembly {assemblyName}");
-        return null;
+        var stream = typeof(Program).Assembly.GetManifestResourceStream($"Assemblies/{name}.dll")
+                     ?? throw new InstallerException($"Embedded assembly not found: {name}.dll");
+
+        var buffer = new byte[stream.Length];
+        return stream.Read(buffer, 0, buffer.Length) != buffer.Length
+            ? throw new InstallerException($"Failed to read embedded assembly: {name}.dll")
+            : AppServices.Assembly.Load(buffer);
     }
 }

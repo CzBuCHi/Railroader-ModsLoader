@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <ImplicitUsings>enable</ImplicitUsings>
+        <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
@@ -16,6 +16,10 @@
       <None Remove="Assemblies\Newtonsoft.Json.dll" />
       <None Remove="Assemblies\Railroader.ModManager.dll" />
       <None Remove="Assemblies\Railroader.ModManager.Interfaces.dll" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="..\SharedCode\JetBrains.Annotations.cs" Link="JetBrains.Annotations.cs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -4,4 +4,4 @@
 _ReSharper.Caches
 *.user
 /Manager/packages
-/StrykerOutput
+/**/StrykerOutput
