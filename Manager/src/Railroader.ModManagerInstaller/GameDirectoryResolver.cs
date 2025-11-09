@@ -46,7 +46,8 @@ public static class GameDirectoryResolver
             throw new ArgumentException("Cannot find Steam registry");
         }
 
-        if (registryKey.GetValue("SteamPath") is not string steamPath || !AppServices.Directory.Exists(steamPath)) {
+        var steamPath = registryKey.GetValue("SteamPath") as string;
+        if (steamPath == null || !AppServices.Directory.Exists(steamPath)) {
             throw new ArgumentException("Steam path not found, or does not exist on file system");
         }
 
@@ -57,19 +58,14 @@ public static class GameDirectoryResolver
         }
 
         foreach (var libraryFolder in libraryFolders.Values.OfType<VdfEntry>()) {
-            if (!libraryFolder.TryGetValue("apps", out var appsRaw) || appsRaw is not VdfEntry apps) {
+            if (libraryFolder.FindValue<VdfEntry>("apps")?.ContainsKey("1683150") != true) {
                 continue;
             }
 
-            if (!apps.ContainsKey("1683150")) {
-                continue;
-            }
-
-            if (!libraryFolder.TryGetValue("path", out var pathRaw) || pathRaw is not string path) {
-                throw new VdfException("Path is not string");
-            }
-
-            return Path.Combine(path, "steamapps", "common", "Railroader");
+            var path = libraryFolder.FindValue<string>("path");
+            return path != null
+                ? Path.Combine(path, "steamapps", "common", "Railroader")
+                : throw new VdfException("Path not found");
         }
 
         return null;

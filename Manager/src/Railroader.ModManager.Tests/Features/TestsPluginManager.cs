@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using NSubstitute;
-using Railroader.ModManager.Delegates.System.IO.File;
+using Railroader.ModManager.Delegates.System.IO;
 using Railroader.ModManager.Delegates.System.Reflection.Assembly;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Interfaces;
@@ -17,9 +17,8 @@ public sealed class TestsPluginManager {
         var modDefinition = new ModDefinition() {
             Identifier = "Identifier"
         };
-        var readAllText = Substitute.For<ReadAllText>();
-        var writeAllText = Substitute.For<WriteAllText>();
-        return new(logger, modDefinition, readAllText, writeAllText) { AssemblyPath = AssemblyPath };
+        var file = Substitute.For<IFileStatic>();
+        return new(logger, modDefinition, file) { AssemblyPath = AssemblyPath };
     }
 
     [Fact]
@@ -97,10 +96,9 @@ public sealed class TestsPluginManager {
         var logger         = Substitute.For<ILogger>();
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
-        var readAllText = Substitute.For<ReadAllText>();
-        var writeAllText = Substitute.For<WriteAllText>();
+        var file = Substitute.For<IFileStatic>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, new ModDefinition(), readAllText, writeAllText) {
+        var mod = new Mod(logger, new ModDefinition(), file) {
             AssemblyPath = AssemblyPath
         };
 

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using NSubstitute;
-using Railroader.ModManager.Delegates.System.IO.File;
+using Railroader.ModManager.Delegates.System.IO;
 using Railroader.ModManager.Interfaces;
 using Serilog;
 using Shouldly;
@@ -14,10 +14,10 @@ public sealed class TestsMod
         // Arrange
         var logger = Substitute.For<ILogger>();
         var modDefinition = new ModDefinition();
-        var readAllText = Substitute.For<ReadAllText>();
-        var writeAllText = Substitute.For<WriteAllText>();
+        var file = Substitute.For<IFileStatic>();
+        
         // Act
-        var sut = new Mod(logger, modDefinition, readAllText, writeAllText);
+        var sut = new Mod(logger, modDefinition, file);
 
         // Assert
         sut.ShouldNotBeNull();
@@ -35,9 +35,8 @@ public sealed class TestsMod
         // Arrange
         var logger        = Substitute.For<ILogger>();
         var modDefinition = new ModDefinition();
-        var readAllText = Substitute.For<ReadAllText>();
-        var writeAllText = Substitute.For<WriteAllText>();
-        var sut           = new Mod(logger, modDefinition, readAllText, writeAllText);
+        var file = Substitute.For<IFileStatic>();
+        var sut           = new Mod(logger, modDefinition, file);
         var plugin        = Substitute.For<IPlugin>();
 
         sut.Plugins = [plugin];
@@ -65,9 +64,8 @@ public sealed class TestsMod
             Identifier = "Identifier"
         };
         
-        var readAllText = Substitute.For<ReadAllText>();
-        var writeAllText = Substitute.For<WriteAllText>();
-        var sut           = new Mod(logger, modDefinition, readAllText, writeAllText);
+        var file = Substitute.For<IFileStatic>();
+        var sut           = new Mod(logger, modDefinition, file);
 
         // Act
         var modLogger = sut.CreateLogger(scope);
@@ -86,9 +84,8 @@ public sealed class TestsMod
             Identifier = "Identifier"
         };
         
-        var readAllText = Substitute.For<ReadAllText>();
-        var writeAllText = Substitute.For<WriteAllText>();
-        var sut           = new Mod(logger, modDefinition, readAllText, writeAllText);
+        var file = Substitute.For<IFileStatic>();
+        var sut           = new Mod(logger, modDefinition, file);
 
         // Act
         var settings = sut.LoadSettings<Settings>("id");
@@ -106,10 +103,9 @@ public sealed class TestsMod
             Identifier = "Identifier"
         };
         
-        var readAllText = Substitute.For<ReadAllText>();
-        readAllText.Invoke(@"C:\Mod\Path\id.json").Returns("invalid json");
-        var writeAllText = Substitute.For<WriteAllText>();
-        var sut           = new Mod(logger, modDefinition, readAllText, writeAllText);
+        var file = Substitute.For<IFileStatic>();
+        file.ReadAllText(@"C:\Mod\Path\id.json").Returns("invalid json");
+        var sut           = new Mod(logger, modDefinition, file);
 
         // Act
         var act = () => sut.LoadSettings<Settings>("id");
@@ -127,13 +123,11 @@ public sealed class TestsMod
             Identifier = "Identifier"
         };
         
-        var fileExists = Substitute.For<FileExists>();
-        fileExists.Invoke(@"C:\Mod\Path\id.json").Returns(true);
-        var readAllText = Substitute.For<ReadAllText>();
-        readAllText.Invoke(@"C:\Mod\Path\id.json").Returns(""" { "value": 42 }""");
-        var writeAllText = Substitute.For<WriteAllText>();
-        var sut           = new Mod(logger, modDefinition, readAllText, writeAllText);
-
+        var file = Substitute.For<IFileStatic>();
+        file.Exists(@"C:\Mod\Path\id.json").Returns(true);
+        file.ReadAllText(@"C:\Mod\Path\id.json").Returns(""" { "value": 42 }""");
+        var sut           = new Mod(logger, modDefinition, file);
+        
         // Act
         var actual = sut.LoadSettings<Settings>("id");
 
@@ -151,15 +145,14 @@ public sealed class TestsMod
             Identifier = "Identifier"
         };
         
-        var readAllText = Substitute.For<ReadAllText>();
-        var writeAllText = Substitute.For<WriteAllText>();
-        var sut           = new Mod(logger, modDefinition, readAllText, writeAllText);
+        var file = Substitute.For<IFileStatic>();
+        var sut           = new Mod(logger, modDefinition, file);
 
         // Act
         sut.SaveSettings("id", new Settings { Value = 42 });
 
         // Assert
-        writeAllText.Received().Invoke(@"C:\Mod\Path\id.json", """{"value":42}""");
+        file.Received().WriteAllText(@"C:\Mod\Path\id.json", """{"value":42}""");
     }
 
     private class Settings

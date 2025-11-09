@@ -1,10 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
 using Railroader.ModManager.Delegates.System.IO;
-using Railroader.ModManager.Delegates.System.IO.Directory;
-using Railroader.ModManager.Delegates.System.IO.File;
 using Railroader.ModManager.Extensions;
 using Serilog;
 using ILogger = Serilog.ILogger;
@@ -83,11 +80,7 @@ public static class CodeCompiler
             CompileMod(
                 Log.Logger.ForSourceContext(),
                 AssemblyCompiler.Compile,
-                DirectoryInfoWrapper.Create,
-                Directory.GetCurrentDirectory,
-                File.Exists,
-                File.GetLastWriteTime,
-                File.Delete,
+                FileSystem.Instance,
                 definition,
                 names ?? DefaultReferenceNames
             );
@@ -100,13 +93,7 @@ public static class CodeCompiler
     /// <param name="compileAssembly">
     ///     Delegate that performs the actual Roslyn compilation.
     /// </param>
-    /// <param name="directoryInfo">
-    ///     Factory to obtain a <see cref="DirectoryInfoWrapper" /> for a path.
-    /// </param>
-    /// <param name="getCurrentDirectory">Delegate returning the process current directory.</param>
-    /// <param name="exists">Delegate that checks file existence.</param>
-    /// <param name="getLastWriteTime">Delegate that retrieves a file's last write time.</param>
-    /// <param name="delete">Delegate that deletes a file.</param>
+    /// <param name="fileSystem"></param>
     /// <param name="definition">Mod definition containing base path and identifier.</param>
     /// <param name="referenceNames">Names of assemblies to reference during compilation.</param>
     /// <returns>
@@ -118,15 +105,11 @@ public static class CodeCompiler
     public static CompileModResult CompileMod(
         ILogger logger,
         AssemblyCompilerDelegate compileAssembly,
-        DirectoryInfoFactory directoryInfo,
-        GetCurrentDirectory getCurrentDirectory,
-        FileExists exists,
-        GetLastWriteTime getLastWriteTime,
-        Delete delete,
+        IFileSystem fileSystem,
         ModDefinition definition,
         string[] referenceNames
     ) {
-        var csFiles = directoryInfo(definition.BasePath)
+        var csFiles = fileSystem.DirectoryInfo(definition.BasePath)
                       .EnumerateFiles("*.cs", SearchOption.AllDirectories)
                       .ToArray();
         if (csFiles.Length == 0) {
@@ -134,27 +117,27 @@ public static class CodeCompiler
         }
 
         var assemblyPath = Path.Combine(definition.BasePath, definition.Identifier + DllExtension);
-        if (exists(assemblyPath)) {
+        if (fileSystem.File.Exists(assemblyPath)) {
             var newestFileTime = csFiles.Max(f => f.LastWriteTime);
-            if (getLastWriteTime(assemblyPath) >= newestFileTime) {
+            if (fileSystem.File.GetLastWriteTime(assemblyPath) >= newestFileTime) {
                 logger.Information("Using existing mod {ModId} DLL at {Path}", definition.Identifier, assemblyPath);
                 return CompileModResult.Skipped;
             }
 
             logger.Information("Deleting mod {ModId} DLL at {Path} because it is outdated", definition.Identifier, assemblyPath);
-            delete(assemblyPath);
+            fileSystem.File.Delete(assemblyPath);
         }
 
         logger.Information("Compiling mod {ModId} ...", definition.Identifier);
 
         var sources = csFiles.Select(o => o.FullName).ToArray();
 
-        var managedPath = Path.Combine(getCurrentDirectory(), "Railroader_Data", "Managed");
+        var managedPath = Path.Combine(fileSystem.Directory.GetCurrentDirectory(), "Railroader_Data", "Managed");
         var references  = referenceNames.Select(o => Path.Combine(managedPath, o + DllExtension)).ToArray();
 
         if (definition.Requires.Count > 0) {
             logger.Information("Adding references to {Mods} ...", definition.Requires.Keys);
-            var modsPath      = Path.Combine(getCurrentDirectory(), "Mods");
+            var modsPath      = Path.Combine(fileSystem.Directory.GetCurrentDirectory(), "Mods");
             var modReferences = definition.Requires.Keys.Select(o => Path.Combine(modsPath, o, o + DllExtension));
             references = references.Concat(modReferences).ToArray();
         }

@@ -1,6 +1,5 @@
 ﻿// resharper disable all
 
-using System.IO;
 using _CompilerCallableEntryPoint = Mono.CSharp.CompilerCallableEntryPoint;
 using _TextWriter = System.IO.TextWriter;
 

@@ -425,7 +425,7 @@ public sealed class TestGameDirectoryResolver
 
         // Assert
         act.ShouldThrow<VdfException>()
-            .Message.ShouldBe("Path is not string");
+            .Message.ShouldBe("Path not found");
     }
     
     [Fact]

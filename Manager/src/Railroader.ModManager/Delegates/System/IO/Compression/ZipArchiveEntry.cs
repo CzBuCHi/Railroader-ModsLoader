@@ -1,25 +1,28 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using _ZipArchiveEntry = System.IO.Compression.ZipArchiveEntry;
+using System.IO.Compression;
 
 namespace Railroader.ModManager.Delegates.System.IO.Compression;
 
-/// <summary> Wrapper for <see cref="_ZipArchiveEntry"/>. </summary>
+/// <summary> Wrapper for <see cref="ZipArchiveEntry" />. </summary>
 public interface IZipArchiveEntry
 {
-    /// <inheritdoc cref="_ZipArchiveEntry.FullName"/>
+    /// <inheritdoc cref="ZipArchiveEntry.FullName" />
     string FullName { get; }
 
-    /// <inheritdoc cref="_ZipArchiveEntry.Name"/>
+    /// <inheritdoc cref="ZipArchiveEntry.Name" />
     string Name { get; }
 
-    /// <inheritdoc cref="_ZipArchiveEntry.Open()"/>
+    /// <inheritdoc cref="ZipArchiveEntry.Open()" />
     Stream Open();
 }
 
 [ExcludeFromCodeCoverage]
-public sealed class ZipArchiveEntryWrapper(_ZipArchiveEntry entry) : IZipArchiveEntry
+public sealed class ZipArchiveEntryWrapper(ZipArchiveEntry entry) : IZipArchiveEntry
 {
+    public static IZipArchiveEntry? CreateWrapper(ZipArchiveEntry? archiveEntry) =>
+        archiveEntry != null ? new ZipArchiveEntryWrapper(archiveEntry) : null;
+
     /// <inheritdoc />
     public string FullName => entry.FullName;
 

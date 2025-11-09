@@ -21,6 +21,11 @@ public class VdfEntry : Dictionary<string, object>
         return Parse(lines);
     }
 
+    public T? FindValue<T>(string name) {
+        TryGetValue(name, out var value);
+        return value is T o ? o : default;
+    }
+
     public static VdfEntry Parse(string[] lines) {
         var i = 0;
         return Parse(lines, 0, ref i);

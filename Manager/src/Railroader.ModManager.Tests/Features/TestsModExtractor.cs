@@ -15,7 +15,7 @@ public sealed class TestsModExtractor
 {
     [DebuggerStepThrough]
     private static void ExtractAll(IMemoryLogger logger, MemoryFs memoryFs) =>
-        ModExtractor.ExtractAll(logger, memoryFs.DirectoryInfo, memoryFs.Directory.Exists, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory, memoryFs.File.Exists);
+        ModExtractor.ExtractAll(logger, memoryFs);
 
     [Fact]
     [SuppressMessage("ReSharper", "UseObjectOrCollectionInitializer")]
@@ -98,7 +98,7 @@ public sealed class TestsModExtractor
         memoryFs.ShouldBeEquivalentTo(expected);
         logger.Received().Information("Processing mod archive {ZipPath} for extraction.", @"C:\Mods\Mod1.zip"); 
         logger.Received().Warning("Extraction path {ExtractPath} already exists – skipping mod {ModId}.", @"C:\Mods\MyMod", "MyMod");
-        memoryFs.ZipFile.ExtractToDirectory.DidNotReceive().Invoke(Arg.Any<string>(), Arg.Any<string>());
+        memoryFs.ZipFile.DidNotReceive().ExtractToDirectory(Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -181,7 +181,7 @@ public sealed class TestsModExtractor
         memoryFs.ShouldBeEquivalentTo(expected);
         logger.Received().Information("Processing mod archive {ZipPath} for extraction.", @"C:\Mods\Mod1.zip");
         logger.Received().Error("Skipping archive {ZipPath}: Invalid mod definition.", @"C:\Mods\Mod1.zip");
-        memoryFs.Directory.Exists.DidNotReceive().Invoke(Arg.Any<string>());
+        memoryFs.Directory.DidNotReceive().Exists(Arg.Any<string>());
     }
 
     [Fact]
@@ -318,7 +318,7 @@ public sealed class TestsModExtractor
         };
 
         // Act
-        ModExtractor.ExtractAll(logger, memoryFs.DirectoryInfo, memoryFs.Directory.Exists, memoryFs.Directory.GetCurrentDirectory, memoryFs.ZipFile.OpenRead, memoryFs.ZipFile.ExtractToDirectory, memoryFs.File.Exists);
+        ModExtractor.ExtractAll(logger, memoryFs);
 
         // Assert
         memoryFs.ShouldBeEquivalentTo(expected);

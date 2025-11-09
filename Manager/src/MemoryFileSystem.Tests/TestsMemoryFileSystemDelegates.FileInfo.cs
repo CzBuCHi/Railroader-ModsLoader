@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Linq;
 using MemoryFileSystem.Types;
 using Shouldly;
 using Xunit;
@@ -14,7 +13,7 @@ public class TestsMemoryFileSystemDelegatesFileInfo
         var fileSystem = new MemoryFs {
             { @"C:\Path\File.txt", "File" }
         };
-        var file = fileSystem.DirectoryInfo(@"C:\\Path").EnumerateFiles("*.*").First();
+        var file = fileSystem.FileInfo(@"C:\Path\File.txt");
 
         // Act
         var actual = file.LastWriteTime;
@@ -29,7 +28,7 @@ public class TestsMemoryFileSystemDelegatesFileInfo
         var fileSystem = new MemoryFs {
             { @"C:\Path\File.txt", "File" }
         };
-        var file = fileSystem.DirectoryInfo(@"C:\Path").EnumerateFiles("*.*").First();
+        var file = fileSystem.FileInfo(@"C:\Path\File.txt");
         fileSystem.Items.Clear();
 
         // Act & Assert
@@ -43,7 +42,7 @@ public class TestsMemoryFileSystemDelegatesFileInfo
         var fileSystem = new MemoryFs {
             { @"C:\Path\File.txt", "File" }
         };
-        var file = fileSystem.DirectoryInfo(@"C:\\Path").EnumerateFiles("*.*").First();
+        var file = fileSystem.FileInfo(@"C:\Path\File.txt");
 
         // Act
         var actual = file.FullName;
@@ -58,7 +57,7 @@ public class TestsMemoryFileSystemDelegatesFileInfo
         var fileSystem = new MemoryFs {
             { @"C:\Path\File.txt", "File" }
         };
-        var file = fileSystem.DirectoryInfo(@"C:\\Path").EnumerateFiles("*.*").First();
+        var file = fileSystem.FileInfo(@"C:\Path\File.txt");
 
         // Act
         file.MoveTo(@"C:\Path\Target.txt");

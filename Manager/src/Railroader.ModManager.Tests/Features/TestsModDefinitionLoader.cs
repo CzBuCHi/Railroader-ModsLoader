@@ -14,7 +14,7 @@ public sealed class TestsModDefinitionLoader
 {
     [DebuggerStepThrough]
     private static LoadDefinitionsDelegate Factory(IMemoryLogger logger, MemoryFs fileSystem) =>
-        [DebuggerStepThrough]() => ModDefinitionLoader.LoadDefinitions(logger, fileSystem.Directory.GetCurrentDirectory, fileSystem.Directory.Exists, fileSystem.Directory.EnumerateDirectories, fileSystem.File.Exists, fileSystem.File.ReadAllText);
+        [DebuggerStepThrough]() => ModDefinitionLoader.LoadDefinitions(logger, fileSystem);
 
     [Fact]
     public void ReturnsEmptyArrayWhenModSDirectoryNotFound() {
@@ -202,7 +202,7 @@ public sealed class TestsModDefinitionLoader
         sut().ShouldBeEmpty();
 
         logger.Received().Warning("Not loading directory {directory}: Missing Definition.json.", @"C:\Current\Mods\BadMod");
-        fileSystem.File.ReadAllText.Received(0).Invoke(Arg.Any<string>());
+        fileSystem.File.Received(0).ReadAllText(Arg.Any<string>());
     }
 
     [Fact]

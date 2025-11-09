@@ -5,11 +5,7 @@ using System.IO;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Railroader.ModManager.Delegates.System.IO;
-using Railroader.ModManager.Delegates.System.IO.Compression.ZipFile;
-using Railroader.ModManager.Delegates.System.IO.Directory;
-using Railroader.ModManager.Delegates.System.IO.File;
 using Railroader.ModManager.Services;
-using ZipFile = System.IO.Compression.ZipFile;
 
 namespace Railroader.ModManager.Features;
 
@@ -31,32 +27,27 @@ public static class ModExtractor
     /// <returns>A delegate that, when invoked, performs the full extraction process.</returns>
     [ExcludeFromCodeCoverage]
     public static ModExtractionAction GetExtractor(IMemoryLogger logger) =>
-        () => ExtractAll(logger, DirectoryInfoWrapper.Create, Directory.Exists, Directory.GetCurrentDirectory, ZipFileDefaults.OpenRead, ZipFile.ExtractToDirectory, File.Exists);
+        () => ExtractAll(logger, FileSystem.Instance);
 
     /// <summary>
     ///     Extracts all <c>*.zip</c> files from the <c>Mods</c> directory that contain a valid <c>Definition.json</c>.
     /// </summary>
     /// <param name="logger">The logger for reporting progress and errors.</param>
-    /// <param name="directoryInfo">Factory to create <see cref="IDirectoryInfo" /> wrappers.</param>
-    /// <param name="directoryExists"> Delegate that checks whether a directory exists at the given path. </param>
-    /// <param name="getCurrentDirectory">Delegate to retrieve the current working directory.</param>
-    /// <param name="openRead">Delegate to open a ZIP archive for reading.</param>
-    /// <param name="extractToDirectory">Delegate to extract a ZIP archive to a directory.</param>
-    /// <param name="fileExists">Delegate that checks whether a file exists at the given path.</param>
+    /// <param name="fileSystem"></param>
     /// <remarks>
     ///     Each archive is processed independently. Invalid or duplicate mods are skipped with appropriate logging.
     ///     Successfully extracted archives are moved to a <c>.bak</c> backup with a unique name if needed.
     /// </remarks>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void ExtractAll(IMemoryLogger logger, DirectoryInfoFactory directoryInfo, DirectoryExists directoryExists, GetCurrentDirectory getCurrentDirectory, OpenRead openRead, ExtractToDirectory extractToDirectory, FileExists fileExists) {
-        var modsDirectory = Path.Combine(getCurrentDirectory(), "Mods");
-        var zipFiles      = directoryInfo(modsDirectory).EnumerateFiles("*.zip");
+    public static void ExtractAll(IMemoryLogger logger, IFileSystem fileSystem) {
+        var modsDirectory = Path.Combine(fileSystem.Directory.GetCurrentDirectory(), "Mods");
+        var zipFiles      = fileSystem.DirectoryInfo(modsDirectory).EnumerateFiles("*.zip");
 
-        foreach (var zipFile in zipFiles) {
+        foreach (var zipFileInfo in zipFiles) {
             try {
-                TryExtractOne(logger, openRead, directoryExists, extractToDirectory, zipFile, modsDirectory, fileExists);
+                TryExtractOne(logger, fileSystem, zipFileInfo, modsDirectory);
             } catch (Exception exc) {
-                logger.Error(exc, "Failed to unzip archive {ZipPath}.", zipFile.FullName);
+                logger.Error(exc, "Failed to unzip archive {ZipPath}.", zipFileInfo.FullName);
             }
         }
     }
@@ -65,12 +56,9 @@ public static class ModExtractor
     ///     Attempts to extract a single mod archive.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
-    /// <param name="openRead">Delegate to open the ZIP archive.</param>
-    /// <param name="directoryExists"> Delegate that checks whether a directory exists at the given path. </param>
-    /// <param name="extractToDirectory">Delegate to extract the archive contents.</param>
-    /// <param name="zipFile">The ZIP file to process.</param>
+    /// <param name="fileSystem"></param>
+    /// <param name="zipFileInfo">The ZIP file to process.</param>
     /// <param name="modsDirectory">The root directory containing mods.</param>
-    /// <param name="fileExists">Delegate that checks whether a file exists at the given path.</param>
     /// <remarks>
     ///     Early returns occur if:
     ///     <list type="bullet">
@@ -89,14 +77,14 @@ public static class ModExtractor
     ///     </list>
     ///     On success, the archive is moved to a <c>.bak</c> backup.
     /// </remarks>
-    private static void TryExtractOne(IMemoryLogger logger, OpenRead openRead, DirectoryExists directoryExists, ExtractToDirectory extractToDirectory, IFileInfo zipFile, string modsDirectory, FileExists fileExists) {
-        logger.Information("Processing mod archive {ZipPath} for extraction.", zipFile.FullName);
+    private static void TryExtractOne(IMemoryLogger logger, IFileSystem fileSystem, IFileInfo zipFileInfo, string modsDirectory) {
+        logger.Information("Processing mod archive {ZipPath} for extraction.", zipFileInfo.FullName);
 
-        using var archive = openRead(zipFile.FullName)!;
+        using var archive = fileSystem.ZipFile.OpenRead(zipFileInfo.FullName)!;
 
         var definitionEntry = archive.GetEntry("Definition.json");
         if (definitionEntry == null) {
-            logger.Error("Skipping archive {ZipPath}: Missing 'Definition.json'.", zipFile.FullName);
+            logger.Error("Skipping archive {ZipPath}: Missing 'Definition.json'.", zipFileInfo.FullName);
             return;
         }
 
@@ -106,25 +94,25 @@ public static class ModExtractor
             json = reader.ReadToEnd();
         }
 
-        var modDefinition = TryDeserialize(logger, json, zipFile.FullName);
+        var modDefinition = TryDeserialize(logger, json, zipFileInfo.FullName);
         if (modDefinition?.IsValid != true) {
-            logger.Error("Skipping archive {ZipPath}: Invalid mod definition.", zipFile.FullName);
+            logger.Error("Skipping archive {ZipPath}: Invalid mod definition.", zipFileInfo.FullName);
             return;
         }
 
         var extractPath = Path.Combine(modsDirectory, modDefinition.Identifier);
 
-        if (directoryExists(extractPath)) {
+        if (fileSystem.Directory.Exists(extractPath)) {
             logger.Warning("Extraction path {ExtractPath} already exists – skipping mod {ModId}.", extractPath, modDefinition.Identifier);
-            MoveToBackup(zipFile, logger, ".dup", fileExists);
+            MoveToBackup(zipFileInfo, logger, ".dup", fileSystem.File);
             return;
         }
 
-        extractToDirectory(zipFile.FullName, extractPath);
+        fileSystem.ZipFile.ExtractToDirectory(zipFileInfo.FullName, extractPath);
 
-        logger.Information("Successfully extracted mod {ModId} from {ZipPath} to {ExtractPath}.", modDefinition.Identifier, zipFile.FullName, extractPath);
+        logger.Information("Successfully extracted mod {ModId} from {ZipPath} to {ExtractPath}.", modDefinition.Identifier, zipFileInfo.FullName, extractPath);
 
-        MoveToBackup(zipFile, logger, ".bak", fileExists);
+        MoveToBackup(zipFileInfo, logger, ".bak", fileSystem.File);
     }
 
     /// <summary>
@@ -151,17 +139,17 @@ public static class ModExtractor
     /// <param name="extension">
     ///     The backup file extension (e.g., <c>".bak"</c> or <c>".dup"</c>).
     /// </param>
-    /// <param name="fileExists">Delegate that checks whether a file exists at the given path.</param>
+    /// <param name="file"></param>
     /// <remarks>
     ///     If a file with the target name already exists, a numeric suffix is appended
     ///     (e.g., <c>mod.zip.bak</c> → <c>mod.zip.bak1</c>) until a unique name is found.
     /// </remarks>
-    private static void MoveToBackup(IFileInfo zipFile, IMemoryLogger logger, string extension, FileExists fileExists) {
+    private static void MoveToBackup(IFileInfo zipFile, IMemoryLogger logger, string extension, IFileStatic file) {
         var basePath   = Path.ChangeExtension(zipFile.FullName, extension);
         var backupPath = basePath;
 
         var i = 1;
-        while (fileExists(backupPath)) {
+        while (file.Exists(backupPath)) {
             backupPath = $"{basePath}{i++}";
         }
 

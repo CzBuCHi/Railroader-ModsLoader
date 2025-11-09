@@ -32,7 +32,7 @@ public sealed class TestsCodePatcher
     private static PatchModAction Factory(ILogger logger, MemoryFs fileSystem, ReadAssemblyDefinition readAssemblyDefinition, WriteAssemblyDefinition writeAssemblyDefinition) =>
         (definition, pluginPatchers) => CodePatcher.ApplyPatches(
             logger, readAssemblyDefinition, writeAssemblyDefinition,
-            fileSystem.Directory.GetCurrentDirectory, fileSystem.Directory.EnumerateDirectories, fileSystem.File.Delete, fileSystem.File.Move,
+            fileSystem,
             definition, pluginPatchers ?? CodePatcher.DefaultPluginPatchers
         );
 
@@ -145,8 +145,8 @@ public sealed class TestsCodePatcher
         );
         writeAssemblyDefinition.Received(1).Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
 
-        fileSystem.File.Delete.Received(1).Invoke(AssemblyPath);
-        fileSystem.File.Move.Received().Invoke(@"C:\Current\Mods\DummyMod\DummyMod.patched.dll", AssemblyPath);
+        fileSystem.File.Received(1).Delete(AssemblyPath);
+        fileSystem.File.Received().Move(@"C:\Current\Mods\DummyMod\DummyMod.patched.dll", AssemblyPath);
 
         // verify assemblyDefinition.Dispose as called ...
         var imageField  = typeof(ModuleDefinition).GetField("Image", BindingFlags.Instance | BindingFlags.NonPublic)!;
@@ -217,8 +217,8 @@ public sealed class TestsCodePatcher
         );
         writeAssemblyDefinition.Received(1).Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
 
-        fileSystem.File.Delete.Received(1).Invoke(AssemblyPath);
-        fileSystem.File.Move.Received().Invoke(@"C:\Current\Mods\DummyMod\DummyMod.patched.dll", AssemblyPath);
+        fileSystem.File.Received(1).Delete(AssemblyPath);
+        fileSystem.File.Received(1).Move(@"C:\Current\Mods\DummyMod\DummyMod.patched.dll", AssemblyPath);
 
         // verify assemblyDefinition.Dispose as called ...
         var imageField  = typeof(ModuleDefinition).GetField("Image", BindingFlags.Instance | BindingFlags.NonPublic)!;
@@ -294,8 +294,8 @@ public sealed class TestsCodePatcher
         );
         writeAssemblyDefinition.Received(1).Invoke(Arg.Any<AssemblyDefinition>(), Arg.Any<string>());
 
-        fileSystem.File.Delete.Received(1).Invoke(AssemblyPath);
-        fileSystem.File.Move.Received().Invoke(@"C:\Current\Mods\DummyMod\DummyMod.patched.dll", AssemblyPath);
+        fileSystem.File.Received(1).Delete(AssemblyPath);
+        fileSystem.File.Received(1).Move(@"C:\Current\Mods\DummyMod\DummyMod.patched.dll", AssemblyPath);
 
         // verify assemblyDefinition.Dispose as called ...
         var imageField  = typeof(ModuleDefinition).GetField("Image", BindingFlags.Instance | BindingFlags.NonPublic)!;

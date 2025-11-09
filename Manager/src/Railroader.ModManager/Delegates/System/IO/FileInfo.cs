@@ -1,30 +1,24 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using _FileInfo = System.IO.FileInfo;
+using System.IO;
 
 namespace Railroader.ModManager.Delegates.System.IO;
 
-/// <inheritdoc cref="_FileInfo(string)"/>
-/// <remarks> Wraps <see cref="_FileInfo(string)"/> for testability. </remarks>
-public delegate IFileInfo FileInfoInfoFactory(string path);
-
 public interface IFileInfo
 {
-    /// <inheritdoc cref="_FileInfo.LastWriteTime"/>
+    /// <inheritdoc cref="FileInfo.LastWriteTime" />
     DateTime LastWriteTime { get; }
 
-    /// <inheritdoc cref="_FileInfo.FullName"/>
+    /// <inheritdoc cref="FileInfo.FullName" />
     string FullName { get; }
 
-    /// <inheritdoc cref="_FileInfo.MoveTo(string)"/>
+    /// <inheritdoc cref="FileInfo.MoveTo(string)" />
     void MoveTo(string destFileName);
 }
 
 [ExcludeFromCodeCoverage]
-public sealed class FileInfoWrapper(_FileInfo fileInfo) : IFileInfo
+public sealed class FileInfoWrapper(FileInfo fileInfo) : IFileInfo
 {
-    public static FileInfoInfoFactory Create => o => new FileInfoWrapper(new _FileInfo(o));
-
     public DateTime LastWriteTime => fileInfo.LastWriteTime;
 
     public string FullName => fileInfo.FullName;

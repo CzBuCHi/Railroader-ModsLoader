@@ -70,7 +70,7 @@ public sealed class TestsMemoryFileInfo
         sut.MoveTo(@"C:\target");
 
         // Assert
-        fileSystem.File.Move.Received().Invoke(@"C:\path", @"C:\target");
+        fileSystem.File.Received().Move(@"C:\path", @"C:\target");
         sut.FullName.ShouldBe(@"C:\target");
     }
 }

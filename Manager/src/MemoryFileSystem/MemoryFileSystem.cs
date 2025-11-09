@@ -6,18 +6,15 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using MemoryFileSystem.Internal;
 using MemoryFileSystem.Types;
 using Railroader.ModManager.Delegates.System.IO;
 
 namespace MemoryFileSystem;
 
-public interface IMemoryFileSystem : IEnumerable<MemoryEntry>
+public interface IMemoryFileSystem : IFileSystem, IEnumerable<MemoryEntry>
 {
-    EntryDictionary             Items         { get; }
-    MemoryFileSystem.IDirectory Directory     { get; }
-    MemoryFileSystem.IFile      File          { get; }
-    MemoryFileSystem.IZipFile   ZipFile       { get; }
-    DirectoryInfoFactory        DirectoryInfo { get; }
+    EntryDictionary Items { get; }
 
     string NormalizePath(string path);
     void LockFile(string path);
@@ -36,11 +33,15 @@ public interface IMemoryFileSystem : IEnumerable<MemoryEntry>
 public abstract partial class MemoryFileSystem : IMemoryFileSystem
 {
     protected MemoryFileSystem() {
-        Init_Directory();
-        Init_File();
-        Init_ZipFile();
+        Directory = CreateDirectoryStatic();
+        File = CreateFileStatic();
+        ZipFile = CreateZipFileStatic();
     }
-
+    
+    public IDirectoryInfo DirectoryInfo(string path) => new MemoryDirectoryInfo(this, path).Mock();
+    
+    public IFileInfo FileInfo(string path) => new MemoryFileInfo(this, path).Mock();
+    
     [ExcludeFromCodeCoverage]
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -139,4 +140,6 @@ public abstract partial class MemoryFileSystem : IMemoryFileSystem
 
         return query.Select(o => o.Value).OrderBy(o => o!.Path);
     }
+
+  
 }

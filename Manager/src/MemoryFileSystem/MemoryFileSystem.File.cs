@@ -1,68 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
 using MemoryFileSystem.Types;
 using NSubstitute;
-using Railroader.ModManager.Delegates.System.IO.File;
+using Railroader.ModManager.Delegates.System.IO;
 
 namespace MemoryFileSystem;
 
-partial class MemoryFileSystem : MemoryFileSystem.IFile
+partial class MemoryFileSystem 
 {
-    public interface IFile {
-        FileExists       Exists           { get; }
-        ReadAllText      ReadAllText      { get; }
-        GetLastWriteTime GetLastWriteTime { get; }
-        Delete           Delete           { get; }
-        Move             Move             { get; }
-        Create           Create           { get; }
-    }
+    public IFileStatic File { get; }
 
-    public IFile File => this;
-
-    [MemberNotNull(nameof(_FileExists))]
-    [MemberNotNull(nameof(_ReadAllText))]
-    [MemberNotNull(nameof(_GetLastWriteTime))]
-    [MemberNotNull(nameof(_Delete))]
-    [MemberNotNull(nameof(_Move))]
-    [MemberNotNull(nameof(_Create))]
-    private void Init_File() {
-        _FileExists = CreateExists();
-        _ReadAllText = CreateReadAllText();
-        _GetLastWriteTime = CreateGetLastWriteTime();
-        _Delete = CreateDelete();
-        _Move = CreateMove();
-        _Create = CreateCreate();
-    }
-
-    private FileExists           _FileExists;
-    private ReadAllText      _ReadAllText;
-    private GetLastWriteTime _GetLastWriteTime;
-    private Delete           _Delete;
-    private Move             _Move;
-    private Create           _Create;
-
-    FileExists IFile.          Exists           => _FileExists;
-    ReadAllText IFile.     ReadAllText      => _ReadAllText;
-    GetLastWriteTime IFile.GetLastWriteTime => _GetLastWriteTime;
-    Delete IFile.          Delete           => _Delete; 
-    Move IFile.            Move             => _Move;
-    Create IFile.          Create           => _Create;
-
-    private FileExists CreateExists() {
-        var mock = Substitute.For<FileExists>();
-        mock.Invoke(Arg.Any<string>())
-            .Returns([DebuggerStepThrough](o) => Items.TryGetValue(NormalizePath(o.Arg<string>()), out var entry) && entry is { IsDirectory: false });
-        return mock;
-    }
-
-    private ReadAllText CreateReadAllText() {
-        var mock = Substitute.For<ReadAllText>();
-        mock.Invoke(Arg.Any<string>()).Returns(o => {
+    private readonly object _MoveLock = new();
+    private readonly object _CreateLock = new();
+    
+    private IFileStatic CreateFileStatic() {
+        var file = Substitute.For<IFileStatic>();
+        
+        file.Exists(Arg.Any<string>())
+            .Returns(o => Items.TryGetValue(NormalizePath(o.Arg<string>()), out var entry) && entry is { IsDirectory: false });
+        
+        file.ReadAllText(Arg.Any<string>()).Returns(o => {
             var path = NormalizePath(o.Arg<string>());
             if (!Items.TryGetValue(path, out var entry) || entry is not { IsDirectory: false }) {
                 throw new FileNotFoundException($"File not found: {path}");
@@ -74,12 +35,8 @@ partial class MemoryFileSystem : MemoryFileSystem.IFile
 
             return Encoding.UTF8.GetString(entry.Content!);
         });
-        return mock;
-    }
-
-    private GetLastWriteTime CreateGetLastWriteTime() {
-        var mock = Substitute.For<GetLastWriteTime>();
-        mock.Invoke(Arg.Any<string>()).Returns(o => {
+        
+        file.GetLastWriteTime(Arg.Any<string>()).Returns(o => {
             var path = NormalizePath(o.Arg<string>());
             if (Items.TryGetValue(path, out var entry) && entry is { IsDirectory: false }) {
                 return entry.LastWriteTime;
@@ -87,13 +44,8 @@ partial class MemoryFileSystem : MemoryFileSystem.IFile
 
             throw new FileNotFoundException($"File not found: {path}");
         });
-
-        return mock;
-    }
-
-    private Delete CreateDelete() {
-        var mock = Substitute.For<Delete>();
-        mock.When(o => o.Invoke(Arg.Any<string>()))
+        
+        file.When(o => o.Delete(Arg.Any<string>()))
             .Do(o => {
                 var path = NormalizePath(o.Arg<string>());
                 if (!Items.TryGetValue(path, out var entry)) {
@@ -108,15 +60,8 @@ partial class MemoryFileSystem : MemoryFileSystem.IFile
 
                 Items.TryRemove(path, out _);
             });
-
-        return mock;
-    }
-
-    private readonly object _MoveLock = new();
-
-    private Move CreateMove() {
-        var mock = Substitute.For<Move>();
-        mock.When(o => o.Invoke(Arg.Any<string>(), Arg.Any<string>()))
+        
+        file.When(o => o.Move(Arg.Any<string>(), Arg.Any<string>()))
             .Do(o => {
                 var sourceFileName = NormalizePath(o.ArgAt<string>(0));
                 var destFileName   = NormalizePath(o.ArgAt<string>(1));
@@ -141,14 +86,8 @@ partial class MemoryFileSystem : MemoryFileSystem.IFile
                     Debug.Assert(added, $"Failed to add destination file '{destFileName}'.");
                 }
             });
-        return mock;
-    }
-
-    private readonly object _CreateLock = new();
-
-    private Create CreateCreate() {
-        var mock = Substitute.For<Create>();
-        mock.Invoke(Arg.Any<string>()).Returns(o => {
+        
+        file.Create(Arg.Any<string>()).Returns(o => {
             var path = NormalizePath(o.Arg<string>());
 
             lock (_CreateLock) {
@@ -158,7 +97,7 @@ partial class MemoryFileSystem : MemoryFileSystem.IFile
                 return new MemoryFileStream((buffer, offset, count) => data.AddRange(buffer.Skip(offset).Take(count)), () => { Items[path] = Items[path]! with { Content = data.ToArray() }; });
             }
         });
-
-        return mock;
+        
+        return file;
     }
 }

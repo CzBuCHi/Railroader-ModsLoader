@@ -2,7 +2,7 @@
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Railroader.ModManager.Delegates.System.IO.File;
+using Railroader.ModManager.Delegates.System.IO;
 using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
 using Serilog;
@@ -10,10 +10,10 @@ using Serilog;
 namespace Railroader.ModManager;
 
 /// <summary> Implementation of <see cref="IMod"/> for a loaded mod instance. </summary>
-public sealed class Mod(ILogger logger, ModDefinition modDefinition, ReadAllText readAllText, WriteAllText writeAllText) : IMod
+public sealed class Mod(ILogger logger, ModDefinition modDefinition, IFileStatic file) : IMod
 {
     internal static Mod Create(ILogger logger, ModDefinition modDefinition) => 
-        new(logger, modDefinition, File.ReadAllText, File.WriteAllText);
+        new(logger, modDefinition, FileSystem.Instance.File);
 
     /// <inheritdoc />
     public IModDefinition Definition => modDefinition;
@@ -69,9 +69,9 @@ public sealed class Mod(ILogger logger, ModDefinition modDefinition, ReadAllText
     
     /// <inheritdoc />
     public T? LoadSettings<T>(string identifier) where T : class => 
-        JsonConvert.DeserializeObject<T>(readAllText(GetSettingsFilePath(identifier)), _JsonSerializerSettings);
+        JsonConvert.DeserializeObject<T>(file.ReadAllText(GetSettingsFilePath(identifier)), _JsonSerializerSettings);
 
     /// <inheritdoc />
     public void SaveSettings<T>(string identifier, T settings) where T : class => 
-        writeAllText(GetSettingsFilePath(identifier), JsonConvert.SerializeObject(settings, _JsonSerializerSettings));
+        file.WriteAllText(GetSettingsFilePath(identifier), JsonConvert.SerializeObject(settings, _JsonSerializerSettings));
 }

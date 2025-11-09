@@ -29,11 +29,7 @@ public sealed class TestsCodeCompiler
     private static CompileModAction CompileModFactory(ILogger logger, AssemblyCompilerDelegate compileAssembly, MemoryFs fileSystem) =>
         (definition, names) => CodeCompiler.CompileMod(logger,
             compileAssembly,
-            fileSystem.DirectoryInfo,
-            fileSystem.Directory.GetCurrentDirectory,
-            fileSystem.File.Exists,
-            fileSystem.File.GetLastWriteTime,
-            fileSystem.File.Delete,
+            fileSystem,
             definition,
             names ?? CodeCompiler.DefaultReferenceNames
         );
@@ -121,7 +117,7 @@ public sealed class TestsCodeCompiler
         logger.Received().Error("Compilation failed for mod {ModId} ...", _ModDefinition.Identifier);
         logger.ShouldReceiveCallCount(3);
 
-        fileSystem.File.Delete.Received().Invoke(AssemblyPath);
+        fileSystem.File.Received().Delete(AssemblyPath);
     }
 
     [Fact]
@@ -176,7 +172,7 @@ public sealed class TestsCodeCompiler
         logger.Received().Information("Compilation complete for mod {ModId}", _ModDefinition.Identifier);
         logger.ShouldReceiveCallCount(3);
 
-        fileSystem.File.Delete.Received().Invoke(AssemblyPath);
+        fileSystem.File.Received().Delete(AssemblyPath);
         fileSystem.Items.ShouldContainKeyWhereValue(AssemblyPath, o => o.ShouldBeEquivalentTo(new MemoryEntry(AssemblyPath, Encoding.UTF8.GetBytes("Compiled DLL"))));
     }
 
@@ -240,7 +236,7 @@ public sealed class TestsCodeCompiler
             Arg.Is<string[]>(o => o.SequenceEqual(expectedReferences))
         );
 
-        fileSystem.File.Delete.Received().Invoke(AssemblyPath);
+        fileSystem.File.Received().Delete(AssemblyPath);
 
         fileSystem.Items.ShouldContainKeyWhereValue(AssemblyPath, o=>o.ShouldBeEquivalentTo(new MemoryEntry(AssemblyPath, Encoding.UTF8.GetBytes("Compiled DLL"))));
     }

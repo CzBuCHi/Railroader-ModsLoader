@@ -4,8 +4,7 @@ using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using Railroader.ModManager.Delegates.Mono.Cecil;
-using Railroader.ModManager.Delegates.System.IO.Directory;
-using Railroader.ModManager.Delegates.System.IO.File;
+using Railroader.ModManager.Delegates.System.IO;
 using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Features.CodePatchers;
 using Railroader.ModManager.Interfaces;
@@ -45,7 +44,7 @@ public static class CodePatcher
     public static PatchModAction Create() =>
         (definition, pluginPatchers) => ApplyPatches(
             Log.Logger.ForSourceContext(), AssemblyDefinitionWrapper.ReadAssembly, AssemblyDefinitionWrapper.Write,
-            Directory.GetCurrentDirectory, Directory.EnumerateDirectories, File.Delete, File.Move,
+            FileSystem.Instance,
             definition, pluginPatchers ?? DefaultPluginPatchers
         );
 
@@ -55,16 +54,13 @@ public static class CodePatcher
     /// <param name="logger">Logger for diagnostic output.</param>
     /// <param name="readAssemblyDefinition">Delegate to read an assembly into an <see cref="AssemblyDefinition" />.</param>
     /// <param name="writeAssemblyDefinition">Delegate to write an <see cref="AssemblyDefinition" /> to disk.</param>
-    /// <param name="getCurrentDirectory">Delegate returning the process current directory.</param>
-    /// <param name="enumerateDirectories">Delegate to enumerate subdirectories.</param>
-    /// <param name="delete">Delegate to delete a file.</param>
-    /// <param name="move">Delegate to move/rename a file.</param>
+    /// <param name="fileSystem"></param>
     /// <param name="definition">Mod definition containing path and identifier.</param>
     /// <param name="pluginPatchers">Array of patchers to apply.</param>
     /// <returns><c>true</c> if patching succeeded or no patches were needed; <c>false</c> on any error.</returns>
     public static bool ApplyPatches(
         ILogger logger, ReadAssemblyDefinition readAssemblyDefinition, WriteAssemblyDefinition writeAssemblyDefinition,
-        GetCurrentDirectory getCurrentDirectory, EnumerateDirectories enumerateDirectories, Delete delete, Move move,
+        IFileSystem fileSystem, 
         ModDefinition definition, TypePatcherInfo[] pluginPatchers
     ) {
         if (pluginPatchers.Length == 0) {
@@ -79,7 +75,7 @@ public static class CodePatcher
         var                 shouldReplaceOriginal = false;
         AssemblyDefinition? assemblyDefinition    = null;
         try {
-            var resolver = CreateAssemblyResolver(getCurrentDirectory, enumerateDirectories, definition, assemblyPath);
+            var resolver = CreateAssemblyResolver(fileSystem.Directory, definition, assemblyPath);
 
             var readParameters = new ReaderParameters { AssemblyResolver = resolver };
             assemblyDefinition = readAssemblyDefinition(assemblyPath, readParameters);
@@ -102,8 +98,8 @@ public static class CodePatcher
 
         if (shouldReplaceOriginal) {
             try {
-                delete(assemblyPath);
-                move(tempFilePath, assemblyPath);
+                fileSystem.File.Delete(assemblyPath);
+                fileSystem.File.Move(tempFilePath, assemblyPath);
             } catch (Exception exc) {
                 logger.Error(exc, "Failed to replace original assembly for mod {ModId}", definition.Identifier);
                 success = false;
@@ -126,12 +122,12 @@ public static class CodePatcher
     ///         <item>Only mods listed in <c>definition.Requires</c></item>
     ///     </list>
     /// </summary>
-    private static DefaultAssemblyResolver CreateAssemblyResolver(GetCurrentDirectory getCurrentDirectory, EnumerateDirectories enumerateDirectories, ModDefinition definition, string assemblyPath) {
+    private static DefaultAssemblyResolver CreateAssemblyResolver(IDirectoryStatic directory, ModDefinition definition, string assemblyPath) {
         var resolver = new DefaultAssemblyResolver();
         resolver.RemoveSearchDirectory(".");
         resolver.RemoveSearchDirectory("bin");
 
-        resolver.AddSearchDirectory(Path.Combine(getCurrentDirectory(), "Railroader_Data", "Managed"));
+        resolver.AddSearchDirectory(Path.Combine(directory.GetCurrentDirectory(), "Railroader_Data", "Managed"));
 
         //  stryker disable once block
         if (definition.Requires.Count == 0) {
@@ -139,7 +135,7 @@ public static class CodePatcher
         }
 
         var thisModDir = Path.GetDirectoryName(assemblyPath);
-        var modDirs = enumerateDirectories(Path.Combine(getCurrentDirectory(), "Mods"))
+        var modDirs = directory.EnumerateDirectories(Path.Combine(directory.GetCurrentDirectory(), "Mods"))
                       .Where(o => o != thisModDir)
                       .Where(o => definition.Requires.ContainsKey(Path.GetFileName(o)));
         foreach (var modDir in modDirs) {

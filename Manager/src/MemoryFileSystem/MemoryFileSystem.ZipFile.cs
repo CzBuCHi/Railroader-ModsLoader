@@ -1,39 +1,20 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using MemoryFileSystem.Internal;
 using Newtonsoft.Json;
 using NSubstitute;
-using Railroader.ModManager.Delegates.System.IO.Compression.ZipFile;
+using Railroader.ModManager.Delegates.System.IO.Compression;
 
 namespace MemoryFileSystem;
 
-partial class MemoryFileSystem : MemoryFileSystem.IZipFile
+partial class MemoryFileSystem
 {
-    public interface IZipFile
-    {
-        ExtractToDirectory ExtractToDirectory { get; }
-        OpenRead           OpenRead           { get; }
-    }
+    public IZipFileStatic ZipFile { get; }
 
-    public IZipFile ZipFile => this;
+    private IZipFileStatic CreateZipFileStatic() {
+        var mock = Substitute.For<IZipFileStatic>();
 
-    [MemberNotNull(nameof(_ExtractToDirectory))]
-    [MemberNotNull(nameof(_OpenRead))]
-    private void Init_ZipFile() {
-        _ExtractToDirectory = CreateExtractToDirectory();
-        _OpenRead = CreateOpenRead();
-    }
-
-    private ExtractToDirectory _ExtractToDirectory;
-    private OpenRead           _OpenRead;
-
-    ExtractToDirectory IZipFile.ExtractToDirectory => _ExtractToDirectory;
-    OpenRead IZipFile.          OpenRead           => _OpenRead;
-
-    private ExtractToDirectory CreateExtractToDirectory() {
-        var mock = Substitute.For<ExtractToDirectory>();
-        mock.When(o => o.Invoke(Arg.Any<string>(), Arg.Any<string>())).Do(o => {
+        mock.When(o => o.ExtractToDirectory(Arg.Any<string>(), Arg.Any<string>())).Do(o => {
             var normalizedSource = NormalizePath(o.ArgAt<string>(0));
             var normalizedDest   = NormalizePath(o.ArgAt<string>(1));
 
@@ -41,7 +22,6 @@ partial class MemoryFileSystem : MemoryFileSystem.IZipFile
                 throw new FileNotFoundException($"Zip file '{normalizedSource}' not found.");
             }
 
-            // Deserialize zip contents
             try {
                 var entries = new MemoryZip(zipEntry.Content!);
                 foreach (var entry in entries.OrderBy(p => p.Path.Length)) {
@@ -51,12 +31,8 @@ partial class MemoryFileSystem : MemoryFileSystem.IZipFile
                 throw new InvalidDataException($"Failed to deserialize zip contents for '{normalizedSource}'.", ex);
             }
         });
-        return mock;
-    }
 
-    private OpenRead CreateOpenRead() {
-        var mock = Substitute.For<OpenRead>();
-        mock.Invoke(Arg.Any<string>()).Returns(o => {
+        mock.OpenRead(Arg.Any<string>()).Returns(o => {
             var normalizedPath = NormalizePath(o.Arg<string>());
             if (!Items.TryGetValue(normalizedPath, out var zipEntry) || zipEntry.IsDirectory) {
                 throw new FileNotFoundException($"Zip file '{normalizedPath}' not found.");
@@ -64,6 +40,7 @@ partial class MemoryFileSystem : MemoryFileSystem.IZipFile
 
             return new MemoryZipArchive(new MemoryZip(zipEntry.Content!)).Mock();
         });
+
         return mock;
     }
 }

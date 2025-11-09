@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using NSubstitute;
 using Railroader.ModManager.Delegates.HarmonyLib;
-using Railroader.ModManager.Delegates.System.IO.File;
+using Railroader.ModManager.Delegates.System.IO;
 using Railroader.ModManager.Features.CodePatchers;
 using Railroader.ModManager.Interfaces;
 using Serilog;
@@ -42,12 +42,11 @@ public sealed class TestsHarmonyPluginPatcher
         var logger = Substitute.For<ILogger>();
         var harmony = Substitute.For<IHarmony>();
         var moddingContext = new ModdingContext([], logger, _ => harmony);
-        var readAllText = Substitute.For<ReadAllText>();
-        var writeAllText = Substitute.For<WriteAllText>();
+        var file = Substitute.For<IFileStatic>();
 
         var plugin = Substitute.For<IHarmonyPlugin>();
         plugin.IsEnabled.Returns(true);
-        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier" }, readAllText, writeAllText));
+        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier" }, file));
         plugin.ModdingContext.Returns(moddingContext);
 
         // Act
@@ -67,12 +66,11 @@ public sealed class TestsHarmonyPluginPatcher
         var logger = Substitute.For<ILogger>();
         var harmony = Substitute.For<IHarmony>();
         var moddingContext = new ModdingContext([], logger, _ => harmony);
-        var readAllText = Substitute.For<ReadAllText>();
-        var writeAllText = Substitute.For<WriteAllText>();
+        var file = Substitute.For<IFileStatic>();
 
         var plugin = Substitute.For<IHarmonyPlugin>();
         plugin.IsEnabled.Returns(false);
-        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier" }, readAllText, writeAllText));
+        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier" }, file));
         plugin.ModdingContext.Returns(moddingContext);
 
         // Act
@@ -91,12 +89,11 @@ public sealed class TestsHarmonyPluginPatcher
         var logger = Substitute.For<ILogger>();
         var harmony = Substitute.For<IHarmony>();
         var moddingContext = new ModdingContext([], logger, _ => harmony);
-        var readAllText = Substitute.For<ReadAllText>();
-        var writeAllText = Substitute.For<WriteAllText>();
+        var file = Substitute.For<IFileStatic>();
 
         var plugin = Substitute.For<IHarmonyPlugin>();
         plugin.IsEnabled.Returns(true);
-        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier" }, readAllText, writeAllText));
+        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier" }, file));
         plugin.ModdingContext.Returns(moddingContext);
 
         // Act

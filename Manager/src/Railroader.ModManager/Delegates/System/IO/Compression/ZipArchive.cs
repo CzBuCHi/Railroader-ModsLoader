@@ -1,31 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO.Compression;
 using System.Linq;
-using _ZipArchive = System.IO.Compression.ZipArchive;
 
 namespace Railroader.ModManager.Delegates.System.IO.Compression;
 
-/// <summary> Wrapper for <see cref="_ZipArchive"/>. </summary>
 public interface IZipArchive : IDisposable
 {
-    /// <inheritdoc cref="_ZipArchive.Entries" />
+    /// <inheritdoc cref="ZipArchive.Entries" />
     IReadOnlyCollection<IZipArchiveEntry> Entries { get; }
 
-    /// <inheritdoc cref="_ZipArchive.GetEntry(string)" />
+    /// <inheritdoc cref="ZipArchive.GetEntry(string)" />
     IZipArchiveEntry? GetEntry(string entryName);
 }
 
 [ExcludeFromCodeCoverage]
-public sealed class ZipArchiveWrapper(_ZipArchive archive) : IZipArchive
+public sealed class ZipArchiveWrapper(ZipArchive archive) : IZipArchive
 {
-    /// <inheritdoc />
-    public IReadOnlyCollection<IZipArchiveEntry> Entries =>
-        archive.Entries.Select(e => new ZipArchiveEntryWrapper(e)).ToList().AsReadOnly();
+    public static IZipArchive? CreateWrapper(ZipArchive? archive) =>
+        archive != null ? new ZipArchiveWrapper(archive) : null;
 
     /// <inheritdoc />
-    public IZipArchiveEntry? GetEntry(string entryName) =>
-        archive.GetEntry(entryName) is { } entry ? new ZipArchiveEntryWrapper(entry) : null;
+    public IReadOnlyCollection<IZipArchiveEntry> Entries =>
+        archive.Entries.Select(ZipArchiveEntryWrapper.CreateWrapper).Cast<IZipArchiveEntry>().ToList().AsReadOnly();
+
+    /// <inheritdoc />
+    public IZipArchiveEntry? GetEntry(string entryName) => ZipArchiveEntryWrapper.CreateWrapper(archive.GetEntry(entryName));
 
     /// <inheritdoc />
     public void Dispose() => archive.Dispose();
