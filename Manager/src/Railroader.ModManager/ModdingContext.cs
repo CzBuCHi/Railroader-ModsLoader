@@ -18,7 +18,7 @@ public sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logge
 {
     [ExcludeFromCodeCoverage]
     public ModdingContext(IReadOnlyCollection<IMod> mods)
-        : this(mods, Log.Logger.ForSourceContext(), Harmony.Factory) {
+        : this(mods, Log.Logger.ForSourceContext(), HarmonyWrapper.Factory) {
     }
 
     /// <inheritdoc />

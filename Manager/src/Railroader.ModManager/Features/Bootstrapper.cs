@@ -32,7 +32,7 @@ public static class Bootstrapper
         Execute(
             ModExtractor.GetExtractor(memoryLogger),
             ModDefinitionLoader.Create(memoryLogger),
-            Harmony.Factory("Railroader.ModManager"),
+            HarmonyWrapper.Factory("Railroader.ModManager"),
             CreateManagerBehaviour
         );
     }
@@ -63,7 +63,7 @@ public static class Bootstrapper
             CodeCompiler.Create(),
             CodePatcher.Create(),
             PluginManager.CreateLoader,
-            Harmony.Factory("Railroader.ModManager")
+            HarmonyWrapper.Factory("Railroader.ModManager")
         );
 
     internal static void LoadMods(
@@ -105,10 +105,11 @@ public static class Bootstrapper
                 _                                                    => throw new ArgumentOutOfRangeException()
             };
 
-            mods[i] = new(logger, definition) {
-                AssemblyPath = assemblyPath,
-                IsValid      = result != CompileModResult.Error
-            };
+            var mod = Mod.Create(logger, definition);
+            mod.AssemblyPath = assemblyPath;
+            mod.IsValid = result != CompileModResult.Error;
+
+            mods[i] = mod;
         }
 
         var moddingContext = new ModdingContext(mods);

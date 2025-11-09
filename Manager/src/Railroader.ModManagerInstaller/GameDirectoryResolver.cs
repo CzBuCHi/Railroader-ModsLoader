@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
@@ -15,13 +14,9 @@ public static class GameDirectoryResolver
     public static Func<IAssembly, string?> TryResolveGameDirectory = TryResolveGameDirectoryCore;
 
     public static string? TryResolveGameDirectoryCore(IAssembly executingAssembly) {
-        return TryPaths().FirstOrDefault(o => o != null);
-        
-        IEnumerable<string?> TryPaths() {
-            yield return CheckCurrentDirectory();
-            yield return CheckExecutingAssemblyLocation(executingAssembly);
-            yield return ResolveGameDirectoryFromRegistry();
-        }
+        return CheckCurrentDirectory() ??
+               CheckExecutingAssemblyLocation(executingAssembly) ??
+               ResolveGameDirectoryFromRegistry();
     }
 
     public static string? CheckCurrentDirectory() {

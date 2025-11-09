@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using NSubstitute;
+using Railroader.ModManager.Delegates.System.IO.File;
 using Railroader.ModManager.Delegates.System.Reflection.Assembly;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Interfaces;
@@ -13,9 +14,12 @@ public sealed class TestsPluginManager {
     private const string AssemblyPath = @"Mod\Dummy\Dummy.dll";
 
     private static Mod CreateMod(ILogger logger) {
-        var modDefinition = Substitute.For<IModDefinition>();
-        modDefinition.Identifier.Returns("Identifier");
-        return new(logger, modDefinition) { AssemblyPath = AssemblyPath };
+        var modDefinition = new ModDefinition() {
+            Identifier = "Identifier"
+        };
+        var readAllText = Substitute.For<ReadAllText>();
+        var writeAllText = Substitute.For<WriteAllText>();
+        return new(logger, modDefinition, readAllText, writeAllText) { AssemblyPath = AssemblyPath };
     }
 
     [Fact]
@@ -93,8 +97,10 @@ public sealed class TestsPluginManager {
         var logger         = Substitute.For<ILogger>();
         var moddingContext = Substitute.For<IModdingContext>();
         var loadFrom       = Substitute.For<LoadFrom>();
+        var readAllText = Substitute.For<ReadAllText>();
+        var writeAllText = Substitute.For<WriteAllText>();
         loadFrom.Invoke(Arg.Any<string>()).Returns(assembly);
-        var mod = new Mod(logger, Substitute.For<IModDefinition>()) {
+        var mod = new Mod(logger, new ModDefinition(), readAllText, writeAllText) {
             AssemblyPath = AssemblyPath
         };
 

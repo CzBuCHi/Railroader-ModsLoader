@@ -1,7 +1,7 @@
 ﻿using System.Linq;
-
 using NSubstitute;
 using Railroader.ModManager.Delegates.HarmonyLib;
+using Railroader.ModManager.Delegates.System.IO.File;
 using Railroader.ModManager.Features.CodePatchers;
 using Railroader.ModManager.Interfaces;
 using Serilog;
@@ -32,19 +32,22 @@ public sealed class TestsHarmonyPluginPatcher
         harmonyPluginPatcher(assemblyDefinition, typeDefinition).ShouldBeFalse();
 
         // Assert
-        logger.Debug("Skipping patching for type {TypeName}: not derived from {BaseType} or does not implement {MarkerInterface}", typeDefinition.FullName, typeof(HarmonyPluginPatcher), typeof(IMarker));
+        logger.Debug("Skipping patching for type {TypeName}: not derived from {BaseType} or does not implement {MarkerInterface}", typeDefinition.FullName,
+            typeof(HarmonyPluginPatcher), typeof(IMarker));
     }
 
     [Fact]
     public void PatchAllWhenEnabled() {
         // Arrange
-        var logger         = Substitute.For<ILogger>();
-        var harmony        = Substitute.For<IHarmony>();
+        var logger = Substitute.For<ILogger>();
+        var harmony = Substitute.For<IHarmony>();
         var moddingContext = new ModdingContext([], logger, _ => harmony);
+        var readAllText = Substitute.For<ReadAllText>();
+        var writeAllText = Substitute.For<WriteAllText>();
 
         var plugin = Substitute.For<IHarmonyPlugin>();
         plugin.IsEnabled.Returns(true);
-        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier", }));
+        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier" }, readAllText, writeAllText));
         plugin.ModdingContext.Returns(moddingContext);
 
         // Act
@@ -61,13 +64,15 @@ public sealed class TestsHarmonyPluginPatcher
     public void UnpatchAllWhenDisabled() {
         // Arrange
 
-        var logger         = Substitute.For<ILogger>();
-        var harmony        = Substitute.For<IHarmony>();
+        var logger = Substitute.For<ILogger>();
+        var harmony = Substitute.For<IHarmony>();
         var moddingContext = new ModdingContext([], logger, _ => harmony);
+        var readAllText = Substitute.For<ReadAllText>();
+        var writeAllText = Substitute.For<WriteAllText>();
 
         var plugin = Substitute.For<IHarmonyPlugin>();
         plugin.IsEnabled.Returns(false);
-        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier", }));
+        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier" }, readAllText, writeAllText));
         plugin.ModdingContext.Returns(moddingContext);
 
         // Act
@@ -83,13 +88,15 @@ public sealed class TestsHarmonyPluginPatcher
     [Fact]
     public void IgnoreRepeatCalls() {
         // Arrange
-        var logger         = Substitute.For<ILogger>();
-        var harmony        = Substitute.For<IHarmony>();
+        var logger = Substitute.For<ILogger>();
+        var harmony = Substitute.For<IHarmony>();
         var moddingContext = new ModdingContext([], logger, _ => harmony);
+        var readAllText = Substitute.For<ReadAllText>();
+        var writeAllText = Substitute.For<WriteAllText>();
 
         var plugin = Substitute.For<IHarmonyPlugin>();
         plugin.IsEnabled.Returns(true);
-        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier", }));
+        plugin.Mod.Returns(new Mod(logger, new ModDefinition { Identifier = "Identifier" }, readAllText, writeAllText));
         plugin.ModdingContext.Returns(moddingContext);
 
         // Act
@@ -103,4 +110,3 @@ public sealed class TestsHarmonyPluginPatcher
         logger.Received(1).Information("Applying Harmony patch for mod {ModId}", "Identifier");
     }
 }
-

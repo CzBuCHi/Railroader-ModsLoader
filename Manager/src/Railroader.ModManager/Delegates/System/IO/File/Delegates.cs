@@ -12,6 +12,10 @@ public delegate bool FileExists(string path);
 /// <remarks> Wraps <see cref="_File.ReadAllText(string)"/> for testability. </remarks>
 public delegate string ReadAllText(string path);
 
+/// <inheritdoc cref="_File.WriteAllText(string, string)"/>
+/// <remarks> Wraps <see cref="_File.WriteAllText(string, string)"/> for testability. </remarks>
+public delegate void WriteAllText(string path, string contents);
+
 /// <inheritdoc cref="_File.GetLastWriteTime(string)"/>
 /// <remarks> Wraps <see cref="_File.GetLastWriteTime(string)"/> for testability. </remarks>
 public delegate DateTime GetLastWriteTime(string path);

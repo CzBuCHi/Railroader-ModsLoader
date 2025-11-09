@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration.Assemblies;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Xml.Linq;
-using DiffEngine;
-using Newtonsoft.Json;
 using NSubstitute;
 using Railroader.ModManager.Delegates.HarmonyLib;
 using Railroader.ModManager.Features;
@@ -73,7 +69,7 @@ public sealed class TestsBootstrapper
         mock.Invoke(Arg.Any<Mod>()).Returns([]);
         return mock;
     }
-
+    
     private static readonly ModDefinition _ModDefinition = new() {
         Identifier = "Identifier",
         Name = "Name",

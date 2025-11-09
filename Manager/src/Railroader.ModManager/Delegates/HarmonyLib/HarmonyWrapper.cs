@@ -20,9 +20,9 @@ public interface IHarmony
 }
 
 [ExcludeFromCodeCoverage]
-public sealed class Harmony(string id) : IHarmony
+public sealed class HarmonyWrapper(string id) : IHarmony
 {
-    public static IHarmony Factory(string id) => new Harmony(id);
+    public static IHarmony Factory(string id) => new HarmonyWrapper(id);
 
     private readonly _Harmony _Harmony = new(id);
 
