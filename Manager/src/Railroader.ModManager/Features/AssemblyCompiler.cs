@@ -18,10 +18,13 @@ namespace Railroader.ModManager.Features;
 /// <param name="outputPath">The path where the compiled assembly will be written.</param>
 /// <param name="sources">A collection of C# source file paths to compile.</param>
 /// <param name="references">A collection of reference assembly paths to include during compilation.</param>
+/// <param name="resources"></param>
 /// <returns>
 ///     <see langword="true" /> if compilation succeeds; otherwise, <see langword="false" />.
 /// </returns>
-public delegate bool AssemblyCompilerDelegate(string outputPath, ICollection<string> sources, ICollection<string> references);
+public delegate bool AssemblyCompilerDelegate(
+    string outputPath, ICollection<string> sources, ICollection<string> references, string[] resources
+);
 
 /// <summary>
 ///     Provides functionality for compiling C# source files into assemblies using the Mono C# compiler.
@@ -35,12 +38,15 @@ public static class AssemblyCompiler
     /// <param name="outputPath">The path to write the compiled assembly to.</param>
     /// <param name="sourceFiles">The collection of source file paths to compile.</param>
     /// <param name="referenceAssemblies">The collection of reference assemblies required for compilation.</param>
+    /// <param name="resources"></param>
     /// <returns>
     ///     <see langword="true" /> if compilation succeeds; otherwise, <see langword="false" />.
     /// </returns>
     [ExcludeFromCodeCoverage]
-    public static bool Compile(string outputPath, ICollection<string> sourceFiles, ICollection<string> referenceAssemblies) =>
-        Compile(CompilerCallableEntryPoint.InvokeCompiler, Log.Logger.ForSourceContext(), outputPath, sourceFiles, referenceAssemblies);
+    public static bool Compile(
+        string outputPath, ICollection<string> sourceFiles, ICollection<string> referenceAssemblies, string[] resources
+    ) =>
+        Compile(CompilerCallableEntryPoint.InvokeCompiler, Log.Logger.ForSourceContext(), outputPath, sourceFiles, referenceAssemblies, resources);
 
     /// <summary>
     ///     Compiles C# source files into an assembly using a specified compiler invoker and logger.
@@ -50,11 +56,15 @@ public static class AssemblyCompiler
     /// <param name="outputPath">The path to write the compiled assembly to.</param>
     /// <param name="sourceFiles">The collection of source file paths to compile.</param>
     /// <param name="referenceAssemblies">The collection of reference assemblies required for compilation.</param>
+    /// <param name="resources"></param>
     /// <returns>
     ///     <see langword="true" /> if compilation succeeds; otherwise, <see langword="false" />.
     /// </returns>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static bool Compile(InvokeCompiler compilerInvoker, ILogger logger, string outputPath, ICollection<string> sourceFiles, ICollection<string> referenceAssemblies) {
+    public static bool Compile(
+        InvokeCompiler compilerInvoker, ILogger logger, string outputPath, ICollection<string> sourceFiles, ICollection<string> referenceAssemblies,
+        string[] resources
+    ) {
         if (sourceFiles.Count == 0) {
             logger.Error("No source files provided for assembly compilation at {outputPath}.", outputPath);
             return false;
@@ -63,8 +73,9 @@ public static class AssemblyCompiler
         logger.Information("Compiling assembly {outputPath} ...", outputPath);
         logger.Debug("References:\n{references}", string.Join("\n", referenceAssemblies));
         logger.Debug("Sources:\n{sources}", string.Join("\n", sourceFiles));
+        logger.Debug("Resources:\n{sources}", string.Join("\n", resources));
 
-        var args = CompilerArguments(outputPath, sourceFiles, referenceAssemblies);
+        var args = CompilerArguments(outputPath, sourceFiles, referenceAssemblies, resources);
 
         bool result;
         var  sb = new StringBuilder();
@@ -92,10 +103,13 @@ public static class AssemblyCompiler
     /// <param name="assemblyPath">The output path for the compiled assembly.</param>
     /// <param name="sources">The collection of source file paths to compile.</param>
     /// <param name="references">The collection of reference assembly paths.</param>
+    /// <param name="resources"></param>
     /// <returns>
     ///     An array of arguments passed to the Mono compiler (<c>mcs</c>).
     /// </returns>
-    private static string[] CompilerArguments(string assemblyPath, ICollection<string> sources, ICollection<string> references) => [
+    private static string[] CompilerArguments(
+        string assemblyPath, ICollection<string> sources, ICollection<string> references, string[] resources
+    ) => [
         ..sources,
         "-debug-",
         "-fullpaths",
@@ -103,6 +117,7 @@ public static class AssemblyCompiler
         $"-out:{assemblyPath}",
         $"-reference:{string.Join(",", references)}",
         "-target:library",
-        "-warn:4"
+        "-warn:4",
+        ..resources
     ];
 }

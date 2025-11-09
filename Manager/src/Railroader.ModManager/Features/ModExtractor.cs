@@ -80,37 +80,38 @@ public static class ModExtractor
     private static void TryExtractOne(IMemoryLogger logger, IFileSystem fileSystem, IFileInfo zipFileInfo, string modsDirectory) {
         logger.Information("Processing mod archive {ZipPath} for extraction.", zipFileInfo.FullName);
 
-        using var archive = fileSystem.ZipFile.OpenRead(zipFileInfo.FullName)!;
+        using (var archive = fileSystem.ZipFile.OpenRead(zipFileInfo.FullName)!) {
+            var definitionEntry = archive.GetEntry("Definition.json");
+            if (definitionEntry == null) {
+                logger.Error("Skipping archive {ZipPath}: Missing 'Definition.json'.", zipFileInfo.FullName);
+                return;
+            }
 
-        var definitionEntry = archive.GetEntry("Definition.json");
-        if (definitionEntry == null) {
-            logger.Error("Skipping archive {ZipPath}: Missing 'Definition.json'.", zipFileInfo.FullName);
-            return;
+            string json;
+            using (var entryStream = definitionEntry.Open())
+            using (var reader = new StreamReader(entryStream)) {
+                json = reader.ReadToEnd();
+            }
+
+            var modDefinition = TryDeserialize(logger, json, zipFileInfo.FullName);
+            if (modDefinition?.IsValid != true) {
+                logger.Error("Skipping archive {ZipPath}: Invalid mod definition.", zipFileInfo.FullName);
+                return;
+            }
+
+            var extractPath = Path.Combine(modsDirectory, modDefinition.Identifier);
+
+            if (fileSystem.Directory.Exists(extractPath)) {
+                logger.Warning("Extraction path {ExtractPath} already exists – skipping mod {ModId}.", extractPath, modDefinition.Identifier);
+                MoveToBackup(zipFileInfo, logger, ".dup", fileSystem.File);
+                return;
+            }
+
+            fileSystem.ZipFile.ExtractToDirectory(zipFileInfo.FullName, extractPath);
+
+            logger.Information("Successfully extracted mod {ModId} from {ZipPath} to {ExtractPath}.", modDefinition.Identifier, zipFileInfo.FullName,
+                extractPath);
         }
-
-        string json;
-        using (var entryStream = definitionEntry.Open())
-        using (var reader = new StreamReader(entryStream)) {
-            json = reader.ReadToEnd();
-        }
-
-        var modDefinition = TryDeserialize(logger, json, zipFileInfo.FullName);
-        if (modDefinition?.IsValid != true) {
-            logger.Error("Skipping archive {ZipPath}: Invalid mod definition.", zipFileInfo.FullName);
-            return;
-        }
-
-        var extractPath = Path.Combine(modsDirectory, modDefinition.Identifier);
-
-        if (fileSystem.Directory.Exists(extractPath)) {
-            logger.Warning("Extraction path {ExtractPath} already exists – skipping mod {ModId}.", extractPath, modDefinition.Identifier);
-            MoveToBackup(zipFileInfo, logger, ".dup", fileSystem.File);
-            return;
-        }
-
-        fileSystem.ZipFile.ExtractToDirectory(zipFileInfo.FullName, extractPath);
-
-        logger.Information("Successfully extracted mod {ModId} from {ZipPath} to {ExtractPath}.", modDefinition.Identifier, zipFileInfo.FullName, extractPath);
 
         MoveToBackup(zipFileInfo, logger, ".bak", fileSystem.File);
     }

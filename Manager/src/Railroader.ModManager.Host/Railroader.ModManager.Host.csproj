@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+    <ItemGroup>
+        <GameAssembly Include="Serilog" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Railroader.ModManager.Interfaces\Railroader.ModManager.Interfaces.csproj" />
+        <ProjectReference Include="..\Railroader.ModManager\Railroader.ModManager.csproj" />
+    </ItemGroup>
+</Project>

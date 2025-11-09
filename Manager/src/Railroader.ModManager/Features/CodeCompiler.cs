@@ -136,13 +136,19 @@ public static class CodeCompiler
         var references  = referenceNames.Select(o => Path.Combine(managedPath, o + DllExtension)).ToArray();
 
         if (definition.Requires.Count > 0) {
-            logger.Information("Adding references to {Mods} ...", definition.Requires.Keys);
+            logger.Information("Adding references: {Mods} ...", definition.Requires.Keys);
             var modsPath      = Path.Combine(fileSystem.Directory.GetCurrentDirectory(), "Mods");
             var modReferences = definition.Requires.Keys.Select(o => Path.Combine(modsPath, o, o + DllExtension));
             references = references.Concat(modReferences).ToArray();
         }
 
-        if (!compileAssembly(assemblyPath, sources, references.ToArray())) {
+        string[] resources = [];
+        if (definition.Resources.Count > 0) {
+            logger.Information("Adding resources: {Mods} ...", definition.Resources.Keys);
+            resources = definition.Resources.Select(o => $"-resource:{Path.Combine(definition.BasePath, o.Value!)},{o.Key}").ToArray();
+        }
+
+        if (!compileAssembly(assemblyPath, sources, references.ToArray(), resources)) {
             logger.Error("Compilation failed for mod {ModId} ...", definition.Identifier);
             return CompileModResult.Error;
         }

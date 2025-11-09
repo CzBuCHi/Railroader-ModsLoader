@@ -22,8 +22,10 @@ public static class TestUtils
 {
     private const string GameDir = @"c:\Program Files (x86)\Steam\steamapps\common\Railroader\";
 
-    public static (Mono.Cecil.AssemblyDefinition AssemblyDefinition, string OutputPath) BuildAssemblyDefinition(string source, string? suffix = null, [CallerFilePath] string callerFilePath = null!, [CallerMemberName] string callerMemberName = null!) {
-        var prefix    = typeof(TestUtils).Namespace!;
+    public static (Mono.Cecil.AssemblyDefinition AssemblyDefinition, string OutputPath) BuildAssemblyDefinition(
+        string source, string? suffix = null, [CallerFilePath] string callerFilePath = null!, [CallerMemberName] string callerMemberName = null!
+    ) {
+        var prefix   = typeof(TestUtils).Namespace!;
         var index    = callerFilePath.IndexOf(prefix, StringComparison.Ordinal) + prefix.Length;
         var rootPath = callerFilePath.Substring(0, index);
 
@@ -40,7 +42,7 @@ public static class TestUtils
 
         Directory.CreateDirectory(outputPath);
 
-        var sourcePath = Path.Combine(outputPath, "source.cs");
+        var sourcePath   = Path.Combine(outputPath, "source.cs");
         var assemblyPath = Path.Combine(outputPath, "output.dll");
 
         File.WriteAllText(sourcePath, source);
@@ -48,28 +50,28 @@ public static class TestUtils
 
         var sources = new[] { sourcePath };
         var references = new[] {
-                             "Assembly-CSharp",
-                             "0Harmony",
-                             typeof(IPlugin).Assembly.GetName().Name,
-                             "Serilog",
-                             "UnityEngine.CoreModule"
-                         }
-                         .Select(o => Path.Combine(GameDir, "Railroader_Data", "Managed", o + ".dll"))
-                         .ToList();
+                "Assembly-CSharp",
+                "0Harmony",
+                typeof(IPlugin).Assembly.GetName().Name,
+                "Serilog",
+                "UnityEngine.CoreModule"
+            }
+            .Select(o => Path.Combine(GameDir, "Railroader_Data", "Managed", o + ".dll"))
+            .ToList();
 
         references.Add(typeof(DateTime).Assembly.Location);
         references.Add(typeof(TestUtils).Assembly.Location);
 
 
-        var result = AssemblyCompiler.Compile(CompilerCallableEntryPoint.InvokeCompiler, logger, assemblyPath, sources, references);
-        if (result == false) {
+        var result = AssemblyCompiler.Compile(CompilerCallableEntryPoint.InvokeCompiler, logger, assemblyPath, sources, references, []);
+        if (!result) {
             throw new InvalidOperationException("Failed to compile source");
         }
 
         return (Mono.Cecil.AssemblyDefinition.ReadAssembly(assemblyPath), outputPath);
     }
 
-    public static Assembly BuildAssembly(string source, string []? references = null) {
+    public static Assembly BuildAssembly(string source, string[]? references = null) {
         var settings = new CompilerSettings {
             Target = Target.Library,
             Optimize = true,
@@ -96,7 +98,7 @@ public static class TestUtils
 
         eval.Compile(source + " interface __AssemblyMarker { } ");
         if (context.Report.Errors > 0) {
-            throw new Exception($"Compilation error: {printer.Messages}");
+            throw new($"Compilation error: {printer.Messages}");
         }
 
         return (Assembly)eval.Evaluate(" typeof(__AssemblyMarker).Assembly ")!;

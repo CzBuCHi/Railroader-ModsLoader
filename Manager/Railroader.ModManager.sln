@@ -44,6 +44,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryFileSystem.Tests", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManagerInstaller.Tests", "src\Railroader.ModManagerInstaller.Tests\Railroader.ModManagerInstaller.Tests.csproj", "{33D5B036-D495-E8F7-16AE-5483543CB087}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Railroader.ModManager.Host", "src\Railroader.ModManager.Host\Railroader.ModManager.Host.csproj", "{1D792034-5D9C-0D8C-9D6C-6014E93E5CDB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,6 +96,10 @@ Global
 		{33D5B036-D495-E8F7-16AE-5483543CB087}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33D5B036-D495-E8F7-16AE-5483543CB087}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33D5B036-D495-E8F7-16AE-5483543CB087}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D792034-5D9C-0D8C-9D6C-6014E93E5CDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D792034-5D9C-0D8C-9D6C-6014E93E5CDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D792034-5D9C-0D8C-9D6C-6014E93E5CDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D792034-5D9C-0D8C-9D6C-6014E93E5CDB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -110,6 +116,7 @@ Global
 		{A95643C7-9CF1-2493-4D0F-630DF3110859} = {DB57033A-B114-4B18-8586-B3D525FF5A60}
 		{5A70ED21-CDF1-8976-6C6F-076A6D00C8D4} = {41EAF235-CFE0-4DC8-B489-0DB9E958A0EE}
 		{33D5B036-D495-E8F7-16AE-5483543CB087} = {41EAF235-CFE0-4DC8-B489-0DB9E958A0EE}
+		{1D792034-5D9C-0D8C-9D6C-6014E93E5CDB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8ED8BFD4-3F8C-4E30-9660-49C14B3A6AFE}

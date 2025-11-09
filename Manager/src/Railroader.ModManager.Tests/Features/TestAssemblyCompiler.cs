@@ -9,7 +9,8 @@ using Shouldly;
 
 namespace Railroader.ModManager.Tests.Features;
 
-public sealed class TestAssemblyCompiler {
+public sealed class TestAssemblyCompiler
+{
     [Fact]
     public void CompileAssemblyWhenNoSourcesProvided() {
         // Arrange
@@ -17,7 +18,7 @@ public sealed class TestAssemblyCompiler {
         var logger         = Substitute.For<ILogger>();
 
         // Act
-        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", [], []);
+        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", [], [], []);
 
         // Assert
         actual.ShouldBeFalse();
@@ -39,7 +40,9 @@ public sealed class TestAssemblyCompiler {
         var logger = Substitute.For<ILogger>();
 
         // Act
-        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"]);
+        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"],
+            ["-resource:image.png,image"]
+        );
 
         // Assert
         actual.ShouldBeTrue();
@@ -47,6 +50,7 @@ public sealed class TestAssemblyCompiler {
         logger.Received().Information("Compiling assembly {outputPath} ...", "outputPath");
         logger.Received().Debug("References:\n{references}", "reference1.dll\nreference2.dll");
         logger.Received().Debug("Sources:\n{sources}", "source1.cs\nsource2.cs");
+        logger.Received().Debug("Resources:\n{sources}", "-resource:image.png,image");
         logger.Received().Write(Arg.Any<LogEventLevel>(), "Compilation messages:\r\n{messages}", "Warning1\r\nWarning2");
         logger.Received().Information("Assembly {outputPath} compiled successfully", "outputPath");
 
@@ -59,7 +63,8 @@ public sealed class TestAssemblyCompiler {
             "-out:outputPath",
             "-reference:reference1.dll,reference2.dll",
             "-target:library",
-            "-warn:4"
+            "-warn:4",
+            "-resource:image.png,image"
         })), Arg.Any<TextWriter>());
     }
 
@@ -75,7 +80,7 @@ public sealed class TestAssemblyCompiler {
         var logger = Substitute.For<ILogger>();
 
         // Act
-        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"]);
+        var actual = AssemblyCompiler.Compile(invokeCompiler, logger, "outputPath", ["source1.cs", "source2.cs"], ["reference1.dll", "reference2.dll"], []);
 
         // Assert
         actual.ShouldBeFalse();

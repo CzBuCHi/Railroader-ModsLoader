@@ -40,6 +40,10 @@ public sealed class ModDefinition : IModDefinition
     [JsonProperty("conflictsWith")]
     [JsonConverter(typeof(ModReferenceJsonConverter))]
     public Dictionary<string, FluentVersion?> ConflictsWith { get; set; } = new();
+    
+    /// <inheritdoc />
+    [JsonProperty("resources")]
+    public Dictionary<string, string> Resources { get; set; } = new();
 
     /// <summary> Gets or sets the base directory path for the mod. </summary>
     [JsonIgnore]

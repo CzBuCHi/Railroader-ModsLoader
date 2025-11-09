@@ -5,6 +5,10 @@ using System.Text.Json;
 
 [assembly: ExcludeFromCodeCoverage]
 
+// removes all mutants with Killed / Ignored / CompileError / Timeout status
+// then removes all files with no mutants
+// and finally removes all test files not testing remaining files
+
 try {
     var strykerOutput = args.Length == 1
         ? Path.GetFullPath(args[0])
@@ -57,7 +61,6 @@ try {
         report.Files.Remove(fileName);
     }
 
-
     // 4. Remove tests not used by any remaining file
     Console.WriteLine("Remove tests not used by any remaining file ...");
     var usedTestIds = report.Files.Values
@@ -83,7 +86,6 @@ try {
     foreach (var testFileName in testFilesToRemove) {
         report.TestFiles.Remove(testFileName);
     }
-
 
     // 6. Save the modified report
     Console.WriteLine("Save the modified report ...");

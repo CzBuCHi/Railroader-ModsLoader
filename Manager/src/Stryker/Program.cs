@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 
 [assembly: ExcludeFromCodeCoverage]
 
+// run stryker only on changed projects, then merge report into single json and html
+
 Regex projectRegex = new("^Project\\(\"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}\"\\) = \"(?<name>[^\"]+)\", \"(?<path>[^\"]+)\", \"[^\"]+\"$",
     RegexOptions.Compiled | RegexOptions.IgnoreCase);
 

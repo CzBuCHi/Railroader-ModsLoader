@@ -66,7 +66,7 @@
         <!-- Collect source files -->
         <ItemGroup>
             <SourceFiles Include="$(MSBuildProjectDirectory)/Definition.json"/>
-            <SourceFiles Include="$(MSBuildProjectDirectory)/**/*.cs" Exclude="$(MSBuildProjectDirectory)/bin/**/*.*;$(MSBuildProjectDirectory)/obj/**/*.*"/>
+            <SourceFiles Include="$(MSBuildProjectDirectory)/**/*.*" Exclude="$(MSBuildProjectDirectory)/bin/**/*.*;$(MSBuildProjectDirectory)/obj/**/*.*"/>
         </ItemGroup>
         <!-- Copy source files to the Mods directory -->
         <Copy SourceFiles="@(SourceFiles)" DestinationFiles="@(SourceFiles->'$(ModDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true"/>
