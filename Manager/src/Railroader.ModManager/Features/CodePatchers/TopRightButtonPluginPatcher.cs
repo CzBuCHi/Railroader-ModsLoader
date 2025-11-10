@@ -6,6 +6,7 @@ using System.IO;
 using JetBrains.Annotations;
 using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Interfaces.Markers;
 using Serilog;
 using UI;
 using UI.Tooltips;

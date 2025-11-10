@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using Railroader.ModManager.Delegates.HarmonyLib;
 using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Interfaces.Markers;
 using Serilog;
 
 namespace Railroader.ModManager.Features.CodePatchers;

@@ -3,7 +3,7 @@ using NSubstitute;
 using Railroader.ModManager.Delegates.HarmonyLib;
 using Railroader.ModManager.Delegates.System.IO;
 using Railroader.ModManager.Features.CodePatchers;
-using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Interfaces.Markers;
 using Serilog;
 using Shouldly;
 

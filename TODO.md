@@ -1,4 +1,7 @@
 - ModdingContext implementation
+    - window: use ProgrammaticWindowBase
+    - settings moved to imod
+    
 - convert my mods to this manager
     - CarInspectorTweaks
     - SwitchNormalizer

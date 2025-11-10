@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace Railroader.ModManager.Interfaces;
+namespace Railroader.ModManager.Interfaces.Markers;
 
 /// <summary> Defines a plugin that adds a custom button to the top-right UI area. </summary>
 [PublicAPI]

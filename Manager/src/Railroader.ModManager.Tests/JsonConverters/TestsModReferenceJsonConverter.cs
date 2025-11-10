@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Interfaces.Data;
 using Railroader.ModManager.JsonConverters;
 using Shouldly;
 

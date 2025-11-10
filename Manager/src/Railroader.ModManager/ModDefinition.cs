@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Interfaces.Data;
 using Railroader.ModManager.JsonConverters;
 using Serilog.Events;
 

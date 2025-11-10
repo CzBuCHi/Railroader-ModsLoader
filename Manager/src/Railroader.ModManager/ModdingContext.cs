@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using Railroader.ModManager.Delegates.HarmonyLib;
 using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Interfaces.UI;
 using Serilog;
-using UI.Builder;
-using UI.Common;
 
 namespace Railroader.ModManager;
 
-/// <summary> Implementation of <see cref="IModdingContext"/> providing basic modding services. </summary>
+/// <summary> Implementation of <see cref="IModdingContext" /> providing basic modding services. </summary>
 [method: EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logger, HarmonyFactory harmonyFactory)
     : IModdingContext
@@ -28,20 +26,9 @@ public sealed class ModdingContext(IReadOnlyCollection<IMod> mods, ILogger logge
 
     public HarmonyFactory HarmonyFactory { get; } = harmonyFactory;
 
-    /// <inheritdoc />
-    [ExcludeFromCodeCoverage]
-    public T LoadSettings<T>(string identifier) where T : class => throw new NotImplementedException();
+    public void RegisterWindow<TWindow>() where TWindow : ProgrammaticWindowBase => Features.WindowManager.Instance.RegisterWindow<TWindow>();
 
-    /// <inheritdoc />
-    [ExcludeFromCodeCoverage]
-    public void SaveSettings<T>(string identifier, T settings) where T : class => throw new NotImplementedException();
+    public void OpenWindow<TWindow>() where TWindow : ProgrammaticWindowBase => Features.WindowManager.Instance.OpenWindow<TWindow>();
 
-    /// <inheritdoc />
-    [ExcludeFromCodeCoverage]
-    public Window CreateWindow(string identifier, int width, int height, Window.Position position) =>
-        throw new NotImplementedException();
-
-    /// <inheritdoc />
-    [ExcludeFromCodeCoverage]
-    public UIPanel PopulateWindow(Window window, Action<UIPanelBuilder> closure) => throw new NotImplementedException();
+    public void CloseWindow<TWindow>() where TWindow : ProgrammaticWindowBase => Features.WindowManager.Instance.CloseWindow<TWindow>();
 }

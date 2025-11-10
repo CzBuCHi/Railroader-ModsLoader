@@ -6,6 +6,7 @@
     <ItemGroup>
         <GameAssembly Include="Assembly-CSharp" />
         <GameAssembly Include="Serilog" />
+        <GameAssembly Include="UnityEngine.CoreModule" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,8 +19,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Include="..\SharedCode\JetBrains.Annotations.cs"  />
-      <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs"  />
+      <Compile Include="..\SharedCode\JetBrains.Annotations.cs" />
+      <Compile Include="..\SharedCode\System.Runtime.CompilerServices.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="UI\" />
     </ItemGroup>
     
     <Target Name="CopyGeneratedFile" AfterTargets="Build">

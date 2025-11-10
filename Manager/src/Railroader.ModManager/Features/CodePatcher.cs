@@ -7,7 +7,7 @@ using Railroader.ModManager.Delegates.Mono.Cecil;
 using Railroader.ModManager.Delegates.System.IO;
 using Railroader.ModManager.Extensions;
 using Railroader.ModManager.Features.CodePatchers;
-using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Interfaces.Markers;
 using Serilog;
 
 namespace Railroader.ModManager.Features;

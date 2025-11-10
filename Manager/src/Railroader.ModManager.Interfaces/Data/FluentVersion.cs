@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Railroader.ModManager.Interfaces;
+namespace Railroader.ModManager.Interfaces.Data;
 
 /// <summary> Specifies the comparison operator used for version constraints in a <see cref="FluentVersion"/>. </summary>
 public enum VersionOperator

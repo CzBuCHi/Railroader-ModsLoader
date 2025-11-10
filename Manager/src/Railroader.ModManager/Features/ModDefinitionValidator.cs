@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Railroader.ModManager.Extensions;
-using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Interfaces.Data;
 using Serilog;
 
 namespace Railroader.ModManager.Features;

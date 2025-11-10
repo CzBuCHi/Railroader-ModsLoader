@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using Railroader.ModManager.Interfaces.Data;
 using Serilog.Events;
 
 namespace Railroader.ModManager.Interfaces;

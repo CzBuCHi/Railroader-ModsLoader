@@ -8,7 +8,7 @@ using NSubstitute;
 using Railroader.ModManager.Delegates.Mono.Cecil;
 using Railroader.ModManager.Features;
 using Railroader.ModManager.Features.CodePatchers;
-using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Interfaces.Markers;
 using Serilog;
 using Shouldly;
 

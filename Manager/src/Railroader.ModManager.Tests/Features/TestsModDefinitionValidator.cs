@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NSubstitute;
 using Railroader.ModManager.Features;
-using Railroader.ModManager.Interfaces;
+using Railroader.ModManager.Interfaces.Data;
 using Railroader.ModManager.JsonConverters;
 using Serilog;
 using Shouldly;
